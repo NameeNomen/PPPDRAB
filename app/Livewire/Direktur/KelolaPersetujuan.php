@@ -43,12 +43,13 @@ class KelolaPersetujuan extends Component
         $this->selected_bidding_id = $id_bidding;
         $this->view = 'detail_bidding';
     }
+
     // --- TANGKAP ID DARI URL NOTIFIKASI ---
     public function mount($id = null)
     {
         if ($id) {
             // Langsung eksekusi fungsi navigasi buat buka dokumen proyek
-            $this->lihatDokumenProyek($id); 
+            $this->lihatDokumenProyek($id);
         }
     }
 
@@ -71,9 +72,10 @@ class KelolaPersetujuan extends Component
             $rab = Rab::findOrFail($id);
             $rab->update(['status_rab' => 'approved']);
             RProject::where('id', $rab->id_r_project)->update(['status_proyek' => 'rab_approved']);
-
+            
             DocumentCommit::create([
-                'id_user' => Auth::id(),
+                'id_user' => Auth::id() ?? 1,
+                'user_name' => Auth::user()->username ?? 'Direktur',
                 'id_r_project' => $rab->id_r_project,
                 'id_rab' => $id,
                 'jenis_aksi' => 'approved',
@@ -83,19 +85,19 @@ class KelolaPersetujuan extends Component
 
             // NOTIFIKASI KE ENGINEERING MENGGUNAKAN ROUTE()
             Notification::create([
-                'id_user' => $rab->id_user, 
+                'id_user' => $rab->id_user,
                 'judul' => 'RAB Disetujui!',
                 'pesan' => "RAB No {$rab->no_boq} telah disetujui. Proyek siap lanjut Bidding.",
-                'url_tujuan' => route('engineering.rab.histori')
+                'url_tujuan' => '/engineering/rab' // Disesuaikan manual jika route error
             ]);
-
         } else {
             $bidding = Bidding::findOrFail($id);
             $bidding->update(['status_bidding' => 'approved']);
             RProject::where('id', $bidding->id_r_project)->update(['status_proyek' => 'won']);
-
+            
             DocumentCommit::create([
-                'id_user' => Auth::id(),
+                'id_user' => Auth::id() ?? 1,
+                'user_name' => Auth::user()->username ?? 'Direktur',
                 'id_r_project' => $bidding->id_r_project,
                 'id_bidding' => $id,
                 'jenis_aksi' => 'approved',
@@ -105,10 +107,10 @@ class KelolaPersetujuan extends Component
 
             // NOTIFIKASI KE MARKETING MENGGUNAKAN ROUTE()
             Notification::create([
-                'id_user' => $bidding->id_user, 
+                'id_user' => $bidding->id_user,
                 'judul' => 'Bidding Disetujui!',
                 'pesan' => "Penawaran No {$bidding->no_penawaran} disetujui. Gass kirim!",
-                'url_tujuan' => route('marketing.bidding.histori')
+                'url_tujuan' => '/marketing/kelola-bidding'
             ]);
         }
 
@@ -139,11 +141,12 @@ class KelolaPersetujuan extends Component
 
         if ($this->jenisDokumen === 'rab') {
             $rab = Rab::find($this->dokumenIdToRevise);
-            $rab->update(['status_rab' => 'draft']); 
+            $rab->update(['status_rab' => 'revision']); // PERBAIKAN: Ubah ke revision biar sinkron sama Enum DB
             RProject::where('id', $rab->id_r_project)->update(['status_proyek' => 'waiting_rab']);
-
+            
             DocumentCommit::create([
-                'id_user' => Auth::id(),
+                'id_user' => Auth::id() ?? 1,
+                'user_name' => Auth::user()->username ?? 'Direktur',
                 'id_r_project' => $rab->id_r_project,
                 'id_rab' => $this->dokumenIdToRevise,
                 'jenis_aksi' => 'revised',
@@ -151,21 +154,21 @@ class KelolaPersetujuan extends Component
                 'created_at' => now()
             ]);
 
-            // NOTIFIKASI KE ENGINEERING DENGAN QUERY PARAMETER YANG BENAR
+            // NOTIFIKASI KE ENGINEERING 
             Notification::create([
-                'id_user' => $rab->id_user, 
+                'id_user' => $rab->id_user,
                 'judul' => 'RAB Direvisi Direktur',
                 'pesan' => "RAB No {$rab->no_boq} butuh revisi: {$this->komentar_commit}",
-                'url_tujuan' => route('engineering.rab', ['open_revisi' => $rab->id])
+                'url_tujuan' => '/engineering/kelola-rab'
             ]);
-
         } else {
             $bidding = Bidding::find($this->dokumenIdToRevise);
-            $bidding->update(['status_bidding' => 'draft']); 
-            RProject::where('id', $bidding->id_r_project)->update(['status_proyek' => 'rab_approved']); 
-
+            $bidding->update(['status_bidding' => 'rejected']);
+            RProject::where('id', $bidding->id_r_project)->update(['status_proyek' => 'rab_approved']);
+            
             DocumentCommit::create([
-                'id_user' => Auth::id(),
+                'id_user' => Auth::id() ?? 1,
+                'user_name' => Auth::user()->username ?? 'Direktur',
                 'id_r_project' => $bidding->id_r_project,
                 'id_bidding' => $this->dokumenIdToRevise,
                 'jenis_aksi' => 'revised',
@@ -173,12 +176,12 @@ class KelolaPersetujuan extends Component
                 'created_at' => now()
             ]);
 
-            // NOTIFIKASI KHUSUS KE MARKETING DENGAN QUERY PARAMETER YANG BENAR
+            // NOTIFIKASI KHUSUS KE MARKETING
             Notification::create([
-                'id_user' => $bidding->id_user, 
+                'id_user' => $bidding->id_user,
                 'judul' => 'Bidding Direvisi Direktur',
                 'pesan' => "Penawaran {$bidding->no_penawaran} butuh revisi: {$this->komentar_commit}",
-                'url_tujuan' => route('marketing.bidding', ['open_revisi' => $bidding->id])
+                'url_tujuan' => '/marketing/kelola-bidding'
             ]);
         }
 
@@ -190,19 +193,27 @@ class KelolaPersetujuan extends Component
     public function render()
     {
         $proyekPending = collect([]);
+        
+        // PERBAIKAN 1: Filter Dashboard Utama Direktur mencari status "pending"
         if ($this->view === 'list') {
             $proyekPending = RProject::whereHas('rabs', function($q) {
-                $q->where('status_rab', 'pending_approval');
+                $q->where('status_rab', 'pending'); // FIXED!
             })->orWhereHas('biddings', function($q) {
-                $q->where('status_bidding', 'draft'); 
+                $q->whereIn('status_bidding', ['draft', 'sent']); // Perluasan filter bidding
             })->orderBy('updated_at', 'desc')->get();
         }
 
         $selectedProject = null;
+        
+        // PERBAIKAN 2: Filter Card Map Dokumen mencari status "pending"
         if ($this->selected_project_id) {
             $selectedProject = RProject::with([
-                'rabs' => function($q) { $q->where('status_rab', 'pending_approval'); },
-                'biddings' => function($q) { $q->where('status_bidding', 'draft'); } 
+                'rabs' => function($q) { 
+                    $q->where('status_rab', 'pending'); // FIXED! Inilah yang bikin kosong
+                },
+                'biddings' => function($q) { 
+                    $q->whereIn('status_bidding', ['draft', 'sent']); 
+                }
             ])->find($this->selected_project_id);
         }
 

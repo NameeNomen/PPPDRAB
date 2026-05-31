@@ -8,6 +8,7 @@ use App\Models\Rab;
 use App\Models\RabItem;
 use App\Models\DocumentCommit;
 use App\Models\RProject;
+use Illuminate\Support\Facades\Auth;
 
 class KelolaRab extends Component
 {
@@ -44,9 +45,7 @@ class KelolaRab extends Component
     {
         $this->loadDaftarProyek();
     }
-
    
-
     public function bukaWorkspace($projectId)
     {
         $this->selectedProject = RProject::findOrFail($projectId);
@@ -68,14 +67,13 @@ class KelolaRab extends Component
             $this->tanggal_dokumen = $this->rabAktif->tgl_boq;
             $this->overhead_cost = $this->rabAktif->overhead_cost;
         } else {
-            // Inisiasi draft kosong
             $rabBaru = Rab::create([
                 'id_r_project' => $this->selectedProject->id,
                 'no_boq' => 'BOQ/' . date('Y/m/d') . '/' . $this->selectedProject->id,
                 'tgl_boq' => date('Y-m-d'),
                 'overhead_cost' => 0,
                 'grand_total' => 0,
-                'status_rab' => 'DRAFT'
+                'status_rab' => 'draft'
             ]);
             
             $this->rabAktif = $rabBaru;
@@ -117,7 +115,6 @@ class KelolaRab extends Component
         unset($this->selectedMaterial[$parentId], $this->hargaInput[$parentId], $this->satuanInput[$parentId]);
     }
 
-    // Nambah Kategori (Parent)
     public function tambahKategori()
     {
         $this->validate(['newKategori' => 'required|min:3']);
@@ -133,13 +130,12 @@ class KelolaRab extends Component
         $this->newKategori = '';
     }
 
-    // Nambah Item (Child)
     public function simpanItemBaru($parentId)
     {
         $this->validate([
             "deskripsiInput.{$parentId}" => 'required',
             "volumeInput.{$parentId}" => 'required|numeric',
-            "hargaInput.{$parentId}" => 'required|numeric',
+            "hargaInput.{$parentId}" => 'required|numeric', 
         ]);
 
         $qty = $this->volumeInput[$parentId];
@@ -164,42 +160,39 @@ class KelolaRab extends Component
     {
         $item = RabItem::find($itemId);
         if($item) {
-            // Hapus children jika ini kategori
             if($item->tipe === 'kategori') {
                 RabItem::where('parent_id', $item->id)->delete();
             }
             $item->delete();
         }
     }
-   public function updatedSearchProyek() { $this->loadDaftarProyek(); }
+
+    public function updatedSearchProyek() { $this->loadDaftarProyek(); }
     public function updatedFilterStatus() { $this->loadDaftarProyek(); }
 
     public function loadDaftarProyek()
     {
         $query = RProject::with('rab')->orderBy('updated_at', 'desc');
 
-        // Logic Pencarian
         if (!empty($this->searchProyek)) {
             $query->where(function($q) {
                 $q->where('nama_pelanggan', 'like', '%' . $this->searchProyek . '%')
                   ->orWhere('request_no', 'like', '%' . $this->searchProyek . '%');
             });
         }
-
+        
         $proyek = $query->get();
 
-        // Logic Filter Status
         if ($this->filterStatus !== 'all') {
             $proyek = $proyek->filter(function($p) {
                 $status = strtolower($p->rab->status_rab ?? '');
                 if ($this->filterStatus === 'draft') return $status === 'draft' || $status === '';
-                if ($this->filterStatus === 'pending_approval') return str_contains($status, 'pending'); 
+                if ($this->filterStatus === 'pending') return $status === 'pending'; 
                 if ($this->filterStatus === 'approved') return $status === 'approved';
                 return true;
             });
         }
 
-        // MAGIC SORTING: Tarik status 'revisi' paksa ke urutan paling atas
         $this->daftarProyek = $proyek->sortBy(function($p) {
             return strtolower($p->rab->status_rab ?? '') === 'revisi' ? 0 : 1;
         })->values();
@@ -211,37 +204,53 @@ class KelolaRab extends Component
         $this->rabAktif = null;
         $this->view = 'card';
     }
-public function submitKeDirektur($id_rab)
+
+    public function submitKeDirektur($id_rab)
     {
-        $rab = \App\Models\Rab::with('project')->findOrFail($id_rab);
+        // Validasi wajib isi form histori sebelum submit
+        $this->validate([
+            'nama_editor' => 'required|min:3',
+            'commit_message' => 'required|min:5',
+        ], [
+            'nama_editor.required' => 'Nama Editor wajib diisi sebelum submit!',
+            'commit_message.required' => 'Pesan Histori wajib diisi sebelum submit!',
+        ]);
+
+        $rab = Rab::with('project')->findOrFail($id_rab);
         
-        // 1. Ubah status RAB jadi pending_approval
-        $rab->update(['status_rab' => 'pending_approval']);
+        // 1. Ubah status RAB jadi pending
+        $rab->update([
+            'status_rab' => 'pending',
+            'overhead_cost' => $this->overhead_cost, // Simpan overhead terakhir
+        ]);
         
-        // 2. Catat ke Document Commits (CCTV-nya)
-        \App\Models\DocumentCommit::create([
-            'id_user' => \Illuminate\Support\Facades\Auth::id(),
-            'user_name' => \Illuminate\Support\Facades\Auth::user()->username, 
+        // 2. Catat ke Document Commits pakai inputan lu
+        DocumentCommit::create([
+            'id_user' => Auth::id() ?? 1,
+            'user_name' => $this->nama_editor, 
             'id_rab' => $rab->id,
             'id_r_project' => $rab->id_r_project,
-            'jenis_aksi' => 'submit_approval',
-            'komentar_commit' => 'RAB telah selesai dibuat/diperbarui dan siap direview.',
+            'jenis_aksi' => 'submitted',
+            'komentar_commit' => $this->commit_message,
             'created_at' => now()
         ]);
 
-        // 3. KIRIM NOTIFIKASI KE DIREKTUR (Mencet Bel-nya)
+        // 3. KIRIM NOTIFIKASI KE DIREKTUR 
         $direktur = \App\Models\User::where('role', 'direktur')->first();
         if ($direktur) {
             \App\Models\Notification::create([
                 'id_user' => $direktur->id,
                 'judul' => 'Persetujuan RAB Dibutuhkan',
                 'pesan' => "RAB untuk proyek {$rab->project->nama_pelanggan} butuh direview. Silakan cek.",
-                'url_tujuan' => '/direktur/persetujuan', // Sesuaikan dengan route dashboard direktur kamu
+                'url_tujuan' => '/direktur/persetujuan/' . $rab->id_r_project,
                 'is_read' => false
             ]);
         }
-
-        session()->flash('sukses', 'RAB berhasil dikirim ke Direktur dan notifikasi telah menyala!');
+        
+        session()->flash('sukses', 'Halo! Dokumen estimasi RAB sudah berhasil meluncur ke sistem Direktur ya. Mohon ditunggu proses review-nya. Terima kasih atas kerja kerasnya, silakan istirahat sejenak! ✨');
+        
+        // Refresh view
+        $this->kembaliKeList();
     }
 
     public function render()
@@ -255,9 +264,8 @@ public function submitKeDirektur($id_rab)
             $kategoris = RabItem::where('id_rab', $this->rabId)
                 ->where('tipe', 'kategori')
                 ->whereNull('parent_id')
-                ->with('children.material') // Panggil relasi children
+                ->with('children.material')
                 ->get();
-
             $totalPekerjaan = RabItem::where('id_rab', $this->rabId)->where('tipe', 'item')->sum('subtotal');
             $grandTotal = $totalPekerjaan + $overhead;
         }
@@ -267,6 +275,6 @@ public function submitKeDirektur($id_rab)
             'totalPekerjaan' => $totalPekerjaan,
             'overhead' => $overhead,
             'grandTotal' => $grandTotal
-        ])->layout('components.layouts.app'); // Jangan dihapus lagi ini layout-nya!
+        ])->layout('components.layouts.app');
     }
 }

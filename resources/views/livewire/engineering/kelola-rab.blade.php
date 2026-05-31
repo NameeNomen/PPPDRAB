@@ -53,13 +53,10 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- GRID DAFTAR PROYEK -->
                 @forelse($daftarProyek as $proyek)
-                    <!-- UBAH overflow-hidden MENJADI overflow-visible AGAR TITIK MERAH TIDAK TERPOTONG -->
                     <div class="border rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-visible group transition-all"
                          :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
                         
-                        <!-- TITIK MERAH BERKEDIP (MUNCUL JIKA STATUS REVISI) -->
                         @if(strtolower($proyek->rab->status_rab ?? '') === 'revisi')
                             <span class="absolute -top-2 -right-2 flex h-4 w-4 z-10">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -75,7 +72,6 @@
                                 @if(!$proyek->rab)
                                     <span class="px-2.5 py-0.5 text-[11px] font-bold rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">Belum Ada RAB</span>
                                 @else
-                                    <!-- Warnai badge merah jika statusnya revisi agar lebih mencolok -->
                                     @php $isRevisiList = strtolower($proyek->rab->status_rab) === 'revisi'; @endphp
                                     <span class="px-2.5 py-0.5 text-[11px] font-bold rounded uppercase" 
                                           :class="darkMode ? ($isRevisiList ? 'bg-rose-500/20 text-rose-500' : 'bg-[#D9B35A]/10 text-[#D9B35A]') : ($isRevisiList ? 'bg-rose-100 text-rose-600' : 'bg-[#D9B35A]/20 text-[#D9B35A]')">
@@ -111,6 +107,10 @@
                 @endforelse
             </div>
         </div>
+
+    <!-- ========================================== -->
+    <!-- 2. VIEW 'CARD': DETAIL PERSIAPAN WORKSPACE -->
+    <!-- ========================================== -->
     @elseif($view === 'card')
         <div class="max-w-5xl mx-auto p-4 md:p-8">
             <button wire:click="kembaliKeList" class="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border transition-all"
@@ -127,7 +127,8 @@
                     
                     <button wire:click="editRab" class="px-6 py-3 text-xs font-black tracking-widest rounded-xl transition-all flex items-center gap-2 uppercase shadow-lg"
                             :class="darkMode ? 'bg-[#D9B35A] hover:bg-[#D9B35A]/90 text-slate-900' : 'bg-[#C7D9F1] hover:bg-[#C7D9F1]/80 text-[#5E6175]'">
-                        + INISIASI & BUAT RAB BARU
+                        <span wire:loading.remove wire:target="editRab">+ INISIASI & BUAT RAB BARU</span>
+                        <span wire:loading wire:target="editRab">⏳ MENYIAPKAN WORKSPACE...</span>
                     </button>
                 </div>
             @else
@@ -167,21 +168,18 @@
                             <p class="text-xl font-black font-mono mt-0.5">Rp {{ number_format($rabAktif->grand_total, 0, ',', '.') }}</p>
                         </div>
                     </div>
-
                     <div class="mt-6 flex flex-wrap gap-3 pt-4 border-t" :class="darkMode ? 'border-[#3D3A36]' : 'border-slate-100'">
-                        
                         <button wire:click="editRab" class="px-4 py-2 text-xs font-black tracking-widest rounded-xl transition-all uppercase flex items-center gap-2"
                                 :class="darkMode ? 'bg-[#D9B35A] hover:bg-[#D9B35A]/90 text-slate-900' : 'bg-[#C7D9F1] hover:bg-[#C7D9F1]/80 text-[#5E6175]'">
-                            {{ $isApproved ? '👁️ BACA SPREADSHEET' : '✏️ EDIT SPREADSHEET' }}
+                            <span wire:loading.remove wire:target="editRab">{{ $isApproved ? '👁️ BACA SPREADSHEET' : '✏️ EDIT SPREADSHEET' }}</span>
+                            <span wire:loading wire:target="editRab">⏳ MEMBUKA...</span>
                         </button>
                         
                         <button onclick="confirm('Yakin ingin menghapus seluruh dokumen RAB ini beserta historinya?') || event.stopImmediatePropagation()" 
                                 wire:click="hapusDokumenRab" class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-black tracking-widest rounded-xl transition-all border border-rose-500/20 uppercase">
                             🗑️ HAPUS
                         </button>
-
                         <div class="w-px bg-gray-500/30 mx-2"></div> 
-
                         <button {{ $isRevisi ? 'disabled' : '' }} 
                                 class="px-4 py-2 text-xs font-black tracking-widest rounded-xl transition-all uppercase flex items-center gap-2 border"
                                 :class="$isRevisi 
@@ -189,7 +187,6 @@
                                         : (darkMode ? 'bg-[#1E1D1B] hover:bg-emerald-900/40 text-emerald-500 border-emerald-500/30' : 'bg-white hover:bg-emerald-50 text-emerald-600 border-emerald-200')">
                             📊 CETAK EXCEL {!! $isRevisi ? '<span class="text-[9px] font-normal tracking-normal">(Terkunci)</span>' : '' !!}
                         </button>
-
                         <button {{ $isRevisi ? 'disabled' : '' }} 
                                 class="px-4 py-2 text-xs font-black tracking-widest rounded-xl transition-all uppercase flex items-center gap-2 border"
                                 :class="$isRevisi 
@@ -213,19 +210,18 @@
         <div class="w-full mx-auto p-4 md:p-6">
             <div class="w-full flex items-center justify-between mb-6 p-3 rounded-xl border transition-colors sticky top-4 z-40 shadow-sm"
                  :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
-                <button wire:click="{{ $rabAktif ? 'kembaliKeWorkspace' : 'kembaliKeList' }}" 
+                <button wire:click="kembaliKeList" 
                         class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-lg border transition-all"
                         :class="darkMode ? 'bg-[#1E1D1B] border-[#3D3A36] text-[#E4E4E4] hover:bg-[#1E1D1B]/70' : 'bg-[#FAFCFF] border-[#C7D9F1] text-[#5E6175] hover:bg-[#C7D9F1]/20'">
-                    ✕ BATAL & KELUAR
+                    ✕ KELUAR
                 </button>
                 <div class="flex items-center gap-2 bg-black/10 p-1 rounded-lg">
                     <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white shadow text-black font-bold' : 'text-slate-400'" class="px-2.5 py-1 text-[11px] rounded transition-all uppercase">💡 Terang</button>
                     <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-[#1E1D1B] text-[#D9B35A] shadow font-bold' : 'text-slate-500'" class="px-2.5 py-1 text-[11px] rounded transition-all uppercase">🕶️ Gelap</button>
                 </div>
                 
-                <!-- TOMBOL SUBMIT DENGAN LOADING ANIMATION (DISEMBUNYIKAN KALAU APPROVED) -->
                 @if(!$isApproved)
-                    <button wire:click="submitKeDirektur" wire:loading.attr="disabled" class="px-5 py-2 text-xs font-black uppercase tracking-wider rounded-lg shadow transition-all relative overflow-hidden"
+                    <button wire:click="submitKeDirektur({{ $rabAktif->id }})" wire:loading.attr="disabled" class="px-5 py-2 text-xs font-black uppercase tracking-wider rounded-lg shadow transition-all relative overflow-hidden"
                             :class="darkMode ? 'bg-[#D9B35A] text-slate-950 hover:bg-[#D9B35A]/90 disabled:opacity-70' : 'bg-slate-800 text-white hover:bg-slate-700 disabled:opacity-70'">
                         <div wire:loading.remove wire:target="submitKeDirektur" class="flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -242,6 +238,14 @@
                     </span>
                 @endif
             </div>
+
+            <!-- TAMPILKAN ERROR JIKA VALIDASI SUBMIT GAGAL -->
+            @if ($errors->has('nama_editor') || $errors->has('commit_message'))
+                <div class="mb-4 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 rounded shadow-sm animate-pulse">
+                    <p class="font-bold text-sm uppercase">Peringatan: Form Histori Belum Lengkap!</p>
+                    <p class="text-xs mt-1">Pastikan Anda telah mengisi Nama Editor dan Pesan Histori Commit sebelum menekan tombol Submit ke Direktur.</p>
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 <div class="lg:col-span-4 border rounded-2xl p-5 flex flex-col justify-between transition-colors shadow-sm h-full min-h-full"
@@ -284,9 +288,7 @@
                 </div>
 
                 <div class="lg:col-span-8 space-y-6">
-                    
                     @if(!$isApproved)
-                        <!-- SETUP HEADER HANYA MUNCUL JIKA BELUM APPROVED -->
                         <div class="border rounded-2xl p-5 transition-colors shadow-sm"
                              :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/60'">
                             <h3 class="text-xs font-black uppercase tracking-widest mb-4" :class="darkMode ? 'text-[#D9B35A]' : 'text-[#5E6175]'">
@@ -306,32 +308,33 @@
                                                :class="darkMode ? 'bg-[#1E1D1B] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-[#FAFCFF] border-[#C7D9F1] text-black focus:border-[#D9B35A]'">
                                     </div>
                                     <div>
-                                        <label class="block text-[11px] font-bold uppercase opacity-70 mb-1">OVERHEAD (RP)</label>
+                                        <label class="block text-[11px] font-bold uppercase opacity-70 mb-1">OVERHEAD COST (RP)</label>
                                         <input type="number" wire:model.live="overhead_cost" class="w-full text-sm font-mono p-2.5 rounded-lg border outline-none font-bold"
                                                :class="darkMode ? 'bg-[#1E1D1B] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-[#FAFCFF] border-[#C7D9F1] text-black focus:border-[#D9B35A]'">
                                     </div>
                                 </div>
                                 
+                                <!-- BLOK COMMIT DIKEMBALIKAN KE SINI SESUAI REQUEST -->
                                 <div class="p-4 rounded-xl border mt-2" :class="darkMode ? 'bg-[#1E1D1B] border-[#3D3A36]' : 'bg-[#FAFCFF] border-[#C7D9F1]/60'">
-                                    <span class="text-[11px] font-black uppercase tracking-wider block mb-3" :class="darkMode ? 'text-[#D9B35A]' : 'text-slate-700'">
-                                        📥 PESAN HISTORI COMMIT & EDITOR (WAJIB)
+                                    <span class="text-[11px] font-black uppercase tracking-wider block mb-3 text-rose-500">
+                                        📥 PESAN HISTORI COMMIT & EDITOR (WAJIB SEBELUM SUBMIT)
                                     </span>
-                                    
                                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                                         <div class="md:col-span-1">
-                                            <input type="text" wire:model="nama_editor" placeholder="Nama Anda (Wajib)..." 
+                                            <input type="text" wire:model="nama_editor" placeholder="Nama Anda..." 
                                                    class="w-full text-xs p-2.5 rounded-lg border outline-none font-bold"
                                                    :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-[#C7D9F1] text-black focus:border-[#D9B35A]'">
                                             @error('nama_editor') <span class="text-rose-500 text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
                                         </div>
                                         <div class="md:col-span-3">
-                                            <input type="text" wire:model="commit_message" placeholder="Tulis catatan rincian perubahan data versi ini..." 
+                                            <input type="text" wire:model="commit_message" placeholder="Tulis catatan rincian perubahan versi ini..." 
                                                    class="w-full text-xs p-2.5 rounded-lg border outline-none font-medium"
                                                    :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-[#C7D9F1] text-black focus:border-[#D9B35A]'">
                                             @error('commit_message') <span class="text-rose-500 text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     @endif
@@ -340,37 +343,39 @@
                          :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
                         
                         @if(!$isApproved)
-                            <!-- ADD KATEGORI HANYA MUNCUL JIKA BELUM APPROVED -->
                             <div class="p-3 border-b flex justify-between items-center gap-3" :class="darkMode ? 'bg-[#1E1D1B]/50 border-[#3D3A36]' : 'bg-slate-50 border-slate-200'">
                                 <div class="flex items-center gap-2 w-full max-w-md">
                                     <input type="text" wire:model="newKategori" placeholder="Ketik nama kategori utama pekerjaan baru..." 
                                            class="text-xs rounded-lg px-3 py-2 w-full border outline-none"
                                            :class="darkMode ? 'bg-[#1E1D1B] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-slate-300 text-black focus:border-[#D9B35A]'">
-                                    <button type="button" wire:click="tambahKategori" class="px-4 py-2 text-xs font-black rounded-lg transition-colors shrink-0 uppercase"
+                                    <button type="button" wire:click="tambahKategori" wire:loading.attr="disabled" class="px-4 py-2 text-xs font-black rounded-lg transition-colors shrink-0 uppercase"
                                             :class="darkMode ? 'bg-[#A2B69D] text-slate-900 hover:bg-[#A2B69D]/80' : 'bg-slate-800 text-white hover:bg-slate-700'">
-                                        + KATEGORI
+                                        <span wire:loading.remove wire:target="tambahKategori">+ KATEGORI</span>
+                                        <span wire:loading wire:target="tambahKategori">⏳...</span>
                                     </button>
                                 </div>
                             </div>
                         @endif
                         
                         <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left text-xs border-collapse min-w-[800px]">
+                            <!-- PERBAIKAN: MIN-WIDTH DITAMBAH JADI 900PX AGAR KOLOM HARGA TIDAK GENCET -->
+                            <table class="w-full text-left text-xs border-collapse min-w-[900px]">
                                 <thead class="font-black uppercase tracking-wider border-b" :class="darkMode ? 'bg-[#1E1D1B] text-gray-400 border-[#3D3A36]' : 'bg-[#FAFCFF] text-slate-700 border-slate-200'">
                                     <tr>
+                                        <!-- LEBAR KOLOM DISESUAIKAN -->
                                         <th class="px-3 py-3 text-center w-12 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">NO</th>
                                         <th class="px-3 py-3 w-1/3 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">DESKRIPSI PEKERJAAN</th>
-                                        <th class="px-3 py-3 w-1/4 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">MATERIAL</th>
-                                        <th class="px-3 py-3 text-center w-16 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">VOL</th>
-                                        <th class="px-3 py-3 text-right w-28 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">HARGA (RP)</th>
-                                        <th class="px-3 py-3 text-right w-32 {{ !$isApproved ? 'border-r' : '' }}" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">SUBTOTAL (RP)</th>
-                                        @if(!$isApproved) <th class="px-3 py-3 text-center w-12">ACT</th> @endif
+                                        <th class="px-3 py-3 w-1/4 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">MATERIAL (OPSIONAL)</th>
+                                        <th class="px-3 py-3 text-center w-20 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">VOL</th>
+                                        <th class="px-3 py-3 text-right w-32 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">HARGA SATUAN</th>
+                                        <th class="px-3 py-3 text-right w-36 {{ !$isApproved ? 'border-r' : '' }}" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">SUBTOTAL (RP)</th>
+                                        @if(!$isApproved) <th class="px-3 py-3 text-center w-16">ACT</th> @endif
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y font-medium relative" :class="darkMode ? 'divide-[#3D3A36]' : 'divide-slate-200'">
                                     @php $noIndex = 1; @endphp
                                     @foreach($kategoris as $kat)
-                                        <tr :class="darkMode ? 'bg-[#1E1D1B]/40 text-white' : 'bg-slate-100 text-slate-900'" class="font-bold border-y">
+                                        <tr wire:key="kategori-{{ $kat->id }}" :class="darkMode ? 'bg-[#1E1D1B]/40 text-white' : 'bg-slate-100 text-slate-900'" class="font-bold border-y">
                                             <td class="px-3 py-2 text-center font-mono border-r" :class="darkMode?'border-[#3D3A36]/40':'border-slate-200'">{{ $noIndex++ }}</td>
                                             <td class="px-3 py-2 border-r" :class="darkMode?'border-[#3D3A36]/40':'border-slate-200'" colspan="2">
                                                 <span :class="darkMode?'text-[#D9B35A]':'text-slate-800'">{{ $kat->deskripsi_pekerjaan }}</span>
@@ -388,11 +393,11 @@
                                         </tr>
                                         
                                         @foreach($kat->children as $item)
-                                            <tr :class="darkMode ? 'hover:bg-[#1E1D1B]/20 text-slate-300' : 'hover:bg-slate-50 text-black'">
+                                            <tr wire:key="item-{{ $item->id }}" :class="darkMode ? 'hover:bg-[#1E1D1B]/20 text-slate-300' : 'hover:bg-slate-50 text-black'">
                                                 <td class="px-3 py-1.5 text-center font-mono border-r opacity-40" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'"></td>
                                                 <td class="px-3 py-1.5 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">{{ $item->deskripsi_pekerjaan }}</td>
                                                 <td class="px-3 py-1.5 border-r font-mono opacity-80" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">
-                                                    {{ $item->material->nama_barang ?? 'Custom Item' }} 
+                                                    {{ $item->material->nama_barang ?? 'Custom/Tenaga' }} 
                                                     <span class="text-[10px] opacity-60">({{ $item->material->satuan ?? '-' }})</span>
                                                 </td>
                                                 <td class="px-3 py-1.5 text-center border-r font-mono" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">{{ $item->qty }}</td>
@@ -407,11 +412,10 @@
                                         @endforeach
                                         
                                         @if(!$isApproved)
-                                            <!-- FORM INLINE INPUT ITEM HANYA MUNCUL JIKA BELUM APPROVED -->
-                                            <tr :class="darkMode ? 'bg-[#1E1D1B]/10' : 'bg-slate-50/50'" class="border-b relative">
+                                            <tr wire:key="form-input-{{ $kat->id }}" :class="darkMode ? 'bg-[#1E1D1B]/10' : 'bg-slate-50/50'" class="border-b relative">
                                                 <td class="px-3 py-2 border-r opacity-30" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'"></td>
                                                 <td class="px-3 py-2 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">
-                                                    <input type="text" wire:model="deskripsiInput.{{ $kat->id }}" placeholder="Ketik nama rincian..." 
+                                                    <input type="text" wire:model="deskripsiInput.{{ $kat->id }}" placeholder="Ketik rincian..." 
                                                            class="w-full text-xs rounded px-2 py-1.5 outline-none border transition-colors font-medium"
                                                            :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-slate-300 text-black focus:border-[#D9B35A]'">
                                                 </td>
@@ -422,12 +426,12 @@
                                                              :class="darkMode ? 'bg-[#1E1C1B] border-[#D9B35A]/50 text-[#D9B35A]' : 'bg-amber-50 border-amber-300 text-amber-800'">
                                                             <div class="flex flex-col truncate pr-2">
                                                                 <span class="font-bold truncate">📦 {{ $selectedMaterial[$kat->id]['nama'] }}</span>
-                                                                <span class="opacity-80">Rp {{ number_format($selectedMaterial[$kat->id]['harga'], 0, ',', '.') }}</span>
+                                                                <span class="opacity-80">Ref: Rp {{ number_format($selectedMaterial[$kat->id]['harga'], 0, ',', '.') }}</span>
                                                             </div>
                                                             <button type="button" wire:click="batalPilihMaterial({{ $kat->id }})" class="text-red-500 hover:text-red-400 font-bold focus:outline-none">✕</button>
                                                         </div>
                                                     @else
-                                                        <input type="text" wire:model.live.debounce.300ms="materialSearch.{{ $kat->id }}" placeholder="Cari material..." 
+                                                        <input type="text" wire:model.live.debounce.300ms="materialSearch.{{ $kat->id }}" placeholder="Ketik material (Opsional)" 
                                                                class="w-full text-xs rounded px-2 py-1.5 outline-none border transition-colors font-mono"
                                                                :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-slate-300 text-black focus:border-[#D9B35A]'">
                                                         
@@ -435,7 +439,7 @@
                                                             <div class="absolute left-0 right-0 top-full rounded-lg shadow-2xl z-50 max-h-48 overflow-y-auto mt-1 p-1 border w-64"
                                                                  :class="darkMode ? 'bg-[#252322] border-[#3D3A36]' : 'bg-white border-slate-200'">
                                                                 @foreach($materialResults[$kat->id] as $m)
-                                                                    <div wire:click="pilihMaterial({{ $kat->id }}, {{ $m->id }}, '{{ addslashes($m->nama_barang) }}', {{ $m->harga }}, '{{ $m->satuan ?? '-' }}')" 
+                                                                    <div wire:key="search-result-{{ $m->id }}-{{ $kat->id }}" wire:click="pilihMaterial({{ $kat->id }}, {{ $m->id }}, '{{ addslashes($m->nama_barang) }}', {{ $m->harga }}, '{{ $m->satuan ?? '-' }}')" 
                                                                          class="p-2 cursor-pointer text-[10px] flex flex-col rounded-md transition-colors border-b last:border-b-0"
                                                                          :class="darkMode ? 'hover:bg-[#4A3F2A]/60 border-[#3D3A36] text-[#EBE7E4]' : 'hover:bg-slate-100 border-slate-100 text-slate-700'">
                                                                         <span class="truncate font-bold">{{ $m->nama_barang }}</span>
@@ -446,17 +450,17 @@
                                                         @endif
                                                     @endif
                                                 </td>
-
                                                 <td class="px-3 py-2 border-r" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">
                                                     <input type="number" step="0.01" wire:model="volumeInput.{{ $kat->id }}" placeholder="0" class="w-full text-xs rounded px-1 py-1.5 text-center border font-mono outline-none" :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-slate-300 text-black'">
                                                 </td>
                                                 <td class="px-3 py-2 border-r text-center" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'">
-                                                    <input type="number" wire:model="hargaInput.{{ $kat->id }}" placeholder="0" class="w-full text-xs rounded px-2 py-1.5 text-right outline-none border font-mono" :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-slate-300 text-black'">
+                                                    <input type="number" wire:model="hargaInput.{{ $kat->id }}" placeholder="Harga..." class="w-full text-xs rounded px-2 py-1.5 text-right outline-none border font-mono" :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-white focus:border-[#D9B35A]' : 'bg-white border-slate-300 text-black'">
                                                 </td>
                                                 <td class="px-3 py-2 border-r text-right" :class="darkMode ? 'border-[#3D3A36]':'border-slate-200'" colspan="2">
-                                                    <button type="button" wire:click="simpanItemBaru({{ $kat->id }})" class="px-3 py-1.5 text-[11px] font-black rounded transition-all w-full uppercase tracking-wide"
+                                                    <button type="button" wire:click="simpanItemBaru({{ $kat->id }})" wire:loading.attr="disabled" class="px-3 py-1.5 text-[11px] font-black rounded transition-all w-full uppercase tracking-wide flex justify-center"
                                                             :class="darkMode ? 'bg-[#A2B69D] text-slate-900 hover:bg-[#A2B69D]/80' : 'bg-slate-700 text-white hover:bg-slate-800'">
-                                                        + ADD
+                                                        <span wire:loading.remove wire:target="simpanItemBaru({{ $kat->id }})">+ ADD</span>
+                                                        <span wire:loading wire:target="simpanItemBaru({{ $kat->id }})">⏳...</span>
                                                     </button>
                                                 </td>
                                             </tr>
