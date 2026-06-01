@@ -1,62 +1,66 @@
-<div class="min-h-screen p-4 md:p-8 transition-colors duration-500" 
+<div class="min-h-screen font-sans transition-colors duration-500" 
      x-data="{ darkMode: true }" 
-     :class="darkMode ? 'bg-[#1E1D1B] text-[#E4E4E4]' : 'bg-[#FAFCFF] text-[#5E6175]'">
+     :class="darkMode ? 'bg-[#1A0D05] text-[#FDF1E6]' : 'bg-[#FCF6F0] text-[#4A3B33]'">
     
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+    <div class="max-w-7xl mx-auto p-8 md:p-16">
+        <!-- HEADER -->
+        <header class="flex justify-between items-start mb-20">
             <div>
-                <h1 class="text-3xl font-black tracking-tight transition-colors" :class="darkMode ? 'text-white' : 'text-[#5E6175]'">Engineering Control Center</h1>
-                <p class="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">Monitoring Estimasi & Eksekusi Proyek</p>
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] opacity-50 mb-2">Engineering Workspace</p>
+                <h1 class="text-4xl font-extrabold tracking-tight mb-2">Control Center</h1>
+                <p class="text-xs font-mono opacity-60" x-text="new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })"></p>
             </div>
-            <button @click="darkMode = !darkMode" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all"
-                    :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36] text-[#D9B35A]' : 'bg-white border-[#C7D9F1] text-[#5E6175] shadow-sm'">
-                <span x-text="darkMode ? '🕶️ DARK MODE' : '💡 LIGHT MODE'"></span>
+            <button @click="darkMode = !darkMode" 
+                    class="px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-full border transition-all hover:scale-105"
+                    :class="darkMode ? 'border-[#892E00] text-[#FFB200] hover:bg-[#3D251A]' : 'border-[#4A3B33]/20 text-[#4A3B33] hover:bg-[#F2E5D9]'">
+                <span x-text="darkMode ? 'LIGHT MODE' : 'DARK MODE'"></span>
             </button>
+        </header>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+            @foreach([
+                ['Proyek Aktif', $countBidding + $countProduksi, '#FF7A00'],
+                ['RAB Draft', $countWaiting, '#E7B12E'],
+                ['Menunggu', $countApproved, '#BA5304'],
+                ['Selesai', $countProduksi, '#892E00']
+            ] as $stat)
+            <div class="p-8 rounded-[2rem] border transition-all hover:scale-[1.02]" 
+                 :class="darkMode ? 'bg-[#261308] border-[#892E00]/20' : 'bg-white border-[#E7B12E]/10 shadow-sm'">
+                <p class="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 mb-3">{{ $stat[0] }}</p>
+                <p class="text-5xl font-black" style="color: {{ $stat[2] }}">{{ $stat[1] }}</p>
+            </div>
+            @endforeach
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="p-6 rounded-[2rem] border transition-all shadow-sm" :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
-                <p class="text-[10px] font-black uppercase tracking-widest opacity-50">📁 Total Proyek Aktif</p>
-                <p class="text-4xl font-black mt-2 transition-colors" :class="darkMode ? 'text-white' : 'text-[#5E6175]'">{{ $countBidding + $countProduksi }}</p>
-            </div>
-            <div class="p-6 rounded-[2rem] border transition-all shadow-sm" :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
-                <p class="text-[10px] font-black uppercase tracking-widest opacity-50">📋 Total RAB Draft</p>
-                <p class="text-4xl font-black mt-2 transition-colors" :class="darkMode ? 'text-white' : 'text-[#5E6175]'">{{ $countWaiting }}</p>
-            </div>
-            <div class="p-6 rounded-[2rem] border transition-all shadow-sm" :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
-                <p class="text-[10px] font-black uppercase tracking-widest opacity-50">⏳ Menunggu Direktur</p>
-                <p class="text-4xl font-black mt-2 transition-colors" :class="darkMode ? 'text-white' : 'text-[#5E6175]'">{{ $countApproved }}</p>
-            </div>
-            <div class="p-6 rounded-[2rem] border transition-all shadow-sm" :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
-                <p class="text-[10px] font-black uppercase tracking-widest opacity-60 text-emerald-500">✅ RAB Disetujui</p>
-                <p class="text-4xl font-black mt-2 text-emerald-500">{{ $countProduksi }}</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-[2rem] border shadow-sm transition-colors" 
-             :class="darkMode ? 'bg-[#2D2B28] border-[#3D3A36]' : 'bg-white border-[#C7D9F1]/50'">
-            <h3 class="font-black mb-6 tracking-tight flex items-center gap-2 transition-colors" :class="darkMode ? 'text-white' : 'text-[#5E6175]'">
-                <span class="w-1.5 h-5 rounded-full" :class="darkMode ? 'bg-[#D9B35A]' : 'bg-[#C7D9F1]'"></span> Aktivitas Terbaru
-            </h3>
+        <!-- ACTIVITY LOG -->
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.2em] mb-12 opacity-50">Log Aktivitas Terbaru</h2>
             <div class="space-y-6">
-                @forelse($aktivitasLog as $log)
-                    <div class="flex gap-4 items-start border-b pb-4 transition-colors" :class="darkMode ? 'border-[#3D3A36]' : 'border-[#C7D9F1]/30'">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
-                             :class="darkMode ? 'bg-[#D9B35A] text-[#1E1D1B]' : 'bg-[#C7D9F1] text-[#5E6175]'">
-                            {{ strtoupper(substr($log->user_name ?? 'S', 0, 1)) }}
-                        </div>
-                        <div>
-                            <p class="text-xs font-black transition-colors" :class="darkMode ? 'text-white' : 'text-[#5E6175]'">
-                                {{ $log->user_name }} <span class="font-normal opacity-70">memperbarui RAB untuk</span> 
-                                <span :class="darkMode ? 'text-[#D9B35A]' : 'text-[#5E6175]'">{{ $log->rab->project->nama_pelanggan ?? 'Proyek' }}</span>
-                            </p>
-                            <p class="text-[10px] font-mono mt-1 opacity-50">{{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}</p>
-                        </div>
+                @forelse($aktivitasLog as $index => $log)
+                @php 
+                    $colors = ['#ECE48F', '#E7B12E', '#E19802', '#E17D12', '#BA5304', '#892E00'];
+                    $color = $colors[$index % count($colors)];
+                @endphp
+                <div class="flex gap-6 items-center p-6 rounded-2xl border transition-all hover:translate-x-2" 
+                     :class="darkMode ? 'bg-[#261308] border-[#892E00]/20' : 'bg-white border-[#E7B12E]/10 shadow-sm'">
+                    <div class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $color }}"></div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold">
+                            <span class="font-black">{{ $log->user_name }}</span> memperbarui estimasi untuk 
+                            <span class="font-bold opacity-80 underline decoration-2" style="text-decoration-color: {{ $color }}">
+                                {{ $log->rab->project->nama_pelanggan ?? 'Proyek' }}
+                            </span>
+                        </p>
                     </div>
+                    <div class="text-[9px] font-mono opacity-40 text-right">
+                        {{ \Carbon\Carbon::parse($log->created_at)->format('H:i') }}
+                    </div>
+                </div>
                 @empty
-                    <p class="text-xs font-bold opacity-50">Belum ada aktivitas terekam.</p>
+                    <p class="text-center text-xs opacity-30 font-black uppercase">Belum ada aktivitas.</p>
                 @endforelse
             </div>
-        </div>
+        </section>
     </div>
 </div>
