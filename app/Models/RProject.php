@@ -7,45 +7,56 @@ use Illuminate\Database\Eloquent\Model;
 class RProject extends Model
 {
     protected $table = 'r_project';
-    
-    // Jangan masukin 'id' ke sini!
+
     protected $fillable = [
-        'request_no', 'id_user', 'nama_pelanggan', 'pic_pelanggan', 
-        'no_hp', 'deskripsi_proyek', 'target_waktu', 'estimasi_budget', 
-        'priority', 'alamat', 'status_proyek'
+        'request_no',
+        'id_user',
+        'nama_pelanggan',
+        'pic_pelanggan',
+        'no_hp',
+        'deskripsi_proyek',
+        'target_waktu',
+        'estimasi_budget',
+        'priority',
+        'alamat',
+        'latitude',
+        'longitude',
+        'status_proyek',
+        'category_id'
     ];
 
-    public function user() {
-        return $this->belongsTo(User::class, 'id_user', 'id');
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
     }
-    // Buka app/Models/RProject.php
-    
+
+    public function category()
+    {
+        return $this->belongsTo(ProjectCategory::class, 'category_id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(RProjectItem::class, 'r_project_id');
+    }
+
     public function biddings()
     {
-        // Pastikan 'id_r_project' adalah nama kolom foreign key di tabel biddings lu
-        return $this->hasMany(Bidding::class, 'id_r_project');
+        return $this->hasMany(Bidding::class, 'r_project_id');
     }
-/**
-     * Relasi: Satu Proyek memiliki banyak dokumen RAB
-     */
+
     public function rabs()
     {
-        return $this->hasMany(Rab::class, 'id_r_project', 'id');
+        return $this->hasMany(Rab::class, 'r_project_id');
     }
-    /**
-     * Relasi: Mengambil 1 dokumen RAB spesifik (terbaru/aktif) untuk keperluan Dashboard
-     */
+
     public function rab()
     {
-        // Menggunakan hasOne untuk langsung mengembalikan object, bukan collection
-        // latestOfMany() memastikan yang ditarik adalah data RAB yang paling akhir dibuat
-        return $this->hasOne(Rab::class, 'id_r_project', 'id')->latestOfMany();
+        return $this->hasOne(Rab::class, 'r_project_id')->latestOfMany();
     }
-    // Ini relasi One-to-Many buat narik banyak gambar/file
-    public function attachments() {
-        return $this->hasMany(ProjectAttachment::class, 'r_project_id', 'id');
+
+    public function attachments()
+    {
+        return $this->hasMany(ProjectAttachment::class, 'r_project_id');
     }
-    public function category() {
-    return $this->belongsTo(ProjectCategory::class, 'category_id', 'id');
-}
 }

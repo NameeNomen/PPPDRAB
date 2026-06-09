@@ -8,18 +8,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('material', function (Blueprint $table) {
-            $table->id('id');
-            $table->string('nama_barang');
-            $table->string('satuan');
-            $table->integer('harga');
-            $table->string('supplier');
-            $table->string('deskripsi');
-            $table->unsignedBigInteger('id_user'); 
-            $table->timestamps();
+       Schema::create('material', function (Blueprint $table) {
+    $table->id();
 
-            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');   
-        });
+    $table->string('nama_barang');
+    $table->text('deskripsi')->nullable();
+
+    $table->string('satuan', 50);
+
+    $table->decimal('harga', 15, 2);
+
+    $table->string('supplier');
+
+    $table->foreignId('id_user')
+        ->constrained('users')
+        ->onDelete('cascade');
+
+    $table->timestamps();
+});
     }
 
     public function down(): void

@@ -10,26 +10,20 @@ class Material extends Model
 
     protected $fillable = [
         'nama_barang',
+        'deskripsi',
         'satuan',
         'harga',
         'supplier',
-        'deskripsi',
         'id_user'
     ];
 
-    /**
-     * Material diinput oleh user
-     */
-    public function user()
+    public function projectItemMaterials()
     {
-        return $this->belongsTo(User::class, 'id_user', 'id');
+        return $this->hasMany(ProjectItemMaterial::class, 'material_id');
     }
 
-    /**
-     * Material dipakai di banyak item RAB
-     */
-    public function rabItems()
+    public function user()
     {
-        return $this->hasMany(RabItem::class, 'id_material', 'id');
+        return $this->belongsTo(User::class, 'id_user');
     }
 }

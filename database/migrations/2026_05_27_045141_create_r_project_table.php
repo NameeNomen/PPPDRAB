@@ -9,25 +9,47 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('r_project', function (Blueprint $table) {
-            $table->id(); // INI ID INTERNAL (Auto Increment)
-            $table->string('request_no')->unique(); // INI NOMOR UNTUK KLIEN
-            $table->unsignedBigInteger('id_user'); 
-            $table->unsignedBigInteger('category_id')->nullable(); // Relasi ke Kategori
-            
-            $table->string('nama_pelanggan');
-            $table->string('pic_pelanggan');
-            $table->string('no_hp');
-            $table->text('deskripsi_proyek');
-            $table->date('target_waktu');
-            $table->bigInteger('estimasi_budget');
-            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
-            $table->enum('status_proyek', ['waiting_rab', 'rab_approved', 'bidding_process', 'won', 'lost'])->default('waiting_rab');
-            $table->text('alamat');
-            $table->timestamps();
+            $table->id();
 
-            // FOREIGN KEYS
-            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade'); 
-            $table->foreign('category_id')->references('id')->on('project_categories')->onDelete('set null'); 
+            $table->string('request_no')->unique();
+
+            $table->foreignId('id_user')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->string('nama_pelanggan');
+            $table->string('pic_pelanggan')->nullable();
+            $table->string('no_hp')->nullable();
+
+            $table->text('deskripsi_proyek')->nullable();
+
+            $table->date('target_waktu')->nullable();
+
+            $table->decimal('estimasi_budget', 15, 2)->nullable();
+
+            $table->enum('priority', ['low', 'medium', 'high'])
+                ->default('medium');
+
+            // alamat + maps
+            $table->text('alamat')->nullable();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+
+            $table->enum('status_proyek', [
+                'draft',
+                'bidding',
+                'approved',
+                'rejected',
+                'on_progress',
+                'completed'
+            ])->default('draft');
+
+            $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('project_categories')
+                ->nullOnDelete();
+
+            $table->timestamps();
         });
     }
 

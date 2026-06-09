@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class ProjectCategory extends Model
 {
     protected $table = 'project_categories';
-    protected $fillable = ['nama_kategori'];
+    protected $fillable = ['nama_kategori','deskripsi'];
 }
