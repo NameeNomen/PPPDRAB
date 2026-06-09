@@ -13,7 +13,7 @@ class RProjectItem extends Model
         'nama_item',
         'qty',
         'satuan',
-        'spesifikasi_klien',
+        'dskripsi',
         'is_calculated',
     ];
 

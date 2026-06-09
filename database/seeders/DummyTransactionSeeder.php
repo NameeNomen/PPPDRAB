@@ -15,32 +15,7 @@ class DummyTransactionSeeder extends Seeder
 {
     public function run(): void
     {
-        // ======================
-        // 1. USERS
-        // ======================
-        $direktur = User::updateOrCreate(
-            ['username' => 'direktur'],
-            ['password' => Hash::make('123456'), 'role' => 'direktur']
-        );
-
-        $marketing = User::updateOrCreate(
-            ['username' => 'marketing'],
-            ['password' => Hash::make('123456'), 'role' => 'marketing']
-        );
-
-        $engineering = User::updateOrCreate(
-            ['username' => 'engineering'],
-            ['password' => Hash::make('123456'), 'role' => 'engineering']
-        );
-
-        $purchasing = User::updateOrCreate(
-            ['username' => 'purchasing'],
-            ['password' => Hash::make('123456'), 'role' => 'purchasing']
-        );
-
-        // ======================
-        // 2. PROJECT
-        // ======================
+      
         $project = RProject::create([
             'request_no' => 'PRJ-0001',
             'id_user' => $marketing->id,

@@ -9,47 +9,50 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style> 
-        /* Background utama sangat cerah (tint terang dari D9E2E0) agar tetap bersih dan nyaman di mata */
+        /* Background utama dibikin lebih "dingin" dengan hint hijau sangat pucat */
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #F2F5F4; 
+            background-color: #F4F9F6; 
             min-height: 100vh;
+            overflow-x: hidden;
         } 
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .livewire-navigating { opacity: 0.5; filter: blur(2px); pointer-events: none; transition: all 0.3s ease-in-out; }
         
-        body { overflow-x: hidden; }
-        
-        /* Custom scrollbar menggunakan palet hijau sage */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        /* Custom scrollbar yang lebih membaur tapi tetap kelihatan */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #A0BDB4; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #557752; }
+        ::-webkit-scrollbar-thumb { background: #B4CDBF; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7A9D8C; }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="antialiased text-[#435F42]">
+<body class="antialiased text-[#2A402B]"> <!-- Warna teks digelapin biar kontrasnya dapet -->
 
-    <nav class="bg-white/80 backdrop-blur-xl border-b border-[#A0BDB4]/40 sticky top-0 z-50 h-16 shadow-[0_4px_20px_-10px_rgba(160,189,180,0.25)] flex items-center transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center relative">
+    <!-- Navbar: Shadow dibikin lebih smooth dan border disesuaikan -->
+    <nav class="bg-white/85 backdrop-blur-xl border-b border-[#B4CDBF]/50 sticky top-0 z-50 h-[72px] shadow-[0_8px_30px_-12px_rgba(122,157,140,0.3)] flex items-center transition-all duration-300">
+        <div class="max-w-[100rem] mx-auto px-6 lg:px-12 w-full flex justify-between items-center relative">
             
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-[#5B4E3F] text-[#D9E2E0] rounded-xl flex items-center justify-center font-black font-mono text-xs shadow-sm shadow-[#5B4E3F]/20">TJT</div>
-                <span class="text-xl font-black text-[#435F42] tracking-tight">PPPD<span class="text-[#A0BDB4]">RAB</span></span>
+            <div class="flex items-center gap-4">
+                <!-- Logo dibikin lebih hijau gelap -->
+                <div class="w-10 h-10 bg-[#354F37] text-[#F4F9F6] rounded-xl flex items-center justify-center font-black font-mono text-sm shadow-md shadow-[#354F37]/30">TJT</div>
+                <span class="text-2xl font-black text-[#2A402B] tracking-tight">PPPD<span class="text-[#648B73]">RAB</span></span>
             </div>
             
-            <div class="flex space-x-2 items-center relative h-full overflow-x-auto no-scrollbar py-2">
+            <div class="flex space-x-3 items-center relative h-full overflow-x-auto no-scrollbar py-2">
                 @auth
                     @php
                         $route = request()->route()->getName();
                         
-                        // KELAS MENU AKTIF: Background hijau daun, teks putih, shadow hijau halus
-                        $activeClass = 'bg-[#557752] text-white px-5 py-2 rounded-full shadow-[0_4px_12px_rgba(85,119,82,0.3)] font-bold z-10 transition-all duration-300 text-[11px] tracking-widest whitespace-nowrap';
+                        /* Sistem Logika Menu:
+                           Aktif: Background hijau solid, shadow hijau, teks putih.
+                           Non-aktif: Teks hijau pudar, hover dapet background mint transparan.
+                        */
+                        $activeClass = 'bg-[#4A7256] text-white px-6 py-2.5 rounded-full shadow-[0_4px_16px_rgba(74,114,86,0.35)] font-bold z-10 transition-all duration-300 text-[12px] tracking-widest whitespace-nowrap';
                         
-                        // KELAS MENU TIDAK AKTIF: Teks forest green, hover berubah ke background frost abu-abu dan teks coklat gelap
-                        $inactiveClass = 'text-[#435F42] hover:text-[#5B4E3F] hover:bg-[#D9E2E0]/60 px-4 py-2 rounded-full text-[11px] font-semibold transition-all duration-300 tracking-wider whitespace-nowrap';
+                        $inactiveClass = 'text-[#5C7E65] hover:text-[#2A402B] hover:bg-[#E2EFE7] px-5 py-2.5 rounded-full text-[12px] font-semibold transition-all duration-300 tracking-wider whitespace-nowrap';
                     @endphp
 
                     @if(auth()->user()->role === 'marketing')
@@ -74,20 +77,20 @@
                 @endauth
             </div>
 
-            <div class="flex items-center gap-3 pl-4 md:pl-6 relative border-l border-[#A0BDB4]/40">
+            <div class="flex items-center gap-4 pl-6 md:pl-8 relative border-l border-[#B4CDBF]/50">
                 @auth
                 
                 <livewire:component.notification-bell />
 
                 <div class="text-right hidden md:block pl-2">
-                    <p class="text-[13px] font-black text-[#435F42] leading-none">{{ auth()->user()->username }}</p>
-                    <p class="text-[9px] text-[#A0BDB4] uppercase tracking-widest font-bold mt-1">{{ auth()->user()->role }}</p>
+                    <p class="text-[14px] font-black text-[#2A402B] leading-none">{{ auth()->user()->username }}</p>
+                    <p class="text-[10px] text-[#648B73] uppercase tracking-widest font-bold mt-1.5">{{ auth()->user()->role }}</p>
                 </div>
                 
-                <form action="{{ route('logout') }}" method="POST" class="inline m-0 p-0 ml-1">
+                <form action="{{ route('logout') }}" method="POST" class="inline m-0 p-0 ml-2">
                     @csrf
-                    <button type="submit" class="p-2 text-[#A0BDB4] hover:text-[#5B4E3F] hover:bg-[#D9E2E0]/50 rounded-full transition-all cursor-pointer flex items-center justify-center group border border-transparent hover:border-[#D9E2E0]" title="Keluar">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <button type="submit" class="p-2.5 text-[#7A9D8C] hover:text-[#E55A5A] hover:bg-[#FCE8E8] rounded-full transition-colors cursor-pointer flex items-center justify-center group" title="Keluar">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     </button>
                 </form>
                 @endauth
@@ -96,7 +99,8 @@
         </div>
     </nav>
 
-    <main class="mt-6 md:mt-10 px-4 max-w-7xl mx-auto pb-16">
+    <!-- Konten Utama: Max width dibesarin drastis, padding ditambah -->
+    <main class="mt-10 md:mt-14 px-6 lg:px-12 max-w-[100rem] mx-auto pb-24">
         {{ $slot }}
     </main>
 

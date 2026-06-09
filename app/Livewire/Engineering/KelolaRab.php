@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\Engineering;
 
 use Livewire\Component;
@@ -24,10 +23,10 @@ class KelolaRab extends Component
     public $no_boq;
     public $tanggal_dokumen;
     public $overhead_cost = 0;
-    
+   
     // Properti Histori
     public $commit_message;
-    public $nama_editor; 
+    public $nama_editor;
 
     // Properti Form Item Baru
     public $newKategori;
@@ -39,7 +38,7 @@ class KelolaRab extends Component
     // Pencarian Material
     public $materialSearch = [];
     public $materialResults = [];
-    public $selectedMaterial = []; 
+    public $selectedMaterial = [];
 
     public function mount()
     {
@@ -75,7 +74,7 @@ class KelolaRab extends Component
                 'grand_total' => 0,
                 'status_rab' => 'draft'
             ]);
-            
+           
             $this->rabAktif = $rabBaru;
             $this->rabId = $rabBaru->id;
             $this->no_boq = $rabBaru->no_boq;
@@ -89,12 +88,11 @@ class KelolaRab extends Component
     {
         if (is_array($value)) return;
         $id = str_contains($key, '.') ? last(explode('.', $key)) : $key;
-        
+       
         if (empty($value) || strlen($value) < 2) {
             $this->materialResults[$id] = [];
             return;
         }
-
         $this->materialResults[$id] = Material::where('nama_barang', 'like', '%' . $value . '%')
             ->select('id', 'nama_barang', 'harga', 'satuan')->take(6)->get();
     }
@@ -135,7 +133,7 @@ class KelolaRab extends Component
         $this->validate([
             "deskripsiInput.{$parentId}" => 'required',
             "volumeInput.{$parentId}" => 'required|numeric',
-            "hargaInput.{$parentId}" => 'required|numeric', 
+            "hargaInput.{$parentId}" => 'required|numeric',
         ]);
 
         $qty = $this->volumeInput[$parentId];
@@ -173,26 +171,23 @@ class KelolaRab extends Component
     public function loadDaftarProyek()
     {
         $query = RProject::with('rab')->orderBy('updated_at', 'desc');
-
         if (!empty($this->searchProyek)) {
             $query->where(function($q) {
                 $q->where('nama_pelanggan', 'like', '%' . $this->searchProyek . '%')
                   ->orWhere('request_no', 'like', '%' . $this->searchProyek . '%');
             });
         }
-        
+       
         $proyek = $query->get();
-
         if ($this->filterStatus !== 'all') {
             $proyek = $proyek->filter(function($p) {
                 $status = strtolower($p->rab->status_rab ?? '');
                 if ($this->filterStatus === 'draft') return $status === 'draft' || $status === '';
-                if ($this->filterStatus === 'pending') return $status === 'pending'; 
+                if ($this->filterStatus === 'pending') return $status === 'pending';
                 if ($this->filterStatus === 'approved') return $status === 'approved';
                 return true;
             });
         }
-
         $this->daftarProyek = $proyek->sortBy(function($p) {
             return strtolower($p->rab->status_rab ?? '') === 'revisi' ? 0 : 1;
         })->values();
@@ -217,17 +212,17 @@ class KelolaRab extends Component
         ]);
 
         $rab = Rab::with('project')->findOrFail($id_rab);
-        
+       
         // 1. Ubah status RAB jadi pending
         $rab->update([
             'status_rab' => 'pending',
             'overhead_cost' => $this->overhead_cost, // Simpan overhead terakhir
         ]);
-        
+       
         // 2. Catat ke Document Commits pakai inputan lu
         DocumentCommit::create([
             'id_user' => Auth::id() ?? 1,
-            'user_name' => $this->nama_editor, 
+            'user_name' => $this->nama_editor,
             'id_rab' => $rab->id,
             'id_r_project' => $rab->id_r_project,
             'jenis_aksi' => 'submitted',
@@ -235,7 +230,7 @@ class KelolaRab extends Component
             'created_at' => now()
         ]);
 
-        // 3. KIRIM NOTIFIKASI KE DIREKTUR 
+        // 3. KIRIM NOTIFIKASI KE DIREKTUR
         $direktur = \App\Models\User::where('role', 'direktur')->first();
         if ($direktur) {
             \App\Models\Notification::create([
@@ -246,9 +241,9 @@ class KelolaRab extends Component
                 'is_read' => false
             ]);
         }
-        
+       
         session()->flash('sukses', 'Halo! Dokumen estimasi RAB sudah berhasil meluncur ke sistem Direktur ya. Mohon ditunggu proses review-nya. Terima kasih atas kerja kerasnya, silakan istirahat sejenak! ✨');
-        
+       
         // Refresh view
         $this->kembaliKeList();
     }
@@ -266,6 +261,7 @@ class KelolaRab extends Component
                 ->whereNull('parent_id')
                 ->with('children.material')
                 ->get();
+            
             $totalPekerjaan = RabItem::where('id_rab', $this->rabId)->where('tipe', 'item')->sum('subtotal');
             $grandTotal = $totalPekerjaan + $overhead;
         }

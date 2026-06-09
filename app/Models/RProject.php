@@ -11,6 +11,7 @@ class RProject extends Model
     protected $fillable = [
         'request_no',
         'id_user',
+        'nama_projek',
         'nama_pelanggan',
         'pic_pelanggan',
         'no_hp',
@@ -19,8 +20,8 @@ class RProject extends Model
         'estimasi_budget',
         'priority',
         'alamat',
-        'latitude',
-        'longitude',
+        // 'latitude',
+        // 'longitude',
         'status_proyek',
         'category_id'
     ];
@@ -45,14 +46,18 @@ class RProject extends Model
         return $this->hasMany(Bidding::class, 'r_project_id');
     }
 
+  // app/Models/RProject.php
+
     public function rabs()
     {
-        return $this->hasMany(Rab::class, 'r_project_id');
+        // Ganti 'r_project_id' jadi 'id_r_project'
+        return $this->hasMany(Rab::class, 'id_r_project');
     }
 
     public function rab()
     {
-        return $this->hasOne(Rab::class, 'r_project_id')->latestOfMany();
+        // Ganti juga di sini
+        return $this->hasOne(Rab::class, 'id_r_project')->latestOfMany();
     }
 
     public function attachments()
