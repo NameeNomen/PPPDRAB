@@ -6,6 +6,7 @@ use App\Http\Controllers\PdfController;
 use App\Livewire\Engineering\RabIndex;
 use App\Livewire\Engineering\RabDetail; 
 use App\Livewire\Engineering\RabWorkspace; 
+use App\Models\RProject; // <-- Tambahan untuk model RProject
 
 // 1. Route Root (Redirector Otomatis)
 Route::get('/', function () {
@@ -39,6 +40,13 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:marketing'])->group(function () {
         Route::get('/marketing/dashboard', App\Livewire\DashboardMarketing::class)->name('marketing.dashboard');
         Route::get('/marketing/proyek', App\Livewire\Marketing\KelolaProyek::class)->name('marketing.proyek');
+        Route::get('/proyek/preview/{id}', [ProjectPreviewController::class, 'show'])->name('proyek.preview');
+        // <-- ROUTE BARU: Detail Proyek (Pop Up) -->
+        Route::get('/marketing/proyek/detail/{id}', function($id) {
+            $proyek = RProject::with(['category', 'user'])->findOrFail($id);
+            return view('livewire.marketing.detail', compact('proyek')); 
+        })->name('marketing.proyek.detail');
+
         Route::get('/marketing/bidding/histori', App\Livewire\Marketing\HistoriRevisiBidding::class)->name('marketing.bidding.histori');
         Route::get('/marketing/bidding/{id?}',  App\Livewire\Marketing\KelolaBidding::class)->name('marketing.bidding');
     });
@@ -49,7 +57,6 @@ Route::middleware(['auth'])->group(function () {
     // Semua rute engineering disatukan di sini biar rapi dan aman
     Route::middleware(['role:engineering'])->prefix('engineering')->group(function () {
         Route::get('/dashboard', App\Livewire\DashboardEngineering::class)->name('engineering.dashboard');
-        
         
         // Rute Kelola RAB (Index, Detail, Workspace)
         Route::get('/kelola-rab', RabIndex::class)->name('engineering.rab.index');

@@ -20,8 +20,6 @@ class RProject extends Model
         'estimasi_budget',
         'priority',
         'alamat',
-        // 'latitude',
-        // 'longitude',
         'status_proyek',
         'category_id'
     ];

@@ -16,10 +16,8 @@ class KelolaProyek extends Component
 
     public $daftarProyek = [];
     public $isModalOpen = false;
-    public $isEdit = false; // Penanda apakah sedang mode edit atau create
-    public $viewMode = 'list'; // Mengatur tampilan: 'list' atau 'detail'
-    public $proyekId; // Menyimpan ID proyek yang sedang dipilih (untuk detail/edit/delete)
-    public $detailProyek; // Menyimpan data proyek untuk tampilan detail
+    public $isEdit = false;
+    public $proyekId; // Tetap dipakai untuk fungsi Edit dan Delete
 
     // Form inputs sesuai Migration
     public $category_id;
@@ -67,21 +65,6 @@ class KelolaProyek extends Component
         $this->search_kategori = '';
     }
 
-    // Navigasi State Tampilan
-    public function tampilkanDetail($id)
-    {
-        $this->proyekId = $id;
-        $this->detailProyek = RProject::with(['category', 'user'])->findOrFail($id);
-        $this->viewMode = 'detail';
-    }
-
-    public function kembaliKeList()
-    {
-        $this->viewMode = 'list';
-        $this->resetForm();
-        $this->loadData();
-    }
-
     public function bukaModal()
     {
         $this->resetForm();
@@ -100,7 +83,7 @@ class KelolaProyek extends Component
         $this->reset([
             'category_id', 'nama_projek', 'nama_pelanggan', 'pic_pelanggan',
             'no_hp', 'deskripsi_proyek', 'target_waktu', 'estimasi_budget', 
-            'priority', 'alamat', 'lampiran', 'search_kategori', 'nama_kategori_terpilih'
+            'priority', 'alamat', 'lampiran', 'search_kategori', 'nama_kategori_terpilih', 'proyekId'
         ]);
         $this->priority = 'medium';
     }
@@ -114,7 +97,7 @@ class KelolaProyek extends Component
 
         $proyek = RProject::create([
             'request_no' => $requestNo,
-            'id_user' => Auth::id(),
+            'id_user' => Auth::id() ?? 1, // Pastikan ada fallback Auth jika testing
             'nama_projek' => $this->nama_projek,
             'category_id' => $this->category_id,
             'nama_pelanggan' => $this->nama_pelanggan,
@@ -143,7 +126,6 @@ class KelolaProyek extends Component
         $this->proyekId = $id;
         $this->isEdit = true;
 
-        // Populate properti form
         $this->category_id = $proyek->category_id;
         $this->nama_kategori_terpilih = $proyek->category->nama_kategori ?? '';
         $this->nama_projek = $proyek->nama_projek;
@@ -183,12 +165,7 @@ class KelolaProyek extends Component
 
         session()->flash('sukses', "Data proyek {$proyek->request_no} berhasil diperbarui!");
         $this->tutupModal();
-        
-        if ($this->viewMode === 'detail') {
-            $this->tampilkanDetail($proyek->id); // Refresh data di halaman detail
-        } else {
-            $this->loadData();
-        }
+        $this->loadData();
     }
 
     // Aksi: Hapus Proyek
@@ -198,7 +175,7 @@ class KelolaProyek extends Component
         $proyek->delete();
 
         session()->flash('sukses', "Proyek berhasil dihapus dari sistem.");
-        $this->kembaliKeList();
+        $this->loadData();
     }
 
     // Helper: Validasi terpusat
@@ -232,35 +209,31 @@ class KelolaProyek extends Component
                     'file_type' => $file->extension()
                 ]);
             }
-            $this->lampiran = []; // Reset input file setelah diproses
+            $this->lampiran = []; 
         }
     }
 
     // Helper: Broadcast Notifikasi
-   private function kirimNotifikasi($requestNo, $namaProjek)
-{
-    $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
-    $namaPenulis = Auth::user()->username ?? 'Tim Marketing';
+    private function kirimNotifikasi($requestNo, $namaProjek)
+    {
+        $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
+        $namaPenulis = Auth::user()->username ?? 'Tim Marketing';
 
-    foreach ($penerimaNotif as $user) {
+        foreach ($penerimaNotif as $user) {
+            $url = '/direktur/persetujuan/' . $requestNo;
+            if ($user->role === 'engineering') {
+                $url = '/engineering/kelola-rab/' . $requestNo;
+            }
 
-        // default URL
-        $url = '/direktur/persetujuan/' . $requestNo;
-
-        // kalau engineering, arahkan ke RAB
-        if ($user->role === 'engineering') {
-            $url = '/engineering/kelola-rab/' . $requestNo;
+            Notification::create([
+                'id_user' => $user->id,
+                'judul' => 'Inisiasi Proyek Baru',
+                'pesan' => "Request Proyek {$requestNo} ({$namaProjek}) telah diajukan oleh {$namaPenulis}.",
+                'url_tujuan' => $url,
+                'is_read' => false
+            ]);
         }
-
-        Notification::create([
-            'id_user' => $user->id,
-            'judul' => 'Inisiasi Proyek Baru',
-            'pesan' => "Request Proyek {$requestNo} ({$namaProjek}) telah diajukan oleh {$namaPenulis}.",
-            'url_tujuan' => $url,
-            'is_read' => false
-        ]);
     }
-}
 
     public function render()
     {

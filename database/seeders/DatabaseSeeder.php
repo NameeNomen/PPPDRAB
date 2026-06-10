@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             //DummyTransactionSeeder::class,
             ProjectCategorySeeder::class,
+            RProjectSeeder::class,
             
         ]);
     }
