@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
             URL::forceRootUrl('https://' . env('CODESPACE_NAME') . '-8000.app.github.dev');
             URL::forceScheme('https');
         }
+
+        if (!file_exists(public_path('storage'))) {
+        symlink(storage_path('app/public'), public_path('storage'));
+    }
     
 }
 }

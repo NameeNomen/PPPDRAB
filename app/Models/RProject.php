@@ -10,6 +10,8 @@ class RProject extends Model
 
     protected $fillable = [
         'request_no',
+        'tanggal_request',
+        'requires_site_survey',
         'id_user',
         'nama_projek',
         'nama_pelanggan',
@@ -22,6 +24,12 @@ class RProject extends Model
         'alamat',
         'status_proyek',
         'category_id'
+    ];
+
+    protected $casts = [
+        'tanggal_request' => 'datetime',
+        'requires_site_survey' => 'boolean',
+        'estimasi_budget' => 'decimal:2',
     ];
 
     public function user()

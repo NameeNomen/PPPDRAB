@@ -16,7 +16,14 @@ return new class extends Migration
         $table->unsignedBigInteger('r_project_id'); // Menghubungkan file ke request yang mana
         $table->string('file_name'); // Nama asli file (proposal.pdf)
         $table->string('file_path'); // Alamat simpan di storage (public/attachments/xyz.pdf)
-        $table->string('file_type'); // jpeg, pdf, png (buat validasi tampilan)
+        $table->string('file_type'); 
+        $table->enum('attachment_category', [
+    'reference_image',
+    'location_photo',
+    'technical_drawing',
+    'proposal',
+    'other'
+])->default('other');
         $table->timestamps();
 
         // Kalau request dihapus, file ikut kehapus dari database

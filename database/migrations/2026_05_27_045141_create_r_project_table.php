@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::create('r_project', function (Blueprint $table) {
             $table->id();
+            $table->date('tanggal_request')->nullable();
+            $table->boolean('requires_site_survey')->default(false);
             $table->string('request_no')->unique();
             $table->foreignId('id_user')->constrained('users')->cascadeOnDelete(); 
             $table->string('nama_projek'); 
@@ -39,6 +41,8 @@ return new class extends Migration
             ])->default('pending');
 
             $table->foreignId('category_id')->nullable()->constrained('project_categories')->nullOnDelete();
+                        $table->foreign('category_id')->references('id')->on('project_categories')->onDelete('set null'); 
+
             $table->timestamps(); 
         });
     }

@@ -10,7 +10,7 @@ class ProjectAttachment extends Model
     protected $table = 'project_request_attachments'; 
     
     protected $fillable = [
-        'r_project_id', 'file_name', 'file_path', 'file_type'
+        'r_project_id', 'file_name', 'file_path', 'file_type' , 'attachment_category'
     ];
 
     public function project() {

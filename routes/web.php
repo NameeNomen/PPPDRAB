@@ -37,19 +37,18 @@ Route::middleware(['auth'])->group(function () {
     // ==========================================
     // AREA MARKETING
     // ==========================================
-    Route::middleware(['role:marketing'])->group(function () {
-        Route::get('/marketing/dashboard', App\Livewire\DashboardMarketing::class)->name('marketing.dashboard');
-        Route::get('/marketing/proyek', App\Livewire\Marketing\KelolaProyek::class)->name('marketing.proyek');
-        Route::get('/proyek/preview/{id}', [ProjectPreviewController::class, 'show'])->name('proyek.preview');
-        // <-- ROUTE BARU: Detail Proyek (Pop Up) -->
-        Route::get('/marketing/proyek/detail/{id}', function($id) {
-            $proyek = RProject::with(['category', 'user'])->findOrFail($id);
-            return view('livewire.marketing.detail', compact('proyek')); 
-        })->name('marketing.proyek.detail');
-
-        Route::get('/marketing/bidding/histori', App\Livewire\Marketing\HistoriRevisiBidding::class)->name('marketing.bidding.histori');
-        Route::get('/marketing/bidding/{id?}',  App\Livewire\Marketing\KelolaBidding::class)->name('marketing.bidding');
-    });
+   Route::middleware(['role:marketing'])->group(function () {
+    Route::get('/marketing/dashboard', App\Livewire\DashboardMarketing::class)->name('marketing.dashboard');
+    Route::get('/marketing/proyek', App\Livewire\Marketing\KelolaProyek::class)->name('marketing.proyek');
+    Route::get('/marketing/proyek/preview/{id}', [ProjectPreviewController::class, 'show'])->name('marketing.proyek.preview');
+    Route::get('/marketing/proyek/detail/{id}', function($id) {
+        $proyek = RProject::with(['category', 'user', 'attachments'])->findOrFail($id);
+        return view('livewire.marketing.detail', compact('proyek')); 
+    })->name('marketing.proyek.detail');
+    
+    Route::get('/marketing/bidding/histori', App\Livewire\Marketing\HistoriRevisiBidding::class)->name('marketing.bidding.histori');
+    Route::get('/marketing/bidding/{id?}', App\Livewire\Marketing\KelolaBidding::class)->name('marketing.bidding');
+});
 
     // ==========================================
     // AREA ENGINEERING

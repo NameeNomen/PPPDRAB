@@ -9,17 +9,32 @@ use App\Models\ProjectAttachment;
 use App\Models\User;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class KelolaProyek extends Component
 {
     use WithFileUploads;
 
+    // State Modal & Edit
     public $daftarProyek = [];
     public $isModalOpen = false;
     public $isEdit = false;
-    public $proyekId; // Tetap dipakai untuk fungsi Edit dan Delete
+    public $proyekId;
+    public $metode_input = 'manual';
+    public $existingAttachments = [];
 
-    // Form inputs sesuai Migration
+    // Search & Filter
+    public $search = '';
+    public $filterStatus = '';
+    public $filterCategory = '';
+    public $search_kategori = '';
+    public $nama_kategori_terpilih = '';
+    public $listKategori = [];
+
+    // Form Inputs
     public $category_id;
     public $nama_projek;
     public $nama_pelanggan;
@@ -28,215 +43,377 @@ class KelolaProyek extends Component
     public $deskripsi_proyek;
     public $target_waktu;
     public $estimasi_budget;
-    public $priority = 'medium'; 
+    public $priority = 'medium';
     public $alamat;
-    
-    public $lampiran = [];
 
-    // Properti buat Dropdown Kategori Kustom
-    public $search_kategori = '';
-    public $nama_kategori_terpilih = '';
-    public $listKategori = [];
+    // File Uploads (Wajib diinisialisasi sebagai array kosong)
+    public $file_rfq;
+    public $file_referensi = [];
+    public $file_lokasi = [];
+    public $file_drawing = [];
 
-    public function mount()
-    {
-        $this->loadData();
+    // Replace Foto State
+    public $replaceAttachmentId = null;
+    public $replaceFile = null;
+
+    // Detail Popup State
+    public $isDetailOpen = false;
+    public $detailProyek = null;
+
+    public function mount() { 
+        $this->loadData(); 
     }
 
     public function loadData()
     {
-        $this->daftarProyek = RProject::latest()->get();
+        $query = RProject::with(['category', 'attachments'])->latest();
+        if ($this->search) {
+            $query->where(function($q) {
+                $q->where('nama_projek', 'like', '%' . $this->search . '%')
+                  ->orWhere('request_no', 'like', '%' . $this->search . '%')
+                  ->orWhere('nama_pelanggan', 'like', '%' . $this->search . '%');
+            });
+        }
+        if ($this->filterStatus) $query->where('status_proyek', $this->filterStatus);
+        if ($this->filterCategory) $query->where('category_id', $this->filterCategory);
+
+        $this->daftarProyek = $query->get();
         $this->listKategori = ProjectCategory::orderBy('nama_kategori')->get();
     }
 
-    public function updatedSearchKategori($value)
-    {
-        if (strlen($value) > 0) {
-            $this->listKategori = ProjectCategory::where('nama_kategori', 'like', '%' . $value . '%')->get();
-        } else {
-            $this->listKategori = ProjectCategory::orderBy('nama_kategori')->get();
-        }
+    public function updatedSearch() { $this->loadData(); }
+    public function updatedFilterStatus() { $this->loadData(); }
+    public function updatedFilterCategory() { $this->loadData(); }
+
+    public function updatedSearchKategori($value) {
+        $this->listKategori = $value
+            ? ProjectCategory::where('nama_kategori', 'like', '%' . $value . '%')->get()
+            : ProjectCategory::orderBy('nama_kategori')->get();
     }
 
-    public function pilihKategori($id, $nama)
-    {
+    public function pilihKategori($id, $nama) {
         $this->category_id = $id;
         $this->nama_kategori_terpilih = $nama;
         $this->search_kategori = '';
     }
 
-    public function bukaModal()
-    {
+    // --- MODAL ACTIONS ---
+    public function bukaModal() {
         $this->resetForm();
         $this->isEdit = false;
-        $this->listKategori = ProjectCategory::orderBy('nama_kategori')->get();
         $this->isModalOpen = true;
     }
 
-    public function tutupModal()
-    {
-        $this->isModalOpen = false;
+    public function tutupModal() { 
+        $this->isModalOpen = false; 
     }
 
-    public function resetForm()
-    {
+    public function resetForm() {
         $this->reset([
             'category_id', 'nama_projek', 'nama_pelanggan', 'pic_pelanggan',
-            'no_hp', 'deskripsi_proyek', 'target_waktu', 'estimasi_budget', 
-            'priority', 'alamat', 'lampiran', 'search_kategori', 'nama_kategori_terpilih', 'proyekId'
+            'no_hp', 'deskripsi_proyek', 'target_waktu', 'estimasi_budget',
+            'priority', 'alamat', 'file_rfq', 'search_kategori', 'nama_kategori_terpilih',
+            'proyekId', 'existingAttachments', 'replaceFile', 'replaceAttachmentId'
         ]);
+        
+        // Reset array file secara manual biar aman di Livewire
+        $this->file_referensi = [];
+        $this->file_lokasi = [];
+        $this->file_drawing = [];
+        
         $this->priority = 'medium';
+        $this->metode_input = 'manual';
     }
 
-    // Aksi: Simpan Data Baru
-    public function simpanProyek()
-    {
-        $this->validateRules();
-
-        $requestNo = 'REQ/TJT/' . date('Y/m') . '/' . str_pad(RProject::whereMonth('created_at', date('m'))->count() + 1, 4, '0', STR_PAD_LEFT);
-
-        $proyek = RProject::create([
-            'request_no' => $requestNo,
-            'id_user' => Auth::id() ?? 1, // Pastikan ada fallback Auth jika testing
-            'nama_projek' => $this->nama_projek,
-            'category_id' => $this->category_id,
-            'nama_pelanggan' => $this->nama_pelanggan,
-            'pic_pelanggan' => $this->pic_pelanggan,
-            'no_hp' => $this->no_hp,
-            'deskripsi_proyek' => $this->deskripsi_proyek,
-            'target_waktu' => $this->target_waktu,
-            'estimasi_budget' => $this->estimasi_budget,
-            'priority' => $this->priority,
-            'alamat' => $this->alamat,
-            'status_proyek' => 'pending'
-        ]);
-
-        $this->prosesLampiran($proyek->id);
-        $this->kirimNotifikasi($requestNo, $this->nama_projek);
-
-        session()->flash('sukses', "Proyek {$requestNo} berhasil dibuat!");
-        $this->tutupModal();
-        $this->loadData();
+    // --- DETAIL POPUP ---
+    public function bukaDetail($id) {
+        $this->detailProyek = RProject::with(['category', 'attachments', 'user'])->findOrFail($id);
+        $this->isDetailOpen = true;
+    }
+    
+    public function tutupDetail() {
+        $this->isDetailOpen = false;
+        $this->detailProyek = null;
     }
 
-    // Aksi: Mengisi Form untuk Edit
-    public function editProyek($id)
-    {
-        $proyek = RProject::findOrFail($id);
-        $this->proyekId = $id;
-        $this->isEdit = true;
+    // --- CREATE & UPDATE ---
+    public function simpanProyek() {
+        try { 
+            $this->validateRules(); 
+        } catch (ValidationException $e) {
+            session()->flash('gagal', 'Validasi gagal: ' . collect($e->validator->errors()->all())->first());
+            return;
+        }
 
-        $this->category_id = $proyek->category_id;
-        $this->nama_kategori_terpilih = $proyek->category->nama_kategori ?? '';
-        $this->nama_projek = $proyek->nama_projek;
-        $this->nama_pelanggan = $proyek->nama_pelanggan;
-        $this->pic_pelanggan = $proyek->pic_pelanggan;
-        $this->no_hp = $proyek->no_hp;
-        $this->deskripsi_proyek = $proyek->deskripsi_proyek;
-        $this->target_waktu = $proyek->target_waktu;
-        $this->estimasi_budget = $proyek->estimasi_budget;
-        $this->priority = $proyek->priority;
-        $this->alamat = $proyek->alamat;
+        $requestNo = 'REQ/TJT/' . date('Y/m') . '/' . str_pad(
+            RProject::whereYear('created_at', date('Y'))->whereMonth('created_at', date('m'))->count() + 1, 4, '0', STR_PAD_LEFT
+        );
 
-        $this->listKategori = ProjectCategory::orderBy('nama_kategori')->get();
-        $this->isModalOpen = true;
-    }
+        DB::beginTransaction();
+        $storedFiles = [];
+        
+        try {
+            $proyek = RProject::create([
+                'request_no' => $requestNo, 
+                'tanggal_request' => now(), 
+                'id_user' => Auth::id() ?? 1,
+                'nama_projek' => $this->nama_projek, 
+                'category_id' => $this->category_id,
+                'nama_pelanggan' => $this->nama_pelanggan, 
+                'pic_pelanggan' => $this->pic_pelanggan,
+                'no_hp' => $this->no_hp, 
+                'deskripsi_proyek' => $this->metode_input === 'rfq' ? 'Berdasarkan Proposal/RFQ Terlampir' : $this->deskripsi_proyek,
+                'target_waktu' => $this->target_waktu, 
+                'estimasi_budget' => $this->estimasi_budget,
+                'priority' => $this->priority, 
+                'alamat' => $this->alamat,
+                'status_proyek' => 'pending', 
+                'requires_site_survey' => $this->metode_input === 'manual',
+            ]);
 
-    // Aksi: Update Data Proyek
-    public function updateProyek()
-    {
-        $this->validateRules();
-
-        $proyek = RProject::findOrFail($this->proyekId);
-        $proyek->update([
-            'nama_projek' => $this->nama_projek,
-            'category_id' => $this->category_id,
-            'nama_pelanggan' => $this->nama_pelanggan,
-            'pic_pelanggan' => $this->pic_pelanggan,
-            'no_hp' => $this->no_hp,
-            'deskripsi_proyek' => $this->deskripsi_proyek,
-            'target_waktu' => $this->target_waktu,
-            'estimasi_budget' => $this->estimasi_budget,
-            'priority' => $this->priority,
-            'alamat' => $this->alamat,
-        ]);
-
-        $this->prosesLampiran($proyek->id);
-
-        session()->flash('sukses', "Data proyek {$proyek->request_no} berhasil diperbarui!");
-        $this->tutupModal();
-        $this->loadData();
-    }
-
-    // Aksi: Hapus Proyek
-    public function hapusProyek($id)
-    {
-        $proyek = RProject::findOrFail($id);
-        $proyek->delete();
-
-        session()->flash('sukses', "Proyek berhasil dihapus dari sistem.");
-        $this->loadData();
-    }
-
-    // Helper: Validasi terpusat
-    private function validateRules()
-    {
-        $this->validate([
-            'nama_projek' => 'required|string|max:255',
-            'category_id' => 'required', 
-            'nama_pelanggan' => 'required|string|max:255',
-            'pic_pelanggan' => 'nullable|string|max:255', 
-            'no_hp' => 'nullable|string|max:255', 
-            'deskripsi_proyek' => 'nullable|string', 
-            'target_waktu' => 'nullable|date', 
-            'estimasi_budget' => 'nullable|numeric', 
-            'priority' => 'required|in:low,medium,high', 
-            'alamat' => 'nullable|string', 
-        ], [
-            'category_id.required' => 'Kategori proyek wajib dipilih dari daftar pencarian.'
-        ]);
-    }
-
-    // Helper: Simpan attachment berkas
-    private function prosesLampiran($proyekId)
-    {
-        if (!empty($this->lampiran)) {
-            foreach ($this->lampiran as $file) {
-                ProjectAttachment::create([
-                    'r_project_id' => $proyekId,
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_path' => $file->store('project', 'public'),
-                    'file_type' => $file->extension()
+            $storedFiles = $this->uploadSemuaLampiran($proyek->id);
+                        \Log::info('DEBUG UPLOAD:', [
+                    'file_rfq' => $this->file_rfq ? 'Ada' : 'Kosong',
+                    'file_ref_count' => count($this->file_referensi),
+                    'file_lokasi_count' => count($this->file_lokasi),
+                    'metode' => $this->metode_input
                 ]);
+
+                $savedPaths = [];
+            $this->kirimNotifikasi($requestNo, $this->nama_projek);
+            DB::commit();
+
+            session()->flash('sukses', "Proyek {$requestNo} berhasil dibuat!");
+            $this->tutupModal();
+            $this->loadData();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            foreach ($storedFiles as $p) { 
+                if ($p && Storage::disk('public')->exists($p)) Storage::disk('public')->delete($p); 
             }
-            $this->lampiran = []; 
+            session()->flash('gagal', 'Gagal menyimpan: ' . $e->getMessage());
         }
     }
 
-    // Helper: Broadcast Notifikasi
-    private function kirimNotifikasi($requestNo, $namaProjek)
-    {
-        $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
-        $namaPenulis = Auth::user()->username ?? 'Tim Marketing';
+    public function editProyek($id) {
+        $proyek = RProject::with(['category', 'attachments'])->findOrFail($id);
+        $this->proyekId = $id;
+        $this->isEdit = true;
+        $this->replaceFile = null; 
+        $this->replaceAttachmentId = null;
 
-        foreach ($penerimaNotif as $user) {
-            $url = '/direktur/persetujuan/' . $requestNo;
-            if ($user->role === 'engineering') {
-                $url = '/engineering/kelola-rab/' . $requestNo;
+        $this->nama_projek = $proyek->nama_projek; 
+        $this->category_id = $proyek->category_id;
+        $this->nama_kategori_terpilih = $proyek->category->nama_kategori ?? '';
+        $this->nama_pelanggan = $proyek->nama_pelanggan; 
+        $this->pic_pelanggan = $proyek->pic_pelanggan;
+        $this->no_hp = $proyek->no_hp; 
+        $this->deskripsi_proyek = $proyek->deskripsi_proyek;
+        $this->target_waktu = $proyek->target_waktu; 
+        $this->estimasi_budget = $proyek->estimasi_budget;
+        $this->priority = $proyek->priority; 
+        $this->alamat = $proyek->alamat;
+
+        $this->existingAttachments = [
+            'reference_image'   => $proyek->attachments->where('attachment_category', 'reference_image')->values(),
+            'location_photo'    => $proyek->attachments->where('attachment_category', 'location_photo')->values(),
+            'technical_drawing' => $proyek->attachments->where('attachment_category', 'technical_drawing')->values(),
+            'proposal'          => $proyek->attachments->where('attachment_category', 'proposal')->first(),
+        ];
+
+        $this->metode_input = !empty($this->existingAttachments['proposal']) ? 'rfq' : 'manual';
+        $this->isModalOpen = true;
+    }
+
+    public function updateProyek() {
+        try { 
+            $this->validateRules(); 
+        } catch (ValidationException $e) {
+            session()->flash('gagal', 'Validasi gagal: ' . collect($e->validator->errors()->all())->first());
+            return;
+        }
+
+        DB::beginTransaction();
+        $storedFiles = [];
+        try {
+            $proyek = RProject::findOrFail($this->proyekId);
+            $proyek->update([
+                'nama_projek' => $this->nama_projek, 
+                'category_id' => $this->category_id,
+                'nama_pelanggan' => $this->nama_pelanggan, 
+                'pic_pelanggan' => $this->pic_pelanggan,
+                'no_hp' => $this->no_hp, 
+                'deskripsi_proyek' => $this->deskripsi_proyek,
+                'target_waktu' => $this->target_waktu, 
+                'estimasi_budget' => $this->estimasi_budget,
+                'priority' => $this->priority, 
+                'alamat' => $this->alamat,
+            ]);
+
+            $storedFiles = $this->uploadSemuaLampiran($proyek->id);
+            DB::commit();
+
+            session()->flash('sukses', "Data proyek {$proyek->request_no} berhasil diperbarui!");
+            $this->tutupModal();
+            $this->loadData();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            foreach ($storedFiles as $p) { 
+                if ($p && Storage::disk('public')->exists($p)) Storage::disk('public')->delete($p); 
             }
+            session()->flash('gagal', 'Gagal update: ' . $e->getMessage());
+        }
+    }
 
+    public function hapusProyek($id) {
+        $proyek = RProject::findOrFail($id);
+        foreach ($proyek->attachments as $at) {
+            if (Storage::disk('public')->exists($at->file_path)) {
+                Storage::disk('public')->delete($at->file_path);
+            }
+            $at->delete();
+        }
+        $proyek->delete();
+        session()->flash('sukses', "Proyek berhasil dihapus.");
+        $this->loadData();
+    }
+
+    // --- FILE HANDLING & REPLACE ---
+    public function replaceFoto($attachmentId) {
+        $this->validate(['replaceFile' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120']);
+        $attachment = ProjectAttachment::findOrFail($attachmentId);
+
+        if (Storage::disk('public')->exists($attachment->file_path)) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
+
+        $newPath = $this->replaceFile->store('gambarProyek', 'public');
+        $attachment->update([
+            'file_name' => $this->replaceFile->getClientOriginalName(),
+            'file_path' => $newPath,
+            'file_type' => $this->replaceFile->extension(),
+        ]);
+
+        $this->replaceFile = null;
+        $this->replaceAttachmentId = null;
+        session()->flash('sukses', 'Foto berhasil diganti!');
+        $this->editProyek($this->proyekId);
+    }
+
+    public function hapusFoto($attachmentId) {
+        $attachment = ProjectAttachment::findOrFail($attachmentId);
+        if (Storage::disk('public')->exists($attachment->file_path)) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
+        $attachment->delete();
+        session()->flash('sukses', 'Foto berhasil dihapus!');
+        $this->editProyek($this->proyekId);
+    }
+
+    private function uploadSemuaLampiran($proyekId) {
+        $savedPaths = [];
+        
+        if ($this->file_rfq) {
+            $saved = $this->simpanSingleFile($proyekId, $this->file_rfq, 'proposal');
+            if ($saved) $savedPaths[] = $saved;
+        }
+        
+        if ($this->metode_input === 'manual') {
+            $kategoriMapping = [
+                'file_referensi' => 'reference_image', 
+                'file_lokasi' => 'location_photo', 
+                'file_drawing' => 'technical_drawing'
+            ];
+
+            foreach ($kategoriMapping as $propertyName => $categoryEnum) {
+                if (!empty($this->$propertyName) && is_array($this->$propertyName)) {
+                    foreach ($this->$propertyName as $file) {
+                        $saved = $this->simpanSingleFile($proyekId, $file, $categoryEnum);
+                        if ($saved) $savedPaths[] = $saved;
+                    }
+                }
+            }
+        }
+        return $savedPaths;
+    }
+
+    private function simpanSingleFile($proyekId, $file, $category) {
+        if (!$file) return null;
+        
+        // Simpan file ke storage/app/public/gambarProyek
+        $path = $file->store('gambarProyek', 'public');
+        
+        ProjectAttachment::create([
+            'r_project_id' => $proyekId, 
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $path, 
+            'file_type' => $file->extension(), 
+            'attachment_category' => $category,
+        ]);
+        
+        return $path;
+    }
+
+    private function validateRules() {
+        $rules = [
+            'nama_projek' => 'required|string|max:255', 
+            'category_id' => 'required|exists:project_categories,id',
+            'nama_pelanggan' => 'required|string|max:255', 
+            'pic_pelanggan' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:30', 
+            'priority' => 'required|in:low,medium,high',
+        ];
+
+        if ($this->metode_input === 'manual') {
+            $rules['target_waktu'] = 'required|date';
+            $rules['estimasi_budget'] = 'required|numeric|min:0';
+            $rules['alamat'] = 'required|string';
+            $rules['deskripsi_proyek'] = 'required|string';
+
+            if (!empty($this->file_referensi)) $rules['file_referensi.*'] = 'image|mimes:jpg,jpeg,png,webp|max:5120';
+            if (!empty($this->file_lokasi)) $rules['file_lokasi.*'] = 'image|mimes:jpg,jpeg,png,webp|max:5120';
+            if (!empty($this->file_drawing)) $rules['file_drawing.*'] = 'image|mimes:jpg,jpeg,png,webp|max:5120';
+        } else {
+            $hasExistingProposal = !empty($this->existingAttachments['proposal']);
+            if (!$this->isEdit || !$hasExistingProposal) {
+                $rules['file_rfq'] = 'required|file|mimes:pdf|max:10240';
+            } else {
+                $rules['file_rfq'] = 'nullable|file|mimes:pdf|max:10240';
+            }
+        }
+
+        Validator::make([
+            'nama_projek' => $this->nama_projek, 
+            'category_id' => $this->category_id,
+            'nama_pelanggan' => $this->nama_pelanggan, 
+            'pic_pelanggan' => $this->pic_pelanggan,
+            'no_hp' => $this->no_hp, 
+            'deskripsi_proyek' => $this->deskripsi_proyek,
+            'target_waktu' => $this->target_waktu, 
+            'estimasi_budget' => $this->estimasi_budget,
+            'priority' => $this->priority, 
+            'alamat' => $this->alamat,
+            'file_rfq' => $this->file_rfq, 
+            'file_referensi' => $this->file_referensi,
+            'file_lokasi' => $this->file_lokasi, 
+            'file_drawing' => $this->file_drawing,
+        ], $rules)->validate();
+    }
+
+    private function kirimNotifikasi($requestNo, $namaProjek) {
+        $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
+        foreach ($penerimaNotif as $user) {
             Notification::create([
-                'id_user' => $user->id,
+                'id_user' => $user->id, 
                 'judul' => 'Inisiasi Proyek Baru',
-                'pesan' => "Request Proyek {$requestNo} ({$namaProjek}) telah diajukan oleh {$namaPenulis}.",
-                'url_tujuan' => $url,
-                'is_read' => false
+                'pesan' => "Proyek {$requestNo} ({$namaProjek}) diajukan oleh " . (Auth::user()->username ?? 'Marketing'),
+                'url_tujuan' => $user->role === 'direktur' ? '/direktur/persetujuan/' . $requestNo : '/engineering/kelola-rab/' . $requestNo,
+                'is_read' => false,
             ]);
         }
     }
 
-    public function render()
-    {
+    public function render() {
         return view('livewire.marketing.kelola-proyek')->layout('components.layouts.app');
     }
 }

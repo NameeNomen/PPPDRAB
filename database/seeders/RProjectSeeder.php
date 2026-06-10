@@ -4,72 +4,109 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\RProject;
-use App\Models\User;
+use App\Models\ProjectAttachment;
 use App\Models\ProjectCategory;
-use App\Models\ProjectAttachment; // Tambahkan ini untuk akses tabel lampiran
-use Faker\Factory as Faker;
+use App\Models\User;
 
 class RProjectSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        // Ambil semua ID user dan kategori untuk mencegah error Foreign Key
-        $userIds = User::pluck('id')->toArray();
-        $categoryIds = ProjectCategory::pluck('id')->toArray();
+        $user = User::first();
 
-        if (empty($userIds) || empty($categoryIds)) {
-            $this->command->error('Tabel users atau project_categories masih kosong! Isi dulu ya.');
-            return;
-        }
+        $projects = [
+            [
+                'request_no' => 'REQ-2026-001',
+                'nama_projek' => 'Pembangunan Gudang Produksi',
+                'nama_pelanggan' => 'PT Astra Otoparts',
+                'kategori' => 'Konstruksi Bangunan',
+                'deskripsi' => 'Pembangunan gudang produksi baru seluas ±1500 m².',
+                'images' => [
+                    'https://images.unsplash.com/photo-1517048676732-d65bc937f952',
+                    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab'
+                ]
+            ],
 
-        $faker = Faker::create('id_ID');
+            [
+                'request_no' => 'REQ-2026-002',
+                'nama_projek' => 'Fabrikasi Struktur Baja Workshop',
+                'nama_pelanggan' => 'PT Indomobil',
+                'kategori' => 'Fabrikasi Baja',
+                'deskripsi' => 'Pembuatan struktur baja workshop bentang 20 meter.',
+                'images' => [
+                    'https://images.unsplash.com/photo-1504307651254-35680f356dfd',
+                    'https://images.unsplash.com/photo-1503387762-592deb58ef4e'
+                ]
+            ],
 
-        // Bikin 5 Proyek Dummy
-        for ($i = 1; $i <= 5; $i++) {
-            $proyek = RProject::create([
-                'request_no'       => 'REQ-' . date('Ymd') . '-' . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'id_user'          => $faker->randomElement($userIds),
-                'nama_projek'      => 'Proyek ' . $faker->words(3, true),
-                'nama_pelanggan'   => $faker->company,
-                'pic_pelanggan'    => $faker->name,
-                'no_hp'            => $faker->phoneNumber,
-                'deskripsi_proyek' => "Catatan Teknis:\n- " . $faker->sentence . "\n- " . $faker->sentence,
-                'target_waktu'     => $faker->dateTimeBetween('now', '+6 months')->format('Y-m-d'),
-                'estimasi_budget'  => $faker->numberBetween(50000000, 2000000000), // 50 Juta - 2 Miliar
-                'priority'         => $faker->randomElement(['low', 'medium', 'high']),
-                'alamat'           => $faker->address,
-                'status_proyek'    => $faker->randomElement(['pending', 'on_progress', 'completed']),
-                'category_id'      => $faker->randomElement($categoryIds),
+            [
+                'request_no' => 'REQ-2026-003',
+                'nama_projek' => 'Maintenance Conveyor Line',
+                'nama_pelanggan' => 'PT Yamaha Indonesia',
+                'kategori' => 'Instalasi & Maintenance',
+                'deskripsi' => 'Perbaikan conveyor dan gearbox line produksi.',
+                'images' => [
+                    'https://images.unsplash.com/photo-1565008447742-97f6f38c985c',
+                    'https://images.unsplash.com/photo-1581094794329-c8112a89af12'
+                ]
+            ],
+
+            [
+                'request_no' => 'REQ-2026-004',
+                'nama_projek' => 'Renovasi Interior Kantor Direksi',
+                'nama_pelanggan' => 'PT Denso Indonesia',
+                'kategori' => 'Interior & Finishing',
+                'deskripsi' => 'Renovasi ruang direktur dan meeting room.',
+                'images' => [
+                    'https://images.unsplash.com/photo-1497366754035-f200968a6e72',
+                    'https://images.unsplash.com/photo-1497366412874-3415097a27e7'
+                ]
+            ],
+
+            [
+                'request_no' => 'REQ-2026-005',
+                'nama_projek' => 'Platform Maintenance dan Tangga Akses',
+                'nama_pelanggan' => 'PT Nestle Indonesia',
+                'kategori' => 'Fabrikasi Baja',
+                'deskripsi' => 'Pembuatan platform maintenance galvanis sesuai drawing.',
+                'images' => [
+                    'https://images.unsplash.com/photo-1513828583688-c52646db42da',
+                    'https://images.unsplash.com/photo-1509395176047-4a66953fd231'
+                ]
+            ]
+        ];
+
+        foreach ($projects as $item) {
+
+            $category = ProjectCategory::where(
+                'nama_kategori',
+                $item['kategori']
+            )->first();
+
+            $project = RProject::create([
+                'request_no' => $item['request_no'],
+                'id_user' => $user->id,
+                'nama_projek' => $item['nama_projek'],
+                'nama_pelanggan' => $item['nama_pelanggan'],
+                'pic_pelanggan' => 'Budi Santoso',
+                'no_hp' => '081234567890',
+                'deskripsi_proyek' => $item['deskripsi'],
+                'target_waktu' => now()->addDays(rand(30,120)),
+                'estimasi_budget' => rand(100000000,3000000000),
+                'priority' => collect(['low','medium','high'])->random(),
+                'alamat' => 'Karawang, Jawa Barat',
+                'status_proyek' => 'pending',
+                'category_id' => $category?->id
             ]);
 
-            // === GENERATE LAMPIRAN DUMMY UNTUK PROYEK INI ===
-            // Acak mau bikin 1 sampai 3 lampiran per proyek
-            $jumlahLampiran = rand(1, 3);
-            
-            for ($j = 0; $j < $jumlahLampiran; $j++) {
-                $tipeFile = $faker->randomElement(['png', 'jpg', 'pdf']);
-                $namaAsli = '';
-
-                // Penamaan file agar terlihat realistis seperti kerjaan Engineering
-                if ($tipeFile === 'png') {
-                    $namaAsli = 'AutoCAD_Blueprint_Tampak_Depan.png';
-                } elseif ($tipeFile === 'jpg') {
-                    $namaAsli = 'Sketsa_Lapangan_Fabrikasi.jpg';
-                } else {
-                    $namaAsli = 'Dokumen_Spesifikasi_Material.pdf';
-                }
+            foreach ($item['images'] as $index => $image) {
 
                 ProjectAttachment::create([
-                    'r_project_id' => $proyek->id,
-                    'file_name'    => $namaAsli,
-                    // Karena ini data dummy, kita arahkan path-nya ke file bohongan
-                    'file_path'    => 'project/dummy_attachment_' . $tipeFile . '.png', 
-                    'file_type'    => $tipeFile
+                    'r_project_id' => $project->id,
+                    'file_name' => 'referensi_' . ($index + 1) . '.jpg',
+                    'file_path' => $image,
+                    'file_type' => 'jpg',
+                    'attachment_category' => 'reference_image'
                 ]);
             }
         }
