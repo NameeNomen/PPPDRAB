@@ -15,6 +15,7 @@ return new class extends Migration
     $table->text('deskripsi')->nullable();
 
     $table->string('satuan', 50);
+    $table->integer('jumlah')->default(0);
 
     $table->decimal('harga', 15, 2);
 
