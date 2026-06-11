@@ -180,8 +180,7 @@ class KelolaProyek extends Component
                 ]);
 
                 $savedPaths = [];
-            $this->kirimNotifikasi($requestNo, $this->nama_projek);
-            DB::commit();
+$this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->nama_projek);            DB::commit();
 
             session()->flash('sukses', "Proyek {$requestNo} berhasil dibuat!");
             $this->tutupModal();
@@ -400,19 +399,24 @@ class KelolaProyek extends Component
         ], $rules)->validate();
     }
 
-    private function kirimNotifikasi($requestNo, $namaProjek) {
-        $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
-        foreach ($penerimaNotif as $user) {
-            Notification::create([
-                'id_user' => $user->id, 
-                'judul' => 'Inisiasi Proyek Baru',
-                'pesan' => "Proyek {$requestNo} ({$namaProjek}) diajukan oleh " . (Auth::user()->username ?? 'Marketing'),
-                'url_tujuan' => $user->role === 'direktur' ? '/direktur/persetujuan/' . $requestNo : '/engineering/kelola-rab/' . $requestNo,
-                'is_read' => false,
-            ]);
-        }
-    }
+   private function kirimNotifikasi($idProyek, $requestNo, $namaProjek) {
+    $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
+    
+    foreach ($penerimaNotif as $user) {
+        // Logika URL: Kalau direktur ke halaman persetujuan, kalau engineering ke detail RAB
+        $urlTujuan = $user->role === 'direktur' 
+            ? '/direktur/persetujuan/' . $idProyek 
+            : '/engineering/kelola-rab/' . $idProyek . '/detail';
 
+        Notification::create([
+            'id_user' => $user->id, 
+            'judul' => 'Inisiasi Proyek Baru',
+            'pesan' => "Proyek {$requestNo} ({$namaProjek}) diajukan oleh " . (Auth::user()->username ?? 'Marketing'),
+            'url_tujuan' => $urlTujuan,
+            'is_read' => false,
+        ]);
+    }
+}
     public function render() {
         return view('livewire.marketing.kelola-proyek')->layout('components.layouts.app');
     }

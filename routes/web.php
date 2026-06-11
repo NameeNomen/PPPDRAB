@@ -54,17 +54,17 @@ Route::middleware(['auth'])->group(function () {
     // AREA ENGINEERING
     // ==========================================
     // Semua rute engineering disatukan di sini biar rapi dan aman
-    Route::middleware(['role:engineering'])->prefix('engineering')->group(function () {
-        Route::get('/dashboard', App\Livewire\DashboardEngineering::class)->name('engineering.dashboard');
+ Route::middleware(['auth', 'role:engineering'])->prefix('engineering')->group(function () {
+        Route::get('/dashboard', \App\Livewire\DashboardEngineering::class)->name('engineering.dashboard');
         
-        // Rute Kelola RAB (Index, Detail, Workspace)
-        Route::get('/kelola-rab', RabIndex::class)->name('engineering.rab.index');
-        Route::get('/kelola-rab/{id}/detail', RabDetail::class)->name('engineering.rab.detail');
-        Route::get('/kelola-rab/{id}/workspace', RabWorkspace::class)->name('engineering.rab.workspace'); 
+        // --- 3 RUTE BARU PECAHAN KELOLA RAB ---
+        Route::get('/kelola-rab', \App\Livewire\Engineering\RabIndex::class)->name('engineering.rab.index');
+        Route::get('/kelola-rab/{id}/detail', \App\Livewire\Engineering\RabDetail::class)->name('engineering.rab.detail');
+        Route::get('/kelola-rab/{id}/workspace', \App\Livewire\Engineering\RabWorkspace::class)->name('engineering.rab.workspace'); 
         
         // Rute Lainnya
-        Route::get('/rab/histori', App\Livewire\Engineering\Histori::class)->name('engineering.rab.histori'); 
-        Route::get('/rab/{id}/wbs', App\Livewire\Engineering\EditorWbs::class)->name('engineering.wbs');
+        Route::get('/rab/histori', \App\Livewire\Engineering\Histori::class)->name('engineering.rab.histori'); 
+        Route::get('/rab/{id}/wbs', \App\Livewire\Engineering\EditorWbs::class)->name('engineering.wbs');
     });
 
     // ==========================================
