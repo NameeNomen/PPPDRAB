@@ -8,19 +8,44 @@ class Bidding extends Model
 {
     protected $table = 'biddings';
 
-    protected $fillable = [
+     protected $fillable = [
+        // Relasi
         'id_r_project',
         'id_user',
-        'nama_perusahaan',
-        'term_of_payment',
-        'masa_berlaku',
+
+        // Identitas Dokumen
         'no_penawaran',
         'tgl_penawaran',
+        'perihal',
+
+        // Tujuan Penawaran
+        'kepada',
+        'up',
+
+        // Isi Penawaran
         'surat_pengantar',
-        'alamat_perusahaan',
+        'catatan',
+
+        // Ketentuan Komersial
+        'term_of_payment',
+        'masa_berlaku',
+        'waktu_pengerjaan',
+        'garansi',
+
+        // Harga
+        'harga_dasar',
         'total_penawaran',
+
+        // Status
         'status_bidding',
-        'email_perusahaan',
+    ];
+
+    protected $casts = [
+        'tgl_penawaran' => 'date',
+        'harga_dasar' => 'integer',
+        'total_penawaran' => 'integer',
+        'masa_berlaku' => 'integer',
+        'waktu_pengerjaan' => 'integer',
     ];
 
     // Relasi ke Project

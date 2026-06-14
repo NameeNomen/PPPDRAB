@@ -218,7 +218,14 @@
                 <p style="margin: 0;">Karawang, {{ date('d F Y') }}<br>Dibuat Oleh,</p>
                 <br><br><br><br>
                 <div style="border-bottom: 1px solid #000; width: 100%; margin: 5px 0;"></div>
-                <p style="margin: 0; font-weight: bold; font-size: 12px; text-transform: uppercase;">{{ $nama_pembuat }}</p>
+                <p style="margin: 0; font-weight: bold; font-size: 12px; text-transform: uppercase;">@php
+    $pembuat = \App\Models\DocumentCommit::where('id_rab', $rabAktif->id)
+        ->where('jenis_aksi', 'submitted')
+        ->orderBy('created_at', 'asc')
+        ->first();
+@endphp
+
+{{ strtoupper($pembuat->user_name ?? '-') }}</p>
                 <p style="margin: 3px 0 0 0; font-weight: bold; font-size: 10px;">Engineering Dept.</p>
             </div>
         </div>

@@ -4,6 +4,7 @@ namespace App\Livewire\Direktur;
 
 use Livewire\Component;
 use App\Models\Rab;
+use App\Models\RabItem; // <-- INI WAJIB ADA BUAT WBS STRUKTUR
 use App\Models\Bidding;
 use App\Models\RProject;
 use App\Models\DocumentCommit;
@@ -14,7 +15,7 @@ class PersetujuanDetail extends Component
 {
     public $projectId;
     public $selectedProject;
-   
+    
     public $view = 'document_list'; 
     public $selected_rab_id = null;
     public $selected_bidding_id = null;
@@ -89,7 +90,7 @@ class PersetujuanDetail extends Component
                 'id_user' => $rab->id_user,
                 'judul' => 'RAB Disetujui Direktur!',
                 'pesan' => "RAB dengan nomor {$rab->no_boq} resmi disetujui. Proyek siap berlanjut ke tahap Bidding.",
-                'url_tujuan' => route('engineering.rab.detail', $id)
+                'url_tujuan' => route('engineering.rab.detail', $rab->id_r_project) // Pastikan id project
             ]);
 
         } else {
@@ -113,7 +114,7 @@ class PersetujuanDetail extends Component
                 'id_user' => $bidding->id_user,
                 'judul' => 'Bidding Disetujui Direktur!',
                 'pesan' => "Surat Penawaran nomor {$bidding->no_penawaran} disetujui. Silakan kirimkan dokumen ke klien.",
-                'url_tujuan' => route('marketing.bidding.detail', $id)
+                'url_tujuan' => route('marketing.bidding.detail', $bidding->id_r_project) // Pastikan id project
             ]);
         }
 
@@ -162,7 +163,7 @@ class PersetujuanDetail extends Component
                 'id_user' => $rab->id_user,
                 'judul' => 'RAB Ditolak / Perlu Revisi',
                 'pesan' => "RAB No {$rab->no_boq} dikembalikan untuk direvisi: {$this->komentar_commit}",
-                'url_tujuan' => '/engineering/detail-rab/' . $this->dokumenIdToRevise
+                'url_tujuan' => route('engineering.rab.detail', $rab->id_r_project)
             ]);
 
         } else {
@@ -186,7 +187,7 @@ class PersetujuanDetail extends Component
                 'id_user' => $bidding->id_user,
                 'judul' => 'Bidding Ditolak / Perlu Revisi',
                 'pesan' => "Penawaran No {$bidding->no_penawaran} dikembalikan untuk direvisi: {$this->komentar_commit}",
-                'url_tujuan' => '/marketing/bidding'
+                'url_tujuan' => route('marketing.bidding.detail', $bidding->id_r_project)
             ]);
         }
 
@@ -198,8 +199,12 @@ class PersetujuanDetail extends Component
     public function render()
     {
         $selectedRab = null;
+        $wbsStruktur = collect([]); // BIAR VIEW GAK ERROR KALAU KOSONG
+
         if ($this->view === 'detail_rab' && $this->selected_rab_id) {
             $selectedRab = Rab::find($this->selected_rab_id);
+            // INI DATA YANG LU ILANGIN, MAKANNYA ERROR 500!
+            $wbsStruktur = RabItem::with('children')->where('id_rab', $this->selected_rab_id)->whereNull('parent_id')->get();
         }
 
         $selectedBidding = null;
@@ -207,7 +212,7 @@ class PersetujuanDetail extends Component
             $selectedBidding = Bidding::find($this->selected_bidding_id);
         }
 
-        return view('livewire.direktur.persetujuan-detail', compact('selectedRab', 'selectedBidding'))
+        return view('livewire.direktur.persetujuan-detail', compact('selectedRab', 'selectedBidding', 'wbsStruktur'))
             ->layout('components.layouts.app');
     }
 }

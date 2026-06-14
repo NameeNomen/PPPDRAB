@@ -43,12 +43,15 @@ protected $casts = [
     {
         return $this->belongsTo(Rab::class, 'id_rab', 'id');
     }
-
+public function project()
+    {
+        return $this->belongsTo(\App\Models\RProject::class, 'id_r_project', 'id');
+    }
     /**
      * Relasi ke dokumen bidding
      */
-    public function bidding()
+   public function bidding()
     {
-        return $this->belongsTo(Bidding::class, 'id_bidding', 'id');
+        return $this->belongsTo(\App\Models\Bidding::class, 'id_bidding', 'id');
     }
 }

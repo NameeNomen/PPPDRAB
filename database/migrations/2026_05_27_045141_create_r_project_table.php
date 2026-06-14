@@ -33,7 +33,6 @@ return new class extends Migration
             $table->enum('status_proyek', [
                 'pending',
                 'draft',
-                'bidding',
                 'approved',
                 'rejected',
                 'on_progress',

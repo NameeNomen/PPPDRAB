@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             MaterialSeeder::class,
             ProjectCategorySeeder::class,
             RProjectSeeder::class,
-            
+            RabSeeder::class,
+            CompanyProfileSeeder::class,
         ]);
     }
 }

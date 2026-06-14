@@ -216,8 +216,7 @@ public function ajukanMaterialBaru()
                 'id_user' => $purchasing->id,
                 'judul' => 'Permintaan Material Baru',
                 'pesan' => "Dibutuhkan: {$this->reqNamaMaterial} ({$this->reqKebutuhan} {$this->reqSatuan}) untuk proyek.",
-                'url_tujuan' => route('direktur.persetujuan.detail', $this->projectId),
-                'is_read' => false,
+'url_tujuan' => route('direktur.persetujuan.detail', ['id' => $this->projectId]),                'is_read' => false,
                 'created_at' => now()
             ]);
         }

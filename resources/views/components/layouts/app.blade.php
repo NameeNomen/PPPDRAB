@@ -51,7 +51,10 @@
                         @if(auth()->user()->role === 'marketing')
                             <a href="{{ route('marketing.dashboard') }}" wire:navigate class="{{ $route === 'marketing.dashboard' ? $activeClass : $inactiveClass }}">Dashboard</a>
                             <a href="{{ route('marketing.proyek') }}" wire:navigate class="{{ $route === 'marketing.proyek' ? $activeClass : $inactiveClass }}">Proyek</a>
-                            <a href="{{ route('marketing.bidding') }}" wire:navigate class="{{ $route === 'marketing.bidding' ? $activeClass : $inactiveClass }}">Bidding</a>
+                            <a href="{{ route('marketing.bidding.index') }}" wire:navigate
+                                class="{{ $route === 'marketing.bidding.index' ? $activeClass : $inactiveClass }}">
+                                    Bidding
+                                </a>
                             <a href="{{ route('marketing.bidding.histori') }}" wire:navigate class="{{ $route === 'marketing.bidding.histori' ? $activeClass : $inactiveClass }}">Histori</a>
                         
                         @elseif(auth()->user()->role === 'engineering')

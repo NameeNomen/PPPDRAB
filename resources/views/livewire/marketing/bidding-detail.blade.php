@@ -1,287 +1,272 @@
-<div class="min-h-screen font-sans transition-colors duration-300 overflow-x-hidden max-w-full"
+<div class="min-h-screen bg-[#F4F9F6] text-[#2A402B] font-sans overflow-x-hidden max-w-full pb-12"
      style="font-family: 'Inter', sans-serif;"
      x-data="{
-         darkMode: false,
-         showPreview: true,
-         ratio: 40,
-         previewZoom: 0.85, 
-         showErrorBanner: {{ $errors->any() ? 'true' : 'false' }},
-         
-         triggerErrorUI() {
-             this.showErrorBanner = true;
-             setTimeout(() => this.showErrorBanner = false, 8000);
-             this.$nextTick(() => {
-                 const firstError = document.querySelector('.field-error, [data-has-error] input, [data-has-error] textarea');
-                 if (firstError) {
-                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                     setTimeout(() => {
-                         if(firstError.tagName === 'INPUT' || firstError.tagName === 'TEXTAREA') {
-                             firstError.focus();
-                         } else {
-                             const input = firstError.querySelector('input, textarea');
-                             if(input) input.focus();
-                         }
-                     }, 400);
-                 }
-             });
-         }
-     }"
-     @validation-failed.window="triggerErrorUI()"
-     :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5]' : 'bg-[#F4F9F6] text-[#2A402B]'">
+        showErrorBanner: {{ $errors->any() ? 'true' : 'false' }},
+        triggerErrorUI() {
+            this.showErrorBanner = true;
+            setTimeout(() => this.showErrorBanner = false, 10000);
+            this.$nextTick(() => {
+                const firstErrorInput = document.querySelector('.field-error');
+                if (firstErrorInput) {
+                    firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        firstErrorInput.focus();
+                    }, 400);
+                }
+            });
+        }
+    }"
+     @validation-failed.window="triggerErrorUI()">
 
-    @if ($errors->any())
-        <div x-init="$dispatch('validation-failed')" class="hidden"></div>
-    @endif
+    @if ($errors->any()) <div x-init="$dispatch('validation-failed')" class="hidden"></div> @endif
 
     <style>
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .field-error { border-color: #EF4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important; animation: pulse-red 2s infinite, shake 0.4s ease-in-out; }
-        .error-banner-enter { animation: slideDown 0.3s ease-out; }
-        .spinner { animation: spin 1s linear infinite; }
-        .btn-loading { position: relative; pointer-events: none; opacity: 0.85; }
-        .btn-loading .btn-text { opacity: 0; }
-        .btn-loading .btn-spinner { display: flex; position: absolute; inset: 0; align-items: center; justify-content: center; }
-        .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #B4CDBF; border-radius: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #7A9D8C; }
+        .field-error {
+            border-color: #EF4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+            animation: pulse-error 2s infinite;
+        }
+        @keyframes pulse-error {
+            0%, 100% { background-color: #FEF2F2; }
+            50% { background-color: #FEE2E2; }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #B4CDBF; border-radius: 4px; }
     </style>
 
-    <!-- Error Banner -->
     <div x-show="showErrorBanner" style="display: none;"
-         x-transition:enter="error-banner-enter"
+         class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[200] w-full max-w-2xl px-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
          x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0 -translate-y-4"
-         class="fixed top-0 left-0 right-0 z-[200] p-3 md:p-4">
-        <div class="max-w-4xl mx-auto bg-red-500 text-white rounded-xl shadow-2xl border-2 border-red-400 p-4 flex items-start gap-3">
-            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 -translate-y-4 scale-95">
+
+        <div class="bg-red-600 text-white rounded-2xl shadow-2xl border-2 border-red-400 p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-3 border-b border-red-500 pb-3">
+                <div class="bg-white/20 p-2 rounded-lg shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-black uppercase tracking-widest">Sistem Menolak Penyimpanan</p>
+                    <p class="text-xs font-medium opacity-90 mt-0.5">Ada data yang tidak valid. Perbaiki kesalahan berikut:</p>
+                </div>
+                <button @click="showErrorBanner = false" class="ml-auto text-white/70 hover:text-white bg-red-700 hover:bg-red-800 p-1.5 rounded-lg transition-colors outline-none focus:ring-2 focus:ring-white/50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <div class="flex-1">
-                <p class="text-sm font-bold uppercase tracking-wide mb-1">Ada Kolom yang Belum Diisi / Tidak Valid</p>
-                <p class="text-xs opacity-90">Periksa form yang ditandai merah di panel kanan sebelum melanjutkan.</p>
-            </div>
-            <button @click="showErrorBanner = false" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+
+            @if($errors->any())
+                <ul class="list-disc list-inside text-xs font-bold space-y-1 ml-2">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <p class="text-[10px] font-medium bg-red-700/50 p-2 rounded-lg mt-2 border border-red-500/50 flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                    Layar sudah digeser otomatis ke kolom yang bermasalah. Silakan ketik perbaikannya.
+                </p>
+            @endif
         </div>
     </div>
 
-    <div class="w-full px-4 md:px-6 py-4 max-w-full">
-        <!-- TOP BAR -->
-        <div class="w-full flex flex-col md:flex-row justify-between items-center mb-6 p-4 rounded-xl border shadow-lg sticky top-4 z-40 backdrop-blur-md gap-4" 
-             :class="darkMode ? 'bg-[#111111]/95 border-[#2A2A2A]' : 'bg-white/90 border-[#B4CDBF]/50'">
-            
-            <div class="flex items-center gap-4 flex-wrap">
-                <button wire:click="kembaliKeList" class="text-xs font-bold px-4 py-2.5 rounded-lg transition-colors border shadow-sm" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#4A7256] hover:border-[#4A7256]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B] hover:border-[#4A7256] hover:bg-[#E2EFE7]'">
+    <div class="w-full px-4 md:px-8 py-6 max-w-full">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 p-4 rounded-2xl bg-white border border-[#B4CDBF]/50 shadow-sm gap-4">
+            <div class="flex items-center gap-4">
+                <button wire:click="kembaliKeList" class="text-xs font-bold px-5 py-2.5 rounded-xl transition-colors border shadow-sm bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B] hover:border-[#4A7256] hover:bg-[#E2EFE7]">
                     &larr; KEMBALI
                 </button>
-                <div class="w-px h-4" :class="darkMode ? 'bg-[#333333]' : 'bg-[#B4CDBF]/50'"></div>
+                <div class="w-px h-6 bg-[#B4CDBF]/50"></div>
+                <div>
+                    <h1 class="text-lg font-black uppercase tracking-tight text-[#2A402B]">Penyusunan Bidding</h1>
+                    <p class="text-[10px] font-bold text-[#648B73] uppercase tracking-wider">Proyek: {{ $proyek->nama_pelanggan }}</p>
+                </div>
+            </div>
+
+            <button wire:click="simpanBidding" wire:loading.attr="disabled"
+                    class="relative px-8 py-3 text-xs font-black rounded-xl shadow-lg transition-all uppercase tracking-widest flex items-center justify-center gap-2 text-white bg-[#4A7256] hover:bg-[#354F37] outline-none focus:ring-4 focus:ring-[#4A7256]/30 disabled:opacity-70 disabled:cursor-not-allowed min-w-[200px]">
                 
-                <div class="flex gap-1 p-1 rounded-lg border shadow-sm" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333]' : 'bg-white border-[#B4CDBF]/50'">
-                    <button @click="darkMode = false" :class="!darkMode ? 'bg-[#4A7256] text-white font-bold shadow-md' : 'text-[#7A9D8C] hover:text-[#4A7256]'" class="px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-wider">Terang</button>
-                    <button @click="darkMode = true" :class="darkMode ? 'bg-[#4A7256] text-white font-bold shadow-md' : 'text-[#7A9D8C] hover:text-[#4A7256]'" class="px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-wider">Gelap</button>
+                <span wire:loading.remove wire:target="simpanBidding" class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    Simpan & Ajukan
+                </span>
+
+                <span wire:loading wire:target="simpanBidding" class="flex items-center gap-2">
+                    <svg class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Memproses...
+                </span>
+            </button>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6 items-start w-full">
+            <div class="w-full lg:w-[35%] shrink-0 space-y-6 sticky top-6">
+                <div class="bg-white rounded-3xl border border-[#B4CDBF]/50 shadow-md p-6">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-[#648B73] border-b border-[#E2EFE7] pb-3 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-[#4A7256]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Referensi RAB Disetujui
+                    </h3>
+                    <div class="space-y-4 font-mono text-sm text-[#2A402B]">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[#648B73] font-sans text-xs font-bold">Klien / Instansi</span>
+                            <span class="font-black text-right uppercase text-xs break-words w-1/2">{{ $proyek->nama_pelanggan }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#648B73] font-sans text-xs font-bold">No. BOQ</span>
+                            <span class="font-black bg-[#F4F9F6] px-2 py-1 rounded">{{ $rabAktif->no_boq ?? '-' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#648B73] font-sans text-xs font-bold">Biaya Engineering</span>
+                            <span class="font-bold">Rp {{ number_format(($rabAktif->grand_total ?? 0) - ($rabAktif->overhead_cost ?? 0), 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#648B73] font-sans text-xs font-bold">Overhead Cost</span>
+                            <span class="font-bold">Rp {{ number_format($rabAktif->overhead_cost ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="pt-4 border-t-2 border-dashed border-[#B4CDBF]/50 flex justify-between items-center text-base">
+                            <span class="font-sans font-black uppercase tracking-wider text-[#4A7256]">Total Harga Dasar</span>
+                            <span class="font-black text-[#4A7256]">Rp {{ number_format($harga_dasar, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex gap-2 items-center p-1 rounded-lg border" :class="darkMode ? 'bg-[#1A1A1A] border-[#4A7256]/30' : 'bg-[#4A7256]/10 border-[#4A7256]/40'">
-                    <button @click="showPreview = !showPreview; setTimeout(() => window.dispatchEvent(new Event('resize')), 300)" class="px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-colors" :class="showPreview ? 'bg-[#4A7256] text-white shadow-sm' : 'text-[#2A402B] hover:bg-[#4A7256]/20'">
-                        <span x-text="showPreview ? '👁️ Tutup PDF' : '👁️ Buka PDF'"></span>
-                    </button>
-                    
-                    <!-- CUSTOM DROPDOWN ALPINE -->
-                    <div x-show="showPreview" class="relative" x-data="{ openRatio: false }">
-                        <button @click="openRatio = !openRatio" type="button" 
-                                class="flex items-center gap-2 text-[10px] font-bold uppercase rounded-md px-3 py-1.5 cursor-pointer shadow-sm transition-all border-none outline-none"
-                                :class="darkMode ? 'bg-[#1A1A1A] text-[#4A7256] hover:bg-[#2A2A2A]' : 'bg-white text-[#2A402B] hover:bg-gray-50'">
-                            <span x-text="ratio + ' : ' + (100 - ratio)"></span>
-                            <svg class="w-3 h-3 transition-transform duration-300" :class="openRatio ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        
-                        <div x-show="openRatio" @click.away="openRatio = false" style="display: none;"
-                             class="absolute left-0 mt-2 w-32 rounded-lg shadow-xl border z-50 overflow-hidden"
-                             :class="darkMode ? 'bg-[#1A1A1A] border-[#333333]' : 'bg-white border-[#B4CDBF]/50'">
-                            <template x-for="val in [20, 30, 40, 50]" :key="val">
-                                <div @click="ratio = val; openRatio = false; setTimeout(() => window.dispatchEvent(new Event('resize')), 100)"
-                                     class="px-4 py-2.5 text-[10px] font-bold uppercase cursor-pointer transition-colors flex justify-between items-center"
-                                     :class="darkMode ? (ratio == val ? 'bg-[#4A7256]/20 text-[#4A7256]' : 'text-[#888888] hover:bg-[#333333]') : (ratio == val ? 'bg-[#E2EFE7] text-[#2A402B]' : 'text-[#648B73] hover:bg-gray-50')">
-                                    <span x-text="val + ' : ' + (100 - val)"></span>
-                                </div>
-                            </template>
+                <div class="bg-[#E2EFE7] rounded-3xl border border-[#4A7256]/30 shadow-lg p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-[#4A7256]/10 rounded-bl-full -z-10"></div>
+                    <h3 class="text-xs font-black uppercase tracking-widest text-[#2A402B] mb-5">Kalkulasi Penawaran</h3>
+                    <div class="space-y-5 relative z-10">
+                        <div>
+                            <label class="block text-[10px] font-bold mb-2 uppercase tracking-wider text-[#4A7256]">Target Margin (%)</label>
+                            <div class="relative">
+                                <input type="number" step="0.01" wire:model.live.debounce.500ms="margin_persen" class="w-full text-xl py-3 pl-4 pr-12 rounded-xl border border-white outline-none font-black text-[#2A402B] shadow-inner focus:ring-2 focus:ring-[#4A7256]/50 transition-all">
+                                <span class="absolute inset-y-0 right-4 flex items-center font-black text-[#648B73] text-lg">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold mb-2 uppercase tracking-wider text-[#4A7256]">Harga Penawaran Final</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-4 flex items-center font-black text-white/70 text-lg">Rp</span>
+                                <input type="number" wire:model.live.debounce.500ms="total_penawaran" class="w-full text-2xl py-4 pl-12 pr-4 rounded-xl border border-[#4A7256]/50 outline-none font-black text-white bg-[#4A7256] shadow-md focus:ring-4 focus:ring-[#4A7256]/30 transition-all @error('total_penawaran') field-error @enderror">
+                            </div>
+                            @error('total_penawaran') <span class="text-red-600 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button wire:click="simpanBidding" wire:loading.class="btn-loading" class="relative px-6 py-2.5 text-xs font-bold rounded-lg shadow-md transition-all uppercase tracking-widest flex items-center gap-2 text-white bg-[#4A7256] hover:bg-[#354F37] focus:outline-none focus:ring-4 focus:ring-[#4A7256]/30">
-                    <span class="btn-text flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                        Simpan & Ajukan
-                    </span>
-                    <span class="btn-spinner"><svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2 text-[10px]">Memproses...</span></span>
-                </button>
-            </div>
-        </div>
-
-        <!-- MAIN GRID (Split Screen) -->
-        <div class="flex flex-col xl:flex-row gap-6 items-start w-full max-w-full relative transition-all duration-300">
-            
-            <!-- PANEL KIRI (LIVE PDF PREVIEW) -->
-            <div x-show="showPreview"
-                 :class="{ 'xl:w-[20%]': ratio == 20, 'xl:w-[30%]': ratio == 30, 'xl:w-[40%]': ratio == 40, 'xl:w-[50%]': ratio == 50 }"
-                 class="w-full shrink-0 flex flex-col border rounded-xl overflow-hidden shadow-xl h-[85vh] sticky top-24 transition-all duration-300"
-                 :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#B4CDBF]/50'">
-                
-                <div class="p-3 border-b flex justify-between items-center z-10 flex-none" :class="darkMode ? 'bg-[#1A1A1A] border-[#2A2A2A]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50'">
-                    <span class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 truncate" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#2A402B]'">
-                        <svg class="w-4 h-4 shrink-0 text-[#4A7256]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Live PDF Preview
-                    </span>
-                    <div class="flex items-center gap-1 rounded px-1 shadow-inner border" :class="darkMode ? 'bg-[#0A0A0A] border-[#333333]' : 'bg-white border-[#B4CDBF]/50'">
-                        <button @click="if(previewZoom > 0.4) previewZoom -= 0.1" class="w-5 h-5 flex items-center justify-center hover:bg-black/10 rounded font-black cursor-pointer transition-colors" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#2A402B]'">-</button>
-                        <span class="text-[9px] font-mono font-black w-8 text-center" :class="darkMode ? 'text-[#4A7256]' : 'text-[#4A7256]'" x-text="Math.round(previewZoom * 100) + '%'"></span>
-                        <button @click="if(previewZoom < 1.5) previewZoom += 0.1" class="w-5 h-5 flex items-center justify-center hover:bg-black/10 rounded font-black cursor-pointer transition-colors" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#2A402B]'">+</button>
-                    </div>
-                </div>
-                
-                <div class="overflow-auto flex-grow p-4 flex justify-center custom-scrollbar" :class="darkMode ? 'bg-[#323639]' : 'bg-[#323639]'">
-                    <div class="transition-all duration-200 origin-top" :style="'zoom: ' + previewZoom">
-                        <!-- MOCK OBJECT BIAR PREVIEW JADI REAL-TIME SAMA INPUTAN KANAN -->
-                        @php
-                            $mockBidding = (object) [
-                                'no_penawaran' => $no_penawaran,
-                                'tgl_penawaran' => $tgl_penawaran,
-                                'masa_berlaku' => $masa_berlaku,
-                                'total_penawaran' => $total_penawaran,
-                                'nama_perusahaan' => $nama_perusahaan,
-                                'email_perusahaan' => $email_perusahaan,
-                                'alamat_perusahaan' => $alamat_perusahaan,
-                                'term_of_payment' => $term_of_payment,
-                                'surat_pengantar' => $surat_pengantar,
-                                'user' => clone auth()->user() ?? (object) ['name' => $nama_penulis]
-                            ];
-                        @endphp
-                        @include('components.dokumen-bidding', ['bidding' => $mockBidding, 'proyek' => $proyek])
-                    </div>
-                </div>
-            </div>
-
-            <!-- PANEL KANAN (FORM INPUT & KOMENTAR) -->
-            <div :class="{ 'xl:w-[80%]': showPreview && ratio == 20, 'xl:w-[70%]': showPreview && ratio == 30, 'xl:w-[60%]': showPreview && ratio == 40, 'xl:w-[50%]': showPreview && ratio == 50, 'xl:w-full': !showPreview }"
-                 class="w-full min-w-0 space-y-4 flex-grow max-w-full transition-all duration-300">
-                
-                <!-- IDENTITAS SURAT -->
-                <div class="rounded-xl p-5 shadow-lg border flex flex-col gap-4" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#B4CDBF]/50'">
-                    <h3 class="text-xs font-black uppercase tracking-widest flex items-center gap-2 border-b pb-2" :class="darkMode ? 'text-[#4A7256] border-[#2A2A2A]' : 'text-[#4A7256] border-[#B4CDBF]/50'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
-                        Identitas Surat Penawaran
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="w-full lg:w-[65%] space-y-6">
+                <div class="rounded-3xl p-6 shadow-sm border border-[#B4CDBF]/50 bg-white">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-[#4A7256] border-b border-[#E2EFE7] pb-3 mb-5">Detail Identitas Dokumen</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div @error('no_penawaran') data-has-error @enderror>
-                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">No. Dokumen <span class="text-red-500">*</span></label>
-                            <input type="text" wire:model.live.blur="no_penawaran" class="w-full text-xs p-2.5 rounded-lg border outline-none font-mono font-bold focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('no_penawaran') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B]'">
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">No. Referensi Penawaran</label>
+                            <input type="text" wire:model.live.blur="no_penawaran" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-mono font-bold focus:border-[#4A7256] transition-all @error('no_penawaran') field-error @enderror">
                             @error('no_penawaran') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
                         <div @error('tgl_penawaran') data-has-error @enderror>
-                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Tanggal Terbit <span class="text-red-500">*</span></label>
-                            <input type="date" wire:model.live.blur="tgl_penawaran" class="w-full text-xs p-2.5 rounded-lg border outline-none font-bold focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('tgl_penawaran') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B]'">
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Tanggal Diterbitkan</label>
+                            <input type="date" wire:model.live.blur="tgl_penawaran" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('tgl_penawaran') field-error @enderror">
                             @error('tgl_penawaran') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
+                        <div class="md:col-span-2" @error('perihal') data-has-error @enderror>
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Perihal Dokumen</label>
+                            <input type="text" wire:model.live.blur="perihal" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('perihal') field-error @enderror">
+                            @error('perihal') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-3xl p-6 shadow-sm border border-[#B4CDBF]/50 bg-white">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-[#4A7256] border-b border-[#E2EFE7] pb-3 mb-5">Tujuan (Kepada Yth.)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div @error('kepada') data-has-error @enderror>
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Nama Instansi / Perusahaan</label>
+                            <input type="text" wire:model.live.blur="kepada" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('kepada') field-error @enderror">
+                            @error('kepada') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
+                        </div>
+                        <div @error('up') data-has-error @enderror>
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">U.P (Penerima Spesifik) - Opsional</label>
+                            <input type="text" wire:model.live.blur="up" placeholder="Contoh: Bpk. Procurement" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('up') field-error @enderror">
+                            @error('up') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-3xl p-6 shadow-sm border border-[#B4CDBF]/50 bg-white">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-[#4A7256] border-b border-[#E2EFE7] pb-3 mb-5">Ketentuan Komersial</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                         <div @error('masa_berlaku') data-has-error @enderror>
-                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Masa Berlaku</label>
-                            <input type="text" wire:model.live.blur="masa_berlaku" class="w-full text-xs p-2.5 rounded-lg border outline-none font-bold focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('masa_berlaku') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B]'">
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Masa Berlaku (Hari)</label>
+                            <input type="number" wire:model.live.blur="masa_berlaku" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('masa_berlaku') field-error @enderror">
                             @error('masa_berlaku') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
-                        <div @error('total_penawaran') data-has-error @enderror>
-                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Grand Total (Rp) <span class="text-red-500">*</span></label>
-                            <input type="number" wire:model.live.blur="total_penawaran" class="w-full text-xs p-2.5 rounded-lg border outline-none font-mono font-black text-[#4A7256] focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('total_penawaran') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333]' : 'bg-[#E2EFE7] border-[#B4CDBF]/50'">
-                            @error('total_penawaran') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
+                        <div @error('waktu_pengerjaan') data-has-error @enderror>
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Waktu Pengerjaan (Hari)</label>
+                            <input type="number" wire:model.live.blur="waktu_pengerjaan" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('waktu_pengerjaan') field-error @enderror">
+                            @error('waktu_pengerjaan') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
+                        <div @error('garansi') data-has-error @enderror>
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Garansi (Contoh: 3 Bulan)</label>
+                            <input type="text" wire:model.live.blur="garansi" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('garansi') field-error @enderror">
+                            @error('garansi') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                    <div @error('term_of_payment') data-has-error @enderror>
+                        <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Term Of Payment (Sistem Pembayaran)</label>
+                        <textarea wire:model.live.blur="term_of_payment" rows="3" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('term_of_payment') field-error @enderror"></textarea>
+                        @error('term_of_payment') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                     </div>
                 </div>
 
-                <!-- INFO KLIEN & KETENTUAN -->
-                <div class="rounded-xl p-5 shadow-lg border" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#B4CDBF]/50'">
-                    <h3 class="text-xs font-black uppercase tracking-widest flex items-center gap-2 border-b pb-2 mb-4" :class="darkMode ? 'text-[#4A7256] border-[#2A2A2A]' : 'text-[#4A7256] border-[#B4CDBF]/50'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                        Informasi Klien & Term Of Payment
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <div @error('nama_perusahaan') data-has-error @enderror>
-                                <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Nama Klien / Perusahaan <span class="text-red-500">*</span></label>
-                                <input type="text" wire:model.live.blur="nama_perusahaan" class="w-full text-xs p-2.5 rounded-lg border outline-none font-bold focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('nama_perusahaan') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B]'">
-                                @error('nama_perusahaan') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
-                            </div>
-                            <div @error('alamat_perusahaan') data-has-error @enderror>
-                                <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Alamat Klien</label>
-                                <textarea wire:model.live.blur="alamat_perusahaan" rows="2" class="w-full text-xs p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('alamat_perusahaan') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B]'"></textarea>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-                            <div @error('term_of_payment') data-has-error @enderror>
-                                <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Sistem Pembayaran (Term of Payment)</label>
-                                <textarea wire:model.live.blur="term_of_payment" rows="4" class="w-full text-xs p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('term_of_payment') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B]'"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SURAT PENGANTAR -->
-                <div class="rounded-xl p-5 shadow-lg border" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#B4CDBF]/50'">
-                    <h3 class="text-xs font-black uppercase tracking-widest flex items-center gap-2 border-b pb-2 mb-4" :class="darkMode ? 'text-[#4A7256] border-[#2A2A2A]' : 'text-[#4A7256] border-[#B4CDBF]/50'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        Paragraf Surat Pengantar
-                    </h3>
+                <div class="rounded-3xl p-6 shadow-sm border border-[#B4CDBF]/50 bg-white space-y-5">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-[#4A7256] border-b border-[#E2EFE7] pb-3">Narasi Surat</h3>
                     <div @error('surat_pengantar') data-has-error @enderror>
-                        <textarea wire:model.live.blur="surat_pengantar" rows="4" class="w-full text-xs p-3 rounded-lg border outline-none focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('surat_pengantar') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#F4F9F6] border-[#B4CDBF]/50 text-[#2A402B]'"></textarea>
+                        <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Paragraf Pengantar</label>
+                        <textarea wire:model.live.blur="surat_pengantar" rows="3" class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('surat_pengantar') field-error @enderror"></textarea>
+                        @error('surat_pengantar') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
+                    </div>
+                    <div @error('catatan') data-has-error @enderror>
+                        <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Catatan Tambahan (Opsional)</label>
+                        <textarea wire:model.live.blur="catatan" rows="2" placeholder="Catatan ekstra yang akan dicetak di bagian bawah dokumen..." class="w-full text-xs p-3 rounded-xl border border-[#E2EFE7] bg-[#F4F9F6] outline-none font-bold focus:border-[#4A7256] transition-all @error('catatan') field-error @enderror"></textarea>
+                        @error('catatan') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                     </div>
                 </div>
 
-                <!-- OTORISASI & COMMIT -->
-                <div class="rounded-xl p-5 shadow-lg border mt-4" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-[#E2EFE7]/50 border-[#4A7256]/30'">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-[#4A7256] mb-4 flex items-center gap-2">
+                <div class="rounded-3xl p-6 shadow-md border-2 border-[#4A7256]/20 bg-[#F4F9F6]">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-[#4A7256] mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        Otorisasi Pengajuan & Log Revisi
+                        Otorisasi Pengajuan
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         <div class="sm:col-span-1" @error('nama_penulis') data-has-error @enderror>
-                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Nama Penyusun <span class="text-red-500">*</span></label>
-                            <input type="text" wire:model.live.blur="nama_penulis" placeholder="Nama Estimator..." class="w-full text-xs font-bold p-3 rounded-lg border outline-none shadow-inner focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('nama_penulis') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-white border-[#B4CDBF]/50 text-[#2A402B]'">
-                            @error('nama_penulis') <span class="text-red-500 text-[10px] font-bold mt-1.5 block">⚠ {{ $message }}</span> @enderror
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Nama Penyusun</label>
+                            <input type="text" wire:model.live.blur="nama_penulis" class="w-full text-xs font-bold p-3 rounded-xl border border-white bg-white outline-none shadow-sm focus:border-[#4A7256] transition-all @error('nama_penulis') field-error @enderror">
+                            @error('nama_penulis') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
                         <div class="sm:col-span-2" @error('komentar_commit') data-has-error @enderror>
-                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Catatan Pengajuan / Revisi <span class="text-red-500">*</span></label>
-                            <input type="text" wire:model.live.blur="komentar_commit" placeholder="Misal: Revisi nominal pajak, penyesuaian term of payment..." class="w-full text-xs font-bold p-3 rounded-lg border outline-none shadow-inner focus:ring-2 focus:ring-[#4A7256]/30 focus:border-[#4A7256] transition-all @error('komentar_commit') field-error @enderror" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-white border-[#B4CDBF]/50 text-[#2A402B]'">
-                            @error('komentar_commit') <span class="text-red-500 text-[10px] font-bold mt-1.5 block">⚠ {{ $message }}</span> @enderror
+                            <label class="block text-[10px] font-bold mb-1.5 uppercase tracking-wider text-[#648B73]">Pesan Pengajuan / Log Versi</label>
+                            <input type="text" wire:model.live.blur="komentar_commit" placeholder="Misal: Penyesuaian margin 12% sesuai meeting..." class="w-full text-xs font-bold p-3 rounded-xl border border-white bg-white outline-none shadow-sm focus:border-[#4A7256] transition-all @error('komentar_commit') field-error @enderror">
+                            @error('komentar_commit') <span class="text-red-500 text-[10px] font-bold mt-1 block">⚠ {{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
 
-                <!-- HISTORI LOG LIST -->
                 @if(count($historiRevisi) > 0)
-                <div class="mt-6">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest mb-3" :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">Histori Perubahan Dokumen</h4>
+                <div class="mt-8">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-[#648B73] mb-4">Histori Perjalanan Dokumen</h4>
                     <div class="space-y-3">
                         @foreach($historiRevisi as $histori)
-                            <div class="p-3 rounded-xl border flex gap-3 text-xs" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333]' : 'bg-white border-[#B4CDBF]/30'">
-                                <div class="w-8 h-8 rounded bg-[#4A7256]/10 text-[#4A7256] flex items-center justify-center font-bold uppercase shrink-0">
-                                    {{ substr($histori->user_name ?? 'U', 0, 2) }}
-                                </div>
-                                <div>
-                                    <p class="font-bold mb-0.5" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#2A402B]'">{{ $histori->user_name }} <span class="opacity-50 text-[9px] ml-2 font-mono">{{ $histori->created_at->format('d M Y H:i') }}</span></p>
-                                    <p :class="darkMode ? 'text-[#888888]' : 'text-[#648B73]'">"{{ $histori->komentar_commit }}"</p>
-                                </div>
+                        <div class="p-4 rounded-2xl bg-white border border-[#E2EFE7] flex gap-4 text-xs shadow-sm">
+                            <div class="w-10 h-10 rounded-full bg-[#E2EFE7] text-[#4A7256] flex items-center justify-center font-black uppercase shrink-0">
+                                {{ substr($histori->user_name ?? 'U', 0, 2) }}
                             </div>
+                            <div>
+                                <p class="font-black text-[#2A402B] mb-0.5">{{ $histori->user_name }} <span class="text-[#648B73] font-normal text-[10px] ml-2 font-mono">{{ \Carbon\Carbon::parse($histori->created_at)->format('d M Y H:i') }}</span></p>                                    <p class="text-[#4A7256] font-medium leading-relaxed">"{{ $histori->komentar_commit }}"</p>
+                            </div>
+                        </div>
                         @endforeach
                     </div>
                 </div>
                 @endif
-
             </div>
         </div>
     </div>
