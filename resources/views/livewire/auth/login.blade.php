@@ -1,163 +1,125 @@
-<div class="min-h-screen flex w-full font-sans bg-emerald-50 relative overflow-hidden">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<div class="min-h-screen flex w-full relative overflow-hidden" style="font-family: 'Inter', sans-serif; background-color: #EEF2E6;">
 
     <!-- LEFT SIDE: Slider -->
-    <div class="relative w-full lg:w-[50%] overflow-hidden hidden lg:block">
+    <div class="relative w-full lg:w-[55%] overflow-hidden hidden lg:block shadow-[15px_0_40px_rgba(0,0,0,0.1)] z-10" style="background-color: #31572C;">
         
         <!-- Background Image -->
-        <div class="absolute inset-0 bg-[url('/gambar/gtjtk.png')] bg-cover bg-center z-0"></div>
+        <div class="absolute inset-0 bg-[url('/gambar/gtjtk.png')] bg-cover bg-center z-0 opacity-10"></div>
         
-        <!-- Green Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 z-10"></div>
-        <!-- Decorative shapes -->
-        <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-10"></div>
-        <div class="absolute bottom-0 left-0 w-80 h-80 bg-emerald-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 z-10"></div>
+        <!-- Gradient Overlay -->
+        <div class="absolute inset-0 z-10" style="background: linear-gradient(to bottom right, #31572C 20%, rgba(37, 66, 33, 0.9) 100%);"></div>
+
+        <!-- Simple Diagonal Pattern -->
+        <div class="absolute inset-0 z-10 pointer-events-none">
+            <div class="absolute top-[-10%] right-[15%] w-[3%] h-[150%] bg-[#ECF39E] transform -skew-x-[25deg] opacity-80"></div>
+            <div class="absolute top-[-10%] right-[19%] w-[1%] h-[150%] bg-[#ECF39E] transform -skew-x-[25deg] opacity-60"></div>
+        </div>
 
         <!-- Slider Track -->
         <div id="slider-track" class="relative z-20 flex w-[300%] h-full transition-transform duration-1000 ease-in-out">
             
             <!-- Slide 1 -->
-            <div class="w-1/3 h-full flex items-center px-20">
-                <div class="w-full max-w-lg space-y-6">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
-                        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-                        <span class="text-xs font-semibold text-white uppercase tracking-widest">Enterprise Solution</span>
-                    </div>
-                    <h1 class="text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-                        Commercial Project <span class="text-emerald-300">System</span>
+            <div class="w-1/3 h-full flex flex-col justify-center px-12 xl:px-20">
+                <div class="w-full max-w-lg">
+                    <span class="inline-block text-xs font-bold uppercase tracking-widest mb-4" style="color: #ECF39E;">Enterprise Solution</span>
+                    <h1 class="text-4xl xl:text-5xl font-extrabold text-white leading-tight tracking-tight mb-4">
+                        Commercial Project<br><span style="color: #ECF39E;">System</span>
                     </h1>
-                    <p class="text-emerald-50 text-lg leading-relaxed font-light">
-                        Sistem terintegrasi untuk pengelolaan proyek, penawaran, dan anggaran biaya. Meningkatkan efisiensi serta pengendalian proses bisnis secara terpusat.
+                    <p class="text-sm leading-relaxed font-light" style="color: rgba(250, 249, 246, 0.85);">
+                        Sistem terintegrasi untuk pengelolaan proyek, penawaran, dan anggaran biaya secara terpusat.
                     </p>
                 </div>
             </div>
 
             <!-- Slide 2 -->
-            <div class="w-1/3 h-full flex items-center px-20">
-                <div class="w-full max-w-lg space-y-6">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
-                        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-                        <span class="text-xs font-semibold text-white uppercase tracking-widest">Real-time Monitoring</span>
-                    </div>
-                    <h1 class="text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-                        Kelola Proyek dengan <span class="text-emerald-300">Efektif</span>
+            <div class="w-1/3 h-full flex flex-col justify-center px-12 xl:px-20">
+                <div class="w-full max-w-lg">
+                    <span class="inline-block text-xs font-bold uppercase tracking-widest mb-4" style="color: #ECF39E;">Real-time Monitoring</span>
+                    <h1 class="text-4xl xl:text-5xl font-extrabold text-white leading-tight tracking-tight mb-4">
+                        Kelola Proyek<br><span style="color: #ECF39E;">dengan Efektif</span>
                     </h1>
-                    <p class="text-emerald-50 text-lg leading-relaxed font-light">
-                        Pantau progres proyek, status persetujuan, dan aktivitas operasional secara real-time. Mendukung transparansi informasi dan pengambilan keputusan yang lebih cepat.
+                    <p class="text-sm leading-relaxed font-light" style="color: rgba(250, 249, 246, 0.85);">
+                        Pantau progres proyek, status persetujuan, dan aktivitas operasional secara real-time.
                     </p>
                 </div>
             </div>
 
             <!-- Slide 3 -->
-            <div class="w-1/3 h-full flex items-center px-20">
-                <div class="w-full max-w-lg space-y-6">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
-                        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-                        <span class="text-xs font-semibold text-white uppercase tracking-widest">Integrated Platform</span>
-                    </div>
-                    <h1 class="text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-                        Efisien, Transparan, <span class="text-emerald-300">Terintegrasi</span>
+            <div class="w-1/3 h-full flex flex-col justify-center px-12 xl:px-20">
+                <div class="w-full max-w-lg">
+                    <span class="inline-block text-xs font-bold uppercase tracking-widest mb-4" style="color: #ECF39E;">Integrated Platform</span>
+                    <h1 class="text-4xl xl:text-5xl font-extrabold text-white leading-tight tracking-tight mb-4">
+                        Efisien, Transparan,<br><span style="color: #ECF39E;">Terintegrasi</span>
                     </h1>
-                    <p class="text-emerald-50 text-lg leading-relaxed font-light">
-                        Kelola RAB, dokumen penawaran, dan proses persetujuan dalam satu platform. Dirancang untuk mendukung tata kelola proyek yang profesional dan akuntabel.
+                    <p class="text-sm leading-relaxed font-light" style="color: rgba(250, 249, 246, 0.85);">
+                        Kelola RAB, dokumen penawaran, dan proses persetujuan dalam satu platform profesional.
                     </p>
                 </div>
             </div>
-            
+
         </div>
 
         <!-- Slider Dots -->
-        <div class="absolute bottom-12 left-20 z-30 flex gap-3">
-            <div class="nav-dot w-10 h-1.5 rounded-full bg-white transition-all duration-500"></div>
-            <div class="nav-dot w-3 h-1.5 rounded-full bg-white/40 transition-all duration-500"></div>
-            <div class="nav-dot w-3 h-1.5 rounded-full bg-white/40 transition-all duration-500"></div>
+        <div class="absolute bottom-10 left-12 xl:left-20 z-30 flex gap-2">
+            <div class="nav-dot h-1.5 rounded-full transition-all duration-500" style="width: 40px; background-color: #ECF39E;"></div>
+            <div class="nav-dot h-1.5 rounded-full transition-all duration-500" style="width: 12px; background-color: rgba(236, 243, 158, 0.35);"></div>
+            <div class="nav-dot h-1.5 rounded-full transition-all duration-500" style="width: 12px; background-color: rgba(236, 243, 158, 0.35);"></div>
         </div>
     </div>
 
-    <!-- RIGHT SIDE: Login Card -->
-    <div class="w-full lg:w-[50%] flex flex-col items-center justify-center p-6 sm:p-12 relative">
+    <!-- RIGHT SIDE: Login -->
+    <div class="w-full lg:w-[45%] flex flex-col items-center justify-center p-8 sm:p-12 relative z-20" style="background-color: #EEF2E6;">
         
-        <!-- Decorative blobs -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-200/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div class="absolute bottom-0 left-0 w-56 h-56 bg-emerald-300/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-
-        <!-- Login Card -->
-        <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-emerald-900/10 p-10 sm:p-12 space-y-8">
+        <div class="relative w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.08)] z-30 p-8 border border-gray-100 lg:-ml-16">
             
-            <!-- Logo -->
-            <div class="flex flex-col items-center space-y-4">
-                <div class="w-20 h-20 rounded-2xl bg-emerald-50 flex items-center justify-center shadow-lg shadow-emerald-100">
-                    <img src="/gambar/cps.png" alt="CPS Logo" class="h-14 w-auto object-contain" />
-                </div>
-                <div class="text-center space-y-1">
-                    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Hello! Welcome back</h2>
-                    <p class="text-sm text-slate-500">Silakan masuk dengan kredensial Anda</p>
+            <!-- Logo & Header -->
+            <div class="flex flex-col items-center space-y-3 mb-8">
+                <img src="/gambar/cps.png" alt="CPS Logo" class="h-12 w-auto object-contain" />
+                <div class="text-center mt-2">
+                    <h2 class="text-2xl font-extrabold tracking-tight text-[#31572C]">Welcome Back</h2>
+                    <p class="text-xs font-semibold mt-1" style="color: #40916C;">Log in to your account</p>
                 </div>
             </div>
 
+            <!-- Form -->
             <form wire:submit="login" class="space-y-5">
                 
-                <!-- Username Input -->
-                <div class="space-y-1.5">
-                    <label class="text-sm font-semibold text-slate-700 ml-1">Username</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <input type="text" wire:model="username" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400" placeholder="Masukkan username Anda" required />
-                    </div>
+                <!-- Username -->
+                <div class="space-y-1.5 group">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#40916C]">Username</label>
+                    <input type="text" wire:model="username" class="w-full px-4 py-3 bg-white text-[#31572C] rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent transition-all duration-300 placeholder:text-gray-400 font-medium" placeholder="direktur" required />
                     @error('username') 
-                        <p class="text-red-500 text-xs mt-1 flex items-center gap-1 ml-1">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                            {{ $message }}
-                        </p>
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Password Input -->
-                <div class="space-y-1.5">
-                    <label class="text-sm font-semibold text-slate-700 ml-1">Password</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input type="password" wire:model="password" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400 tracking-wide" placeholder="••••••••" required />
+                <!-- Password -->
+                <div class="space-y-1.5 group">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-[#40916C]">Password</label>
+                        <a href="#" class="text-[10px] font-bold tracking-wide text-[#31572C] hover:text-[#40916C] hover:underline transition-colors">Forgot?</a>
                     </div>
+                    <input type="password" wire:model="password" class="w-full px-4 py-3 bg-white text-[#31572C] rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent transition-all duration-300 placeholder:text-gray-400 tracking-widest font-medium" placeholder="••••••••" required />
                     @error('password') 
-                        <p class="text-red-500 text-xs mt-1 flex items-center gap-1 ml-1">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                            {{ $message }}
-                        </p>
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Remember Me & Forgot Password -->
-                <div class="flex items-center justify-between pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/20 transition-all" />
-                        <span class="text-sm text-slate-600 group-hover:text-slate-800 transition-colors">Remember me</span>
-                    </label>
-                    <a href="#" class="text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline transition-all">Reset Password</a>
-                </div>
+                <!-- Show Password -->
+                <label class="flex items-center gap-2 cursor-pointer w-max pt-1 group">
+                    <input type="checkbox" class="w-3.5 h-3.5 appearance-none rounded-sm border-2 border-gray-300 checked:bg-[#40916C] checked:border-[#40916C] relative after:content-['✔'] after:absolute after:text-white after:text-[10px] after:left-[1px] after:top-[-2px] after:opacity-0 checked:after:opacity-100 transition-all cursor-pointer" />
+                    <span class="text-xs font-semibold text-gray-500 group-hover:text-[#31572C] transition-colors">Show Password</span>
+                </label>
 
-                <!-- Submit Button -->
-                <div class="pt-2">
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold py-3.5 px-8 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30">
-                        Login
-                    </button>
-                </div>
+                <!-- Submit -->
+                <button type="submit" class="w-full font-bold py-3.5 rounded-md text-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 mt-2" style="background-color: #31572C; color: white;">
+                    LOGIN
+                </button>
             </form>
-            
-            <!-- Footer -->
-            <div class="text-center pt-4 border-t border-slate-100">
-                <p class="text-xs text-slate-400">
-                    &copy; {{ date('Y') }} Commercial Project System. All rights reserved.
-                </p>
-            </div>
-            
         </div>
     </div>
 
@@ -177,11 +139,11 @@
 
             dots.forEach((dot, index) => {
                 if (index === currentIndex) {
-                    dot.classList.remove('w-3', 'bg-white/40');
-                    dot.classList.add('w-10', 'bg-white');
+                    dot.style.width = '40px';
+                    dot.style.backgroundColor = '#ECF39E';
                 } else {
-                    dot.classList.remove('w-10', 'bg-white');
-                    dot.classList.add('w-3', 'bg-white/40');
+                    dot.style.width = '12px';
+                    dot.style.backgroundColor = 'rgba(236, 243, 158, 0.35)';
                 }
             });
         };
