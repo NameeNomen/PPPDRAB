@@ -4,6 +4,7 @@ namespace App\Livewire\Engineering;
 use Livewire\Component;
 use App\Models\RProject;
 use App\Models\Rab;
+use App\Models\DocumentCommit;
 use Illuminate\Support\Facades\Auth;
 
 class RabDetail extends Component
@@ -15,7 +16,7 @@ class RabDetail extends Component
     public function mount($id)
     {
         $this->projectId = $id;
-        // Bawa relasi attachment biar panel kiri lu bisa nampilin lampiran marketing
+        // Ambil data proyek beserta berkas lampirannya
         $this->selectedProject = RProject::with('attachments')->findOrFail($id);
         $this->rabAktif = Rab::where('id_r_project', $id)->first();
     }
@@ -48,12 +49,20 @@ class RabDetail extends Component
         if ($this->rabAktif) {
             $this->rabAktif->delete();
             $this->rabAktif = null;
-            session()->flash('sukses', 'Dokumen RAB berhasil dihapus.');
+            session()->flash('sukses', 'Dokumen RAB berhasil dihapus dari sistem.');
         }
     }
 
     public function render()
     {
-        return view('livewire.engineering.rab-detail')->layout('components.layouts.app');
+        // Ambil data commit versi terakhir untuk keperluan cetak cetak-rab murni
+        $latestCommit = null;
+        if ($this->rabAktif) {
+            $latestCommit = DocumentCommit::where('id_rab', $this->rabAktif->id)->latest()->first();
+        }
+
+        return view('livewire.engineering.rab-detail', [
+            'latestCommit' => $latestCommit
+        ])->layout('components.layouts.app');
     }
 }

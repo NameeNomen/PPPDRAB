@@ -13,7 +13,7 @@ return new class extends Migration
     {
        Schema::create('project_request_attachments', function (Blueprint $table) {
         $table->id();
-        $table->unsignedBigInteger('r_project_id'); // Menghubungkan file ke request yang mana
+        $table->unsignedBigInteger('id_r_project'); // Menghubungkan file ke request yang mana
         $table->string('file_name'); // Nama asli file (proposal.pdf)
         $table->string('file_path'); // Alamat simpan di storage (public/attachments/xyz.pdf)
         $table->string('file_type'); 
@@ -27,7 +27,7 @@ return new class extends Migration
         $table->timestamps();
 
         // Kalau request dihapus, file ikut kehapus dari database
-        $table->foreign('r_project_id')->references('id')->on('r_project')->onDelete('cascade');
+        $table->foreign('id_r_project')->references('id')->on('r_project')->onDelete('cascade');
     });
     }
 

@@ -11,15 +11,15 @@ class Histori extends Component
 {
     public $view = 'project-list';
     
-    // Properti Search
+    // Properti Search Binding
     public $searchProyek = '';
     public $searchCommit = '';
 
-    // Properti Data
+    // Properti Koleksi Data
     public $projects = [];
     public $historiCommits = [];
 
-    // Properti State Terpilih
+    // Properti State Pointer Terpilih
     public $selectedProject = null;
     public $rabData = null;
     public $selectedCommit = null;
@@ -31,7 +31,7 @@ class Histori extends Component
         $this->loadProjects();
     }
 
-    // STATE 1: Load semua proyek yang sudah punya RAB
+    // STATE 1: Ambil semua proyek yang sudah terbit RAB-nya
     public function loadProjects()
     {
         $proyekBerRabIds = Rab::pluck('id_r_project')->unique()->toArray();
@@ -53,7 +53,7 @@ class Histori extends Component
         $this->loadProjects();
     }
 
-    // STATE 2: Masuk ke daftar commit sebuah proyek
+    // STATE 2: Menampilkan daftar riwayat perubahan (Commit) dari satu proyek
     public function showCommits($id_project)
     {
         $this->selectedProject = RProject::findOrFail($id_project);
@@ -70,7 +70,7 @@ class Histori extends Component
     {
         if ($this->rabData) {
             $query = DocumentCommit::where('id_rab', $this->rabData->id)
-                                   ->orderBy('created_at', 'desc'); // Paling baru di atas
+                                   ->orderBy('created_at', 'desc');
 
             if (!empty($this->searchCommit)) {
                 $query->where(function($q) {
@@ -90,14 +90,14 @@ class Histori extends Component
         $this->loadCommits();
     }
 
-    // STATE 3: Masuk ke detail dokumen satu commit spesifik
+    // STATE 3: Membuka berkas spesifik pada log commit tertentu
     public function showDetail($commitId)
     {
         $this->selectedCommit = DocumentCommit::findOrFail($commitId);
         $this->view = 'detail-view';
     }
 
-    // FUNGSI NAVIGASI MUNDUR
+    // SISTEM NAVIGASI MUNDUR (Back)
     public function goBack()
     {
         if ($this->view === 'detail-view') {
@@ -112,7 +112,6 @@ class Histori extends Component
         }
     }
 
-    // UTILITIES
     public function toggleKomentar($commit_id)
     {
         if (isset($this->expandedKomentar[$commit_id])) {
@@ -122,14 +121,8 @@ class Histori extends Component
         }
     }
 
-    public function cetakVersi($commit_id, $versi)
-    {
-        session()->flash('sukses', "Sistem sedang memproses Cetak PDF untuk Dokumen RAB Versi {$versi}...");
-    }
-
     public function render()
     {
-        // Jangan lupa layoutnya biar nggak error 500 lagi!
         return view('livewire.engineering.histori')->layout('components.layouts.app');
     }
 }

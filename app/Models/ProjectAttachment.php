@@ -10,10 +10,10 @@ class ProjectAttachment extends Model
     protected $table = 'project_request_attachments'; 
     
     protected $fillable = [
-        'r_project_id', 'file_name', 'file_path', 'file_type' , 'attachment_category'
+        'id_r_project', 'file_name', 'file_path', 'file_type' , 'attachment_category'
     ];
 
     public function project() {
-        return $this->belongsTo(RProject::class, 'r_project_id', 'id');
+        return $this->belongsTo(RProject::class, 'id_r_project', 'id');
     }
 }

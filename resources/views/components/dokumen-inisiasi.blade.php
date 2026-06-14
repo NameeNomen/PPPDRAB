@@ -54,6 +54,7 @@
 
 <div class="flex flex-col gap-8 w-full items-center">
     
+    <!-- COVER DEPAN -->
     <div class="paper-a4 paper-cover" style="zoom: 0.7;">
         <div class="flex justify-between items-start">
             <img src="{{ asset('gambar/tjt.png') }}" alt="TJT" class="w-24 object-contain">
@@ -79,15 +80,35 @@
         </div>
     </div>
 
+    <!-- HALAMAN SURAT INISIASI -->
     <div class="paper-a4 paper-surat" style="zoom: 0.7;">
-        <div class="relative border-b-[3px] border-black pb-4 mb-2 flex items-center">
-            <img src="{{ asset('gambar/tjt.png') }}" alt="Logo TJT" class="absolute left-0 w-20 object-contain">
-            <div class="w-full text-center pl-24">
-                <h1 class="text-[20px] font-extrabold text-[#003057] uppercase tracking-wide m-0">PT TRI JAYA TEKNIK</h1>
-                <p class="text-[11px] font-bold text-gray-800 mt-1 uppercase m-0">Industrial Engineering & Construction</p>
+        
+        <!-- KOP SURAT FORMAL RESMI (Sama Kayak RAB) -->
+        <div class="grid grid-cols-[120px_1fr_120px] w-full border-2 border-black mb-8">
+            <!-- Logo Kiri -->
+            <div class="border-r-2 border-black p-2 flex items-center justify-center">
+                <img src="{{ asset('gambar/tjt.png') }}" class="w-full object-contain" alt="TJT Logo" onerror="this.style.display='none'">
+            </div>
+            
+            <!-- Teks Tengah -->
+            <div class="p-2 flex flex-col items-center justify-center text-center">
+                <h1 class="m-0 text-[#00CC00] text-2xl font-black tracking-wider" style="text-shadow: 1px 1px 0 #000;">
+                    PT. TRI JAYA TEKNIK KARAWANG
+                </h1>
+                <h2 class="m-0 mt-1 text-xs font-bold text-black uppercase">
+                    MACHINING, STAMPING, FABRICATION,<br>CONSTRUCTION, AND CIVIL WORK
+                </h2>
+                <p class="m-0 text-[9px] font-bold text-black mt-1">
+                    JL. Alternatif Krajan II Warung Bambu - Karawang Timur<br>
+                    Telp. (0267) 8615387 Fax: (0267) 8615386 Email: pt.tjtk@yahoo.com
+                </p>
+            </div>
+            
+            <!-- Logo Kanan -->
+            <div class="border-l-2 border-black p-2 flex items-center justify-center">
+                <img src="{{ asset('gambar/iso.png') }}" class="w-full object-contain" alt="ISO Logo" onerror="this.style.display='none'">
             </div>
         </div>
-        <div class="border-b-[1px] border-black mb-8 mt-[-6px]"></div>
         
         <div class="mb-5">
             <p class="m-0">Kepada Yth.,<br><strong>Tim Engineering / Estimator</strong><br>PT Tri Jaya Teknik</p>
@@ -143,11 +164,13 @@
         </div>
     </div>
 
+    <!-- HALAMAN LAMPIRAN RFQ PDF -->
     @if($rfq)
         <div class="paper-a4" style="zoom: 0.7; background-color: #f0f0f0;">
             <iframe src="{{ asset('storage/' . $rfq->file_path) }}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" class="pdf-embed"></iframe>
         </div>
     @else
+        <!-- HALAMAN FOTO LAMPIRAN -->
         <div class="paper-a4 paper-surat" style="zoom: 0.7;">
             <div class="border-b-[3px] border-black pb-2 mb-6">
                 <h2 class="text-lg font-bold uppercase">Lampiran Dokumentasi Pendukung</h2>
@@ -183,6 +206,7 @@
         </div>
     @endif
     
+    <!-- HALAMAN PENUTUP -->
     <div class="paper-a4 paper-cover flex flex-col items-center justify-center text-center" style="zoom: 0.7;">
         <img src="{{ asset('gambar/tjt.png') }}" alt="TJT Logo" class="w-32 object-contain mb-6">
         <h2 class="text-3xl font-extrabold tracking-wider uppercase text-white mb-2">Halaman Penutup</h2>

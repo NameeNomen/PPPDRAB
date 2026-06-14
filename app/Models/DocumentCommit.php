@@ -21,8 +21,12 @@ class DocumentCommit extends Model
     'jenis_aksi',
     'komentar_commit',
     'user_name',
-    'created_at'
+    'created_at',
+    'snapshot_data'
 ];
+protected $casts = [
+        'snapshot_data' => 'array', 
+    ];
 
     /**
      * User yang melakukan commit

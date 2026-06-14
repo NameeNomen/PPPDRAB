@@ -15,7 +15,7 @@ return new class extends Migration
     $table->id();
     
     // 1. KONTEKS: Material ini diminta buat RAB proyek mana?
-    $table->foreignId('r_project_id')->nullable()->constrained('r_project')->onDelete('cascade');
+    $table->foreignId('id_r_project')->nullable()->constrained('r_project')->onDelete('cascade');
     
     $table->string('nama_material');
     $table->text('deskripsi')->nullable();
@@ -25,13 +25,13 @@ return new class extends Migration
     $table->string('satuan', 50);
     
     // 3. DEADLINE: Biar Purchasing tau kapan barangnya harus ready
-    $table->date('target_waktu_dibutuhkan')->nullable();
+    $table->dateTime('target_waktu_dibutuhkan')->nullable();
 
     $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
     $table->text('catatan_purchasing')->nullable();
     
     // 4. CLOSING LOOP: Kalau disetujui, link ke ID material aslinya yang udah dibuat purchasing
-    $table->foreignId('id_material_terdaftar')->nullable()->constrained('materials')->onDelete('set null');
+    $table->foreignId('id_material_terdaftar')->nullable()->constrained('material')->onDelete('set null');
     
     $table->foreignId('requested_by')->constrained('users')->onDelete('cascade');
     $table->timestamps();

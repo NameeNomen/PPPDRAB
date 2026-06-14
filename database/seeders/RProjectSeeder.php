@@ -102,7 +102,7 @@ class RProjectSeeder extends Seeder
             foreach ($item['images'] as $index => $image) {
 
                 ProjectAttachment::create([
-                    'r_project_id' => $project->id,
+                    'id_r_project' => $project->id,
                     'file_name' => 'referensi_' . ($index + 1) . '.jpg',
                     'file_path' => $image,
                     'file_type' => 'jpg',

@@ -44,19 +44,19 @@ class RProject extends Model
 
     public function items()
     {
-        return $this->hasMany(RProjectItem::class, 'r_project_id');
+        return $this->hasMany(RProjectItem::class, 'id_r_project');
     }
 
     public function biddings()
     {
-        return $this->hasMany(Bidding::class, 'r_project_id');
+        return $this->hasMany(Bidding::class, 'id_r_project');
     }
 
   // app/Models/RProject.php
 
     public function rabs()
     {
-        // Ganti 'r_project_id' jadi 'id_r_project'
+        // Ganti 'id_r_project' jadi 'id_r_project'
         return $this->hasMany(Rab::class, 'id_r_project');
     }
 
@@ -68,6 +68,6 @@ class RProject extends Model
 
     public function attachments()
     {
-        return $this->hasMany(ProjectAttachment::class, 'r_project_id');
+        return $this->hasMany(ProjectAttachment::class, 'id_r_project');
     }
 }

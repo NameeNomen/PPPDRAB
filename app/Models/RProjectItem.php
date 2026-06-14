@@ -9,7 +9,7 @@ class RProjectItem extends Model
     protected $table = 'r_project_items';
 
     protected $fillable = [
-        'r_project_id',
+        'id_r_project',
         'nama_item',
         'qty',
         'satuan',
@@ -19,7 +19,7 @@ class RProjectItem extends Model
 
     public function project()
     {
-        return $this->belongsTo(Project::class, 'r_project_id');
+        return $this->belongsTo(Project::class, 'id_r_project');
     }
 
     public function materials()
