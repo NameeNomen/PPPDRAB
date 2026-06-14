@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_user')->nullable(); // Terisi jika dokumen terkait adalah Bidding
             $table->enum('jenis_aksi', ['created', 'updated', 'submitted', 'revised', 'approved']); 
             $table->text('komentar_commit'); // Isi komentar revisi atau alasan komitan data
+             $table->decimal('total_penawaran', 20, 2)->default(0);
             $table->string('user_name');
             $table->json('snapshot_data')->nullable(); // Isi komentar revisi atau alasan komitan data
 

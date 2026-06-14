@@ -41,6 +41,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:marketing'])->prefix('marketing')->group(function () {
         
         // Modul Dashboard & Proyek
+
+        Route::get('/marketing/bidding/log/{id}', \App\Livewire\Marketing\LogBidding::class)
+    ->name('marketing.bidding.log');
         Route::get('/dashboard', App\Livewire\DashboardMarketing::class)->name('marketing.dashboard');
         Route::get('/proyek', App\Livewire\Marketing\KelolaProyek::class)->name('marketing.proyek');
         Route::get('/proyek/preview/{id}', [ProjectPreviewController::class, 'show'])->name('marketing.proyek.preview');

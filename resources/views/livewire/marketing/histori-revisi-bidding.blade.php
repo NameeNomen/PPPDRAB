@@ -154,7 +154,7 @@
                                     {{ \Carbon\Carbon::parse($c->created_at)->format('d M Y, H:i') }}
                                 </td>
                                 <td class="px-8 py-5 font-mono font-bold text-right text-[#1A1A1A]">
-                                    Rp {{ number_format($c->total_nilai, 0, ',', '.') }}
+                                    Rp {{ number_format($c->total_penawaran ?? 0, 0, ',', '.') }}
                                 </td>
                                 <td class="px-8 py-5 text-center">
                                     <button wire:click="showDetail({{ $c->id }})" 
@@ -248,7 +248,7 @@
                                     Nilai Penawaran (Versi Ini)
                                 </p>
                                 <p class="text-xl font-black font-mono mt-1 text-[#1A1A1A]">
-                                    Rp {{ number_format($selectedCommit->total_nilai, 0, ',', '.') }}
+                                    Rp {{ number_format($selectedCommit->total_penawaran ?? 0, 0, ',', '.') }}
                                 </p>
                             </div>
 
@@ -257,7 +257,7 @@
                                     Harga Dasar
                                 </p>
                                 <p class="text-lg font-black font-mono mt-1 text-[#1A1A1A]">
-                                    Rp {{ number_format($biddingData->harga_dasar, 0, ',', '.') }}
+                                    Rp {{ number_format($biddingData->harga_dasar ?? 0, 0, ',', '.') }}
                                 </p>
                             </div>
                         </div>

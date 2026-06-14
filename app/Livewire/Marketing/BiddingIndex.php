@@ -10,7 +10,7 @@ use App\Models\RProject;
 class BiddingIndex extends Component
 {
     use WithPagination;
-
+    
     public $search = '';
     public $filterStatus = 'all';
 
@@ -26,23 +26,31 @@ class BiddingIndex extends Component
 
     public function lihatDetail($id)
     {
-        // Arahin ke halaman workspace/detail bidding (nantinya lu bikin route ini)
-        return $this->redirectRoute('marketing.bidding.detail', ['id' => $id], navigate: true);
+        // ✅ CEK APAKAH SUDAH ADA BIDDING UNTUK PROYEK INI
+        $bidding = Bidding::where('id_r_project', $id)->first();
+        
+        if ($bidding) {
+            // ✅ SUDAH ADA → KE HALAMAN LOG-BIDDING (Preview + Kontrol)
+            return $this->redirectRoute('marketing.bidding.log', ['id' => $id], navigate: true);
+        } else {
+            // ✅ BELUM ADA → KE HALAMAN BIDDING-DETAIL (Form Input)
+            return $this->redirectRoute('marketing.bidding.detail', ['id' => $id], navigate: true);
+        }
     }
 
     public function render()
     {
         // 1. Ambil proyek yang RAB-nya udah Approved tapi belum dibikinin Bidding
-        $siapBidding = RProject::whereHas('rab', function($q) {
+        $siapBidding = RProject::whereHas('rab', function ($q) {
             $q->where('status_rab', 'approved');
         })->whereDoesntHave('biddings')->get();
 
-        // 2. Ambil histori Bidding dengan relasinya [cite: 658-661]
+        // 2. Ambil histori Bidding dengan relasinya
         $query = Bidding::with('project')->orderBy('created_at', 'desc');
 
         if (!empty($this->search)) {
-            $query->where(function($q) {
-                $q->where('nama_perusahaan', 'like', '%' . $this->search . '%')
+            $query->where(function ($q) {
+                $q->where('nama_pelanggan_snapshot', 'like', '%' . $this->search . '%')
                   ->orWhere('no_penawaran', 'like', '%' . $this->search . '%');
             });
         }

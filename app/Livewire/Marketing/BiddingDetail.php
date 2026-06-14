@@ -7,6 +7,8 @@ use App\Models\Bidding;
 use App\Models\RProject;
 use App\Models\DocumentCommit;
 use App\Models\CompanyProfile;
+use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 
 class BiddingDetail extends Component
@@ -15,17 +17,17 @@ class BiddingDetail extends Component
     public $proyek;
     public $biddingAktif;
     public $rabAktif;
-
+    
     // Field Form sesuai skema tabel biddings
     public $no_penawaran, $tgl_penawaran, $perihal, $kepada, $up;
     public $surat_pengantar, $catatan;
     public $term_of_payment, $masa_berlaku, $waktu_pengerjaan, $garansi;
-
+    
     // Kalkulasi Harga
     public $harga_dasar = 0;
     public $total_penawaran = 0;
-    public $margin_persen = 0; // Field virtual untuk UI Kalkulator
-
+    public $margin_persen = 0;
+    
     public $komentar_commit = '';
     public $nama_penulis = '';
 
@@ -41,14 +43,14 @@ class BiddingDetail extends Component
         $this->projectId = $id;
         
         // Menerapkan Aturan: Hanya ambil RAB yang statusnya sudah 'approved'
-        $this->proyek = RProject::with(['rabs' => function($q) {
+        $this->proyek = RProject::with(['rabs' => function ($q) {
             $q->where('status_rab', 'approved')->latest();
         }, 'user'])->findOrFail($id);
 
         $this->rabAktif = $this->proyek->rabs->first();
 
         // Validasi: Jika tidak ada RAB yang approved, tolak pembuatan bidding
-        if(!$this->rabAktif) {
+        if (!$this->rabAktif) {
             session()->flash('error', 'Sistem mendeteksi proyek ini belum memiliki RAB yang berstatus Approved. Bidding tidak dapat dibuat.');
             return $this->redirectRoute('marketing.bidding.index', navigate: true);
         }
@@ -60,8 +62,8 @@ class BiddingDetail extends Component
             $this->no_penawaran = $this->biddingAktif->no_penawaran;
             $this->tgl_penawaran = $this->biddingAktif->tgl_penawaran;
             $this->perihal = $this->biddingAktif->perihal;
-            $this->kepada = $this->biddingAktif->kepada;
-            $this->up = $this->biddingAktif->up;
+            $this->kepada = $this->biddingAktif->nama_pelanggan_snapshot ?? $this->biddingAktif->kepada;
+            $this->up = $this->biddingAktif->pic_pelanggan_snapshot ?? $this->biddingAktif->up;
             $this->surat_pengantar = $this->biddingAktif->surat_pengantar;
             $this->catatan = $this->biddingAktif->catatan;
             $this->term_of_payment = $this->biddingAktif->term_of_payment;
@@ -80,14 +82,17 @@ class BiddingDetail extends Component
             $this->no_penawaran = 'PEN/' . date('Y/m/d') . '/' . $id;
             $this->tgl_penawaran = date('Y-m-d');
             $this->perihal = 'Penawaran Harga Pekerjaan ' . $this->proyek->nama_projek;
+            
+            // Ambil dari r_project
             $this->kepada = $this->proyek->nama_pelanggan;
-
+            $this->up = $this->proyek->pic_pelanggan;
+            
             // Ambil Base Price dari RAB yang Approved
             $this->harga_dasar = $this->rabAktif->grand_total ?? 0;
             $this->total_penawaran = $this->harga_dasar;
             $this->margin_persen = 0;
-
-            $this->masa_berlaku = 14; // Default 14 Hari
+            
+            $this->masa_berlaku = 14;
             $this->term_of_payment = "DP 30% Setelah PO terbit.\nPelunasan 70% Setelah Berita Acara Serah Terima (BAST).";
             $this->surat_pengantar = "Bersama surat ini kami mengajukan proposal penawaran harga untuk pelaksanaan pekerjaan tersebut.";
         }
@@ -134,8 +139,8 @@ class BiddingDetail extends Component
             'no_penawaran' => $this->no_penawaran,
             'tgl_penawaran' => $this->tgl_penawaran,
             'perihal' => $this->perihal,
-            'kepada' => $this->kepada,
-            'up' => $this->up,
+            'nama_pelanggan_snapshot' => $this->kepada,
+            'pic_pelanggan_snapshot' => $this->up,
             'surat_pengantar' => $this->surat_pengantar,
             'catatan' => $this->catatan,
             'term_of_payment' => $this->term_of_payment,
@@ -144,14 +149,12 @@ class BiddingDetail extends Component
             'garansi' => $this->garansi,
             'harga_dasar' => $this->harga_dasar,
             'total_penawaran' => $this->total_penawaran,
-            'status_bidding' => 'pending', // Masuk antrean persetujuan atasan
+            'status_bidding' => 'pending',
         ];
 
         if (!$this->biddingAktif) {
             $this->biddingAktif = Bidding::create($dataForm);
             $jenisAksi = 'created';
-            // Hindari mengubah status proyek ke 'pending' jika seharusnya proyek sedang berjalan/approved.
-            // Biarkan status proyek tidak berubah atau sesuaikan dengan kebutuhan spesifik workflow Anda.
         } else {
             $this->biddingAktif->update($dataForm);
             $jenisAksi = 'updated';
@@ -165,9 +168,23 @@ class BiddingDetail extends Component
             'id_bidding' => $this->biddingAktif->id,
             'jenis_aksi' => $jenisAksi,
             'komentar_commit' => $this->komentar_commit,
-            'total_nilai' => $this->total_penawaran,
+            'total_penawaran' => $this->total_penawaran,
             'created_at' => now()
         ]);
+
+        // ✅ TEMBAK NOTIFIKASI KE DIREKTUR BIAR LONCENGNYA BUNYI
+        $direktur = User::where('role', 'direktur')->first();
+        if ($direktur) {
+            $totalFormatted = number_format($this->total_penawaran, 0, ',', '.');
+            Notification::create([
+                'id_user' => $direktur->id,
+                'judul' => 'Pengajuan Penawaran Membutuhkan Review',
+                'pesan' => "Dokumen penawaran untuk proyek {$this->proyek->nama_pelanggan} telah disubmit oleh {$this->nama_penulis}. Total: Rp {$totalFormatted}. Catatan: {$this->komentar_commit}",
+                'url_tujuan' => route('direktur.persetujuan.detail', $this->proyek->id),
+              'is_read' => false,
+                'created_at' => now()
+            ]);
+        }
 
         session()->flash('sukses', 'Dokumen Penawaran berhasil diajukan untuk disetujui Direktur!');
         return $this->kembaliKeList();

@@ -74,7 +74,7 @@ class PersetujuanDetail extends Component
             $rab->update(['status_rab' => 'approved']);
             
             // DIPERBAIKI: 'rab_approved' diganti 'bidding' (sesuai enum database)
-            RProject::where('id', $rab->id_r_project)->update(['status_proyek' => 'bidding']);
+            RProject::where('id', $rab->id_r_project)->update(['status_proyek' => 'pending']);
 
             DocumentCommit::create([
                 'id_user' => Auth::id() ?? 1,
@@ -114,7 +114,7 @@ class PersetujuanDetail extends Component
                 'id_user' => $bidding->id_user,
                 'judul' => 'Bidding Disetujui Direktur!',
                 'pesan' => "Surat Penawaran nomor {$bidding->no_penawaran} disetujui. Silakan kirimkan dokumen ke klien.",
-                'url_tujuan' => route('marketing.bidding.detail', $bidding->id_r_project) // Pastikan id project
+                'url_tujuan' => route('marketing.bidding.log', $bidding->id_r_project) // Pastikan id project
             ]);
         }
 

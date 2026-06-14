@@ -269,7 +269,7 @@ public function ajukanMaterialBaru()
                 'id_user' => $direktur->id,
                 'judul' => 'Pengajuan RAB Membutuhkan Review',
                 'pesan' => "RAB telah disubmit oleh {$this->nama_editor}. Catatan: {$this->commit_message}",
-                'url_tujuan' => '/direktur/persetujuan',
+                'url_tujuan' => route('direktur.persetujuan.detail', $this->proyek->id),
                 'is_read' => false,
                 'created_at' => now()
             ]);
