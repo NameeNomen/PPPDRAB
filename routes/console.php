@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
+
 use Illuminate\Support\Facades\Schedule;
 use App\Models\Notification;
 
@@ -12,6 +13,9 @@ Schedule::call(function () {
         ->where('read_at', '<', now()->subDays(3))
         ->delete();
 })->daily(); // Jalan tiap hari otomatis
+
+
+Schedule::command('app:cek-deadline-request')->everyMinute();
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

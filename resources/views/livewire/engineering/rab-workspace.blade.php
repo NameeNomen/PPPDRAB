@@ -311,220 +311,213 @@
                                     </tr>
                                     
                                     @php $itemNo = 1; @endphp
-                                    @foreach($kat->children as $item)
-                                        <tr class="font-semibold relative" :class="darkMode ? 'bg-[#111111] text-[#F5F5F5]' : 'bg-white text-[#1A1A1A]'">
-                                            <td class="px-2 py-2 text-center border-r font-mono" :class="darkMode ? 'text-[#888888] border-[#2A2A2A]' : 'text-[#888888] border-[#E5E5E5]'">{{ $itemNo++ }}</td>
-                                            
-                                            <td class="px-3 py-2 border-r pl-6 relative" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, deskripsi: '{{ addslashes($item->deskripsi_pekerjaan) }}' }">
-                                                <div class="w-full">
-                                                    <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer break-words">{{ $item->deskripsi_pekerjaan }}</div>
-                                                    @if(!$isApproved)
-                                                        <input x-show="editing" x-model="deskripsi" x-trap="editing"
-                                                               @keydown.enter="editing = false; $wire.updateInline({{ $item->id }}, 'deskripsi_pekerjaan', deskripsi)"
-                                                               @click.away="editing = false; $wire.updateInline({{ $item->id }}, 'deskripsi_pekerjaan', deskripsi)"
-                                                               class="w-full px-2 py-0.5 outline-none rounded border-2 text-[11px]"
-                                                               :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-[#FAFAFA] text-[#1A1A1A] border-[#F5C518]'">
-                                                    @endif
-                                                    
-                                                    @if(!$isApproved)
-                                                        <div class="mt-1 relative" x-data="{ open: false }">
-                                                            @if($item->id_material)
-                                                                <span class="text-[9px] font-normal px-1.5 py-0.5 rounded cursor-pointer border" :class="darkMode ? 'text-[#F5C518] bg-[#F5C518]/20 border-[#F5C518]/40' : 'text-[#1A1A1A] bg-[#F5C518]/20 border-[#F5C518]/40'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $item->id }})">
-                                                                    📦 {{ $item->material->nama_barang }} (Ganti) &rarr;
-                                                                </span>
-                                                            @else
-                                                                <button class="text-[9px] font-bold px-1.5 py-0.5 rounded border transition-colors" :class="darkMode ? 'text-[#F5C518] bg-[#F5C518]/30 border-[#F5C518]/50 hover:bg-[#F5C518] hover:text-[#1A1A1A]' : 'text-[#1A1A1A] bg-[#F5C518]/30 border-[#F5C518]/50 hover:bg-[#F5C518]'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $item->id }})">
-                                                                    + Hubungkan DB Material
-                                                                </button>
-                                                            @endif
+@foreach($kat->children as $item)
+<tr class="font-semibold relative" :class="darkMode ? 'bg-[#111111] text-[#F5F5F5]' : 'bg-white text-[#1A1A1A]'">
+    <td class="px-2 py-2 text-center border-r font-mono" :class="darkMode ? 'text-[#888888] border-[#2A2A2A]' : 'text-[#888888] border-[#E5E5E5]'">{{ $itemNo++ }}</td>
 
-                                                            @if($searchMaterialId == $item->id)
-                                                                <div class="absolute left-0 mt-1 z-50 w-[450px] p-3 border-2 rounded-lg shadow-2xl"
-                                                                     :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'"
-                                                                     @click.away="$wire.set('searchMaterialId', null)">
-                                                                     
-                                                                    <div class="relative mb-3">
-                                                                        <input type="text"
-                                                                               wire:model.live.debounce.300ms="materialSearchKeyword"
-                                                                               placeholder="Cari nama material, merk, atau spesifikasi..."
-                                                                               class="w-full p-2.5 text-xs border-2 rounded-lg outline-none focus:border-[#F5C518] pr-10"
-                                                                               :class="darkMode ? 'bg-[#0A0A0A] border-[#2A2A2A] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
-                                                                        <div wire:loading wire:target="materialSearchKeyword" class="absolute right-3 top-2.5">
-                                                                            <svg class="w-4 h-4 spinner text-[#F5C518]" fill="none" viewBox="0 0 24 24">
-                                                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                                            </svg>
-                                                                        </div>
-                                                                    </div>
-                                                                    
-                                                                    <div class="max-h-64 overflow-y-auto custom-scrollbar">
-                                                                        @if(count($materialResults) > 0)
-                                                                            <table class="w-full text-[10px]">
-                                                                                <thead class="sticky top-0" :class="darkMode ? 'bg-[#1A1A1A]' : 'bg-[#F5C518]/20'">
-                                                                                    <tr>
-                                                                                        <th class="text-left p-2 font-bold" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">MATERIAL</th>
-                                                                                        <th class="text-center p-2 font-bold" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">QTY</th>
-                                                                                        <th class="text-right p-2 font-bold" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">HARGA</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody class="divide-y" :class="darkMode ? 'divide-[#2A2A2A]' : 'divide-[#E5E5E5]'">
-                                                                                    @foreach($materialResults as $m)
-                                                                                        <tr wire:click="pilihMaterial({{ $item->id }}, {{ $m->id }})"
-                                                                                            class="cursor-pointer transition-colors"
-                                                                                            :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">
-                                                                                            <td class="p-2">
-                                                                                                <p class="font-bold mb-0.5" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $m->nama_barang }}</p>
-                                                                                                <p class="text-[9px] opacity-70 mb-1" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">{{ $m->deskripsi }}</p>
-                                                                                                <p class="text-[9px] font-semibold" :class="darkMode ? 'text-[#F5C518]' : 'text-[#F5C518]'">
-                                                                                                    {{ $m->jumlah }} {{ $m->satuan }}
-                                                                                                </p>
-                                                                                            </td>
-                                                                                            <td class="p-2 text-center">
-                                                                                                <span class="px-2 py-1 rounded font-mono text-[9px]"
-                                                                                                      :class="darkMode ? 'bg-[#1A1A1A] text-[#F5C518]' : 'bg-[#F5C518]/10 text-[#1A1A1A]'">
-                                                                                                    {{ $m->jumlah }} {{ $m->satuan }}
-                                                                                                </span>
-                                                                                            </td>
-                                                                                            <td class="p-2 text-right">
-                                                                                                <p class="font-bold font-mono" :class="darkMode ? 'text-[#F5C518]' : 'text-[#F5C518]'">
-                                                                                                    Rp {{ number_format($m->harga, 0, ',', '.') }}
-                                                                                                </p>
-                                                                                                <p class="text-[8px] opacity-60" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">
-                                                                                                    / {{ $m->jumlah }} {{ $m->satuan }}
-                                                                                                </p>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    @endforeach
-                                                                                </tbody>
-                                                                            </table>
-                                                                        @elseif(strlen($materialSearchKeyword) >= 2)
-                                                                            <div class="p-4 text-center" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">
-                                                                                <p class="text-xs">Material tidak ditemukan</p>
-                                                                            </div>
-                                                                        @else
-                                                                            <div class="p-4 text-center" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">
-                                                                                <p class="text-xs">Ketik minimal 2 karakter untuk mencari</p>
-                                                                            </div>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                    @else
-                                                        @if($item->material) <span class="block text-[9px] font-normal mt-1" :class="darkMode ? 'text-[#888888]' : 'text-[#888888]'">Spec: {{ $item->material->nama_barang }}</span> @endif
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            
-                                            @if($item->children->count() > 0)
-                                                <td class="px-2 py-2 border-r text-center opacity-40 text-[9px] italic" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" colspan="3">(Dirinci di bawah)</td>
-                                                <td class="px-3 py-2 text-right font-mono font-black border-r" :class="darkMode ? 'text-[#F5C518] border-[#2A2A2A]' : 'text-[#F5C518] border-[#E5E5E5]'">{{ number_format($item->children->sum('subtotal'), 0, ',', '.') }}</td>
-                                            @else
-                                                <td class="px-2 py-2 text-center border-r font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, qty: '{{ $item->qty }}' }">
-                                                    <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer font-bold rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ $item->qty }}</div>
-                                                    @if(!$isApproved)
-                                                        <input type="number" step="0.01" x-show="editing" x-model="qty" @keydown.enter="editing = false; $wire.updateInline({{ $item->id }}, 'qty', qty)" @click.away="editing = false; $wire.updateInline({{ $item->id }}, 'qty', qty)" class="w-full text-center outline-none border-2 rounded text-xs shadow-sm" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
-                                                    @endif
-                                                </td>
-                                                <td class="px-2 py-2 text-center border-r opacity-70 uppercase font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">{{ $item->material->satuan ?? 'Lot' }}</td>
-                                                <td class="px-3 py-2 text-right border-r font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, harga: '{{ $item->harga_awal }}' }">
-                                                    <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ number_format($item->harga_awal, 0, ',', '.') }}</div>
-                                                    @if(!$isApproved)
-                                                        <input type="number" x-show="editing" x-model="harga" @keydown.enter="editing = false; $wire.updateInline({{ $item->id }}, 'harga_awal', harga)" @click.away="editing = false; $wire.updateInline({{ $item->id }}, 'harga_awal', harga)" class="w-full text-right outline-none border-2 rounded text-xs shadow-sm" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
-                                                    @endif
-                                                </td>
-                                                <td class="px-3 py-2 text-right font-mono font-black border-r" :class="darkMode ? 'text-[#1A1A1A] border-[#2A2A2A]' : 'text-[#1A1A1A] border-[#E5E5E5]'">{{ number_format($item->subtotal, 0, ',', '.') }}</td>
-                                            @endif
-                                            
-                                            @if(!$isApproved)
-                                                <td class="text-center p-1 flex justify-center gap-1">
-                                                    <button wire:click="tambahSubSubBab({{ $item->id }})" wire:loading.class="btn-loading" class="relative px-2 py-0.5 rounded text-[9px] font-black border-2 transition-colors" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-red-500 hover:bg-red-500 hover:text-white' : 'bg-[#FAFAFA] border-[#E5E5E5] text-red-500 hover:bg-red-500 hover:text-white'" title="Tambah Sub-sub Bab Material">
-                                                        <span class="btn-text">&#8627;&#8627; +</span>
-                                                        <span class="btn-spinner"><svg class="w-3 h-3 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>
-                                                    </button>
-                                                    <button wire:click="hapusItem({{ $item->id }})" wire:loading.class="btn-loading" class="relative font-bold transition-colors" :class="darkMode ? 'text-[#888888] hover:text-red-500' : 'text-[#888888] hover:text-red-500'">
-                                                        <span class="btn-text">&times;</span>
-                                                        <span class="btn-spinner"><svg class="w-3 h-3 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>
-                                                    </button>
-                                                </td>
-                                            @endif
-                                        </tr>
+    <td class="px-3 py-2 border-r pl-6 relative" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, deskripsi: '{{ addslashes($item->deskripsi_pekerjaan) }}' }">
+        <div class="w-full">
+            <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer break-words">{{ $item->deskripsi_pekerjaan }}</div>
+            @if(!$isApproved)
+                <input x-show="editing" x-model="deskripsi" x-trap="editing"
+                       @keydown.enter="editing = false; $wire.updateInline({{ $item->id }}, 'deskripsi_pekerjaan', deskripsi)"
+                       @click.away="editing = false; $wire.updateInline({{ $item->id }}, 'deskripsi_pekerjaan', deskripsi)"
+                       class="w-full px-2 py-0.5 outline-none rounded border-2 text-[11px]"
+                       :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-[#FAFAFA] text-[#1A1A1A] border-[#F5C518]'">
+            @endif
+
+            @if(!$isApproved)
+                <div class="mt-1 relative" x-data="{ open: false }">
+                    @if($item->id_material)
+                        <span class="text-[9px] font-normal px-1.5 py-0.5 rounded cursor-pointer border" :class="darkMode ? 'text-[#F5C518] bg-[#F5C518]/20 border-[#F5C518]/40' : 'text-[#1A1A1A] bg-[#F5C518]/20 border-[#F5C518]/40'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $item->id }})">
+                            📦 {{ $item->material->nama_barang }} (Ganti) &rarr;
+                        </span>
+                    @else
+                        <button class="text-[9px] font-bold px-1.5 py-0.5 rounded border transition-colors" :class="darkMode ? 'text-[#F5C518] bg-[#F5C518]/30 border-[#F5C518]/50 hover:bg-[#F5C518] hover:text-[#1A1A1A]' : 'text-[#1A1A1A] bg-[#F5C518]/30 border-[#F5C518]/50 hover:bg-[#F5C518]'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $item->id }})">
+                            + Hubungkan DB Material
+                        </button>
+                    @endif
+
+                    @if($searchMaterialId == $item->id)
+                        <div class="absolute left-0 mt-1 z-50 w-[450px] p-3 border-2 rounded-lg shadow-2xl"
+                             :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'"
+                             @click.away="$wire.set('searchMaterialId', null)">
+                            
+                            <div class="relative mb-3">
+                                <input type="text"
+                                       wire:model.live.debounce.300ms="materialSearchKeyword"
+                                       placeholder="Cari nama material, merk, atau spesifikasi..."
+                                       class="w-full p-2.5 text-xs border-2 rounded-lg outline-none focus:border-[#F5C518] pr-10"
+                                       :class="darkMode ? 'bg-[#0A0A0A] border-[#2A2A2A] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
+                                <div wire:loading wire:target="materialSearchKeyword" class="absolute right-3 top-2.5">
+                                    <svg class="w-4 h-4 spinner text-[#F5C518]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                </div>
+                            </div>
+
+                            <div class="max-h-64 overflow-y-auto custom-scrollbar">
+                                @if(count($materialResults) > 0)
+                                    <table class="w-full text-[10px]">
+                                        <thead class="sticky top-0" :class="darkMode ? 'bg-[#1A1A1A]' : 'bg-[#F5C518]/20'">
+                                            <tr>
+                                                <th class="text-left p-2 font-bold" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">MATERIAL</th>
+                                                <th class="text-center p-2 font-bold" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">QTY</th>
+                                                <th class="text-right p-2 font-bold" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">HARGA</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y" :class="darkMode ? 'divide-[#2A2A2A]' : 'divide-[#E5E5E5]'">
+                                            @foreach($materialResults as $m)
+                                                <tr wire:click="pilihMaterial({{ $item->id }}, {{ $m->id }})" class="cursor-pointer transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">
+                                                    <td class="p-2">
+                                                        <p class="font-bold mb-0.5" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $m->nama_barang }}</p>
+                                                        <p class="text-[9px] opacity-70 mb-1" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">{{ $m->deskripsi }}</p>
+                                                    </td>
+                                                    <td class="p-2 text-center">
+                                                        <span class="px-2 py-1 rounded font-mono text-[9px]" :class="darkMode ? 'bg-[#1A1A1A] text-[#F5C518]' : 'bg-[#F5C518]/10 text-[#1A1A1A]'">{{ $m->jumlah }} {{ $m->satuan }}</span>
+                                                    </td>
+                                                    <td class="p-2 text-right">
+                                                        <p class="font-bold font-mono" :class="darkMode ? 'text-[#F5C518]' : 'text-[#F5C518]'">Rp {{ number_format($m->harga, 0, ',', '.') }}</p>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @elseif(strlen($materialSearchKeyword) >= 2)
+                                    <div class="p-4 text-center text-xs" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Material tidak ditemukan</div>
+                                @else
+                                    <div class="p-4 text-center text-xs" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Ketik min 2 karakter untuk mencari</div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @else
+                @if($item->material) <span class="block text-[9px] font-normal mt-1" :class="darkMode ? 'text-[#888888]' : 'text-[#888888]'">Spec: {{ $item->material->nama_barang }}</span> @endif
+            @endif
+        </div>
+    </td>
+
+    @if($item->children->count() > 0)
+        <td class="px-2 py-2 border-r text-center opacity-40 text-[9px] italic" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" colspan="3">(Dirinci di bawah)</td>
+        <td class="px-3 py-2 text-right font-mono font-black border-r" :class="darkMode ? 'text-[#F5C518] border-[#2A2A2A]' : 'text-[#F5C518] border-[#E5E5E5]'">{{ number_format($item->children->sum('subtotal'), 0, ',', '.') }}</td>
+    @else
+        <td class="px-2 py-2 text-center border-r font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" 
+            wire:key="qty-item-{{ $item->id }}-{{ $item->qty }}" 
+            x-data="{ editing: false, qty: '{{ $item->qty }}' }">
+            <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer font-bold rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ $item->qty }}</div>
+            @if(!$isApproved)
+                <input type="number" step="0.01" x-show="editing" x-model="qty" @keydown.enter="editing = false; $wire.updateInline({{ $item->id }}, 'qty', qty)" @click.away="editing = false; $wire.updateInline({{ $item->id }}, 'qty', qty)" class="w-full text-center outline-none border-2 rounded text-xs shadow-sm" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
+            @endif
+        </td>
+
+        <td class="px-2 py-2 text-center border-r opacity-70 uppercase font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">{{ $item->material->satuan ?? 'Lot' }}</td>
+
+        <td class="px-3 py-2 text-right border-r font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" 
+            wire:key="harga-item-{{ $item->id }}-{{ $item->harga_awal }}" 
+            x-data="{ editing: false, harga: '{{ $item->harga_awal }}' }">
+            <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ number_format($item->harga_awal, 0, ',', '.') }}</div>
+            @if(!$isApproved)
+                <input type="number" x-show="editing" x-model="harga" @keydown.enter="editing = false; $wire.updateInline({{ $item->id }}, 'harga_awal', harga)" @click.away="editing = false; $wire.updateInline({{ $item->id }}, 'harga_awal', harga)" class="w-full text-right outline-none border-2 rounded text-xs shadow-sm" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
+            @endif
+        </td>
+
+        <td class="px-3 py-2 text-right font-mono font-black border-r" :class="darkMode ? 'text-[#1A1A1A] border-[#2A2A2A]' : 'text-[#1A1A1A] border-[#E5E5E5]'">{{ number_format($item->subtotal, 0, ',', '.') }}</td>
+    @endif
+
+    @if(!$isApproved)
+        <td class="text-center p-1 flex justify-center gap-1">
+            <button wire:click="tambahSubSubBab({{ $item->id }})" wire:loading.class="btn-loading" class="relative px-2 py-0.5 rounded text-[9px] font-black border-2 transition-colors" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-red-500 hover:bg-red-500 hover:text-white' : 'bg-[#FAFAFA] border-[#E5E5E5] text-red-500 hover:bg-red-500 hover:text-white'" title="Tambah Sub-sub Bab Material">
+                <span class="btn-text">&#8627;&#8627; +</span>
+                <span class="btn-spinner"><svg class="w-3 h-3 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>
+            </button>
+            <button wire:click="hapusItem({{ $item->id }})" wire:loading.class="btn-loading" class="relative font-bold transition-colors" :class="darkMode ? 'text-[#888888] hover:text-red-500' : 'text-[#888888] hover:text-red-500'">
+                <span class="btn-text">&times;</span>
+                <span class="btn-spinner"><svg class="w-3 h-3 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>
+            </button>
+        </td>
+    @endif
+</tr> 
                                         
                                         @foreach($item->children as $sub)
-                                            <tr class="text-[10px] border-b" :class="darkMode ? 'bg-[#0A0A0A] text-[#888888] border-[#2A2A2A]' : 'bg-[#FAFAFA] text-[#666666] border-[#E5E5E5]'">
-                                                <td class="border-r text-right pr-2 text-red-500 font-bold opacity-50" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">&#8627;&#8627;</td>
-                                                
-                                                <td class="px-3 py-1.5 border-r pl-10" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, deskripsi: '{{ addslashes($sub->deskripsi_pekerjaan) }}' }">
-                                                    <div class="w-full">
-                                                        <span x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer break-words block">- {{ $sub->deskripsi_pekerjaan }}</span>
-                                                        @if(!$isApproved)
-                                                            <input x-show="editing" x-model="deskripsi" x-trap="editing"
-                                                                   @keydown.enter="editing = false; $wire.updateInline({{ $sub->id }}, 'deskripsi_pekerjaan', deskripsi)"
-                                                                   @click.away="editing = false; $wire.updateInline({{ $sub->id }}, 'deskripsi_pekerjaan', deskripsi)"
-                                                                   class="w-full px-2 py-0.5 outline-none rounded border-2 text-[10px]"
-                                                                   :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
-                                                        @endif
-                                                        
-                                                        @if(!$isApproved)
-                                                            <div class="mt-0.5 relative" x-data="{ open: false }">
-                                                                @if($sub->id_material)
-                                                                    <span class="text-[8px] font-normal cursor-pointer" :class="darkMode ? 'text-[#F5C518]' : 'text-[#1A1A1A]'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $sub->id }})">
-                                                                        [Mat: {{ $sub->material->nama_barang }}]
-                                                                    </span>
-                                                                @else
-                                                                    <button class="text-[8px] font-bold hover:underline" :class="darkMode ? 'text-[#F5C518]' : 'text-[#1A1A1A]'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $sub->id }})">
-                                                                        + Set Material
-                                                                    </button>
-                                                                @endif
+    <tr class="text-[10px] border-b" :class="darkMode ? 'bg-[#0A0A0A] text-[#888888] border-[#2A2A2A]' : 'bg-[#FAFAFA] text-[#666666] border-[#E5E5E5]'">
+        
+        <td class="border-r text-right pr-2 text-red-500 font-bold opacity-50" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">&#8627;&#8627;</td>
+        
+        <td class="px-3 py-1.5 border-r pl-10" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, deskripsi: '{{ addslashes($sub->deskripsi_pekerjaan) }}' }">
+            <div class="w-full">
+                <span x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer break-words block">- {{ $sub->deskripsi_pekerjaan }}</span>
+                @if(!$isApproved)
+                    <input x-show="editing" x-model="deskripsi" x-trap="editing"
+                           @keydown.enter="editing = false; $wire.updateInline({{ $sub->id }}, 'deskripsi_pekerjaan', deskripsi)"
+                           @click.away="editing = false; $wire.updateInline({{ $sub->id }}, 'deskripsi_pekerjaan', deskripsi)"
+                           class="w-full px-2 py-0.5 outline-none rounded border-2 text-[10px]"
+                           :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
+                @endif
+                
+                @if(!$isApproved)
+                    <div class="mt-0.5 relative" x-data="{ open: false }">
+                        @if($sub->id_material)
+                            <span class="text-[8px] font-normal cursor-pointer" :class="darkMode ? 'text-[#F5C518]' : 'text-[#1A1A1A]'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $sub->id }})">
+                                [Mat: {{ $sub->material->nama_barang }}]
+                            </span>
+                        @else
+                            <button class="text-[8px] font-bold hover:underline" :class="darkMode ? 'text-[#F5C518]' : 'text-[#1A1A1A]'" @click="open = !open; $wire.aktifkanPencarianMaterial({{ $sub->id }})">
+                                + Set Material
+                            </button>
+                        @endif
 
-                                                                @if($searchMaterialId == $sub->id)
-                                                                    <div class="absolute left-0 mt-1 z-50 w-[250px] p-2 border-2 rounded-lg shadow-xl" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'" @click.away="$wire.set('searchMaterialId', null)">
-                                                                        <input type="text" wire:model.live.debounce.200ms="materialSearchKeyword" placeholder="Cari..." class="w-full p-1 text-[9px] border-2 rounded outline-none focus:border-[#F5C518]" :class="darkMode ? 'bg-[#0A0A0A] border-[#2A2A2A] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
-                                                                        <div class="mt-1 max-h-32 overflow-y-auto divide-y custom-scrollbar" :class="darkMode ? 'divide-[#2A2A2A]' : 'divide-[#E5E5E5]'">
-                                                                            @foreach($materialResults as $m)
-                                                                                <div wire:click="pilihMaterial({{ $sub->id }}, {{ $m->id }})" class="p-1 text-[8px] cursor-pointer" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">
-                                                                                    <p class="font-bold m-0" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $m->nama_barang }}</p>
-                                                                                    <p class="m-0" :class="darkMode ? 'text-[#888888]' : 'text-[#888888]'">Rp {{ number_format($m->harga,0,',','.') }}</p>
-                                                                                </div>
-                                                                            @endforeach
-                                                                        </div>
-                                                                    </div>
-                                                                @endif
-                                                            </div>
-                                                        @else
-                                                            @if($sub->material) <span class="block text-[8px] opacity-60 mt-0.5" :class="darkMode ? 'text-[#F5C518]' : 'text-[#F5C518]'">[Mat: {{ $sub->material->nama_barang }}]</span> @endif
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                                
-                                                <td class="px-2 py-1.5 border-r text-center font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, qty: '{{ $sub->qty }}' }">
-                                                    <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ $sub->qty }}</div>
-                                                    @if(!$isApproved)
-                                                        <input type="number" step="0.01" x-show="editing" x-model="qty" @keydown.enter="editing = false; $wire.updateInline({{ $sub->id }}, 'qty', qty)" @click.away="editing = false; $wire.updateInline({{ $sub->id }}, 'qty', qty)" class="w-full text-center outline-none border-2 rounded text-[10px]" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
-                                                    @endif
-                                                </td>
-                                                
-                                                <td class="px-2 py-1.5 border-r text-center opacity-60 uppercase font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">{{ $sub->material->satuan ?? 'Pcs' }}</td>
-                                                
-                                                <td class="px-3 py-1.5 border-r text-right font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" x-data="{ editing: false, harga: '{{ $sub->harga_awal }}' }">
-                                                    <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ number_format($sub->harga_awal, 0, ',', '.') }}</div>
-                                                    @if(!$isApproved)
-                                                        <input type="number" x-show="editing" x-model="harga" @keydown.enter="editing = false; $wire.updateInline({{ $sub->id }}, 'harga_awal', harga)" @click.away="editing = false; $wire.updateInline({{ $sub->id }}, 'harga_awal', harga)" class="w-full text-right outline-none border-2 rounded text-[10px]" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
-                                                    @endif
-                                                </td>
-                                                <td class="px-3 py-1.5 text-right font-mono border-r font-semibold" :class="darkMode ? 'text-[#F5C518] border-[#2A2A2A]' : 'text-[#F5C518] border-[#E5E5E5]'">{{ number_format($sub->subtotal, 0, ',', '.') }}</td>
-                                                @if(!$isApproved)
-                                                    <td class="text-center">
-                                                        <button wire:click="hapusItem({{ $sub->id }})" wire:loading.class="btn-loading" class="relative transition-colors text-red-400 hover:text-red-600">
-                                                            <span class="btn-text">&times;</span>
-                                                            <span class="btn-spinner"><svg class="w-3 h-3 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>
-                                                        </button>
-                                                    </td>
-                                                @endif
-                                            </tr>
-                                        @endforeach
+                        @if($searchMaterialId == $sub->id)
+                            <div class="absolute left-0 mt-1 z-50 w-[250px] p-2 border-2 rounded-lg shadow-xl" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'" @click.away="$wire.set('searchMaterialId', null)">
+                                <input type="text" wire:model.live.debounce.200ms="materialSearchKeyword" placeholder="Cari..." class="w-full p-1 text-[9px] border-2 rounded outline-none focus:border-[#F5C518]" :class="darkMode ? 'bg-[#0A0A0A] border-[#2A2A2A] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
+                                <div class="mt-1 max-h-32 overflow-y-auto divide-y custom-scrollbar" :class="darkMode ? 'divide-[#2A2A2A]' : 'divide-[#E5E5E5]'">
+                                    @foreach($materialResults as $m)
+                                        <div wire:click="pilihMaterial({{ $sub->id }}, {{ $m->id }})" class="p-1 text-[8px] cursor-pointer" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">
+                                            <p class="font-bold m-0" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $m->nama_barang }}</p>
+                                            <p class="m-0" :class="darkMode ? 'text-[#888888]' : 'text-[#888888]'">Rp {{ number_format($m->harga,0,',','.') }}</p>
+                                        </div>
                                     @endforeach
-                                    
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @else
+                    @if($sub->material) <span class="block text-[8px] opacity-60 mt-0.5" :class="darkMode ? 'text-[#F5C518]' : 'text-[#F5C518]'">[Mat: {{ $sub->material->nama_barang }}]</span> @endif
+                @endif
+            </div>
+        </td>
+        
+        <td class="px-2 py-1.5 border-r text-center font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" 
+            wire:key="qty-sub-{{ $sub->id }}-{{ $sub->qty }}" 
+            x-data="{ editing: false, qty: '{{ $sub->qty }}' }">
+            <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ $sub->qty }}</div>
+            @if(!$isApproved)
+                <input type="number" step="0.01" x-show="editing" x-model="qty" @keydown.enter="editing = false; $wire.updateInline({{ $sub->id }}, 'qty', qty)" @click.away="editing = false; $wire.updateInline({{ $sub->id }}, 'qty', qty)" class="w-full text-center outline-none border-2 rounded text-[10px]" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
+            @endif
+        </td>
+        
+        <td class="px-2 py-1.5 border-r text-center opacity-60 uppercase font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">{{ $sub->material->satuan ?? 'Pcs' }}</td>
+        
+        <td class="px-3 py-1.5 border-r text-right font-mono" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'" 
+            wire:key="harga-sub-{{ $sub->id }}-{{ $sub->harga_awal }}" 
+            x-data="{ editing: false, harga: '{{ $sub->harga_awal }}' }">
+            <div x-show="!editing" @dblclick="{{ !$isApproved ? 'editing = true' : '' }}" class="cursor-pointer rounded transition-colors" :class="darkMode ? 'hover:bg-[#F5C518]/10' : 'hover:bg-[#F5C518]/10'">{{ number_format($sub->harga_awal, 0, ',', '.') }}</div>
+            @if(!$isApproved)
+                <input type="number" x-show="editing" x-model="harga" @keydown.enter="editing = false; $wire.updateInline({{ $sub->id }}, 'harga_awal', harga)" @click.away="editing = false; $wire.updateInline({{ $sub->id }}, 'harga_awal', harga)" class="w-full text-right outline-none border-2 rounded text-[10px]" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5] border-[#F5C518]' : 'bg-white text-[#1A1A1A] border-[#F5C518]'">
+            @endif
+        </td>
+        
+        <td class="px-3 py-1.5 text-right font-mono border-r font-semibold" :class="darkMode ? 'text-[#F5C518] border-[#2A2A2A]' : 'text-[#F5C518] border-[#E5E5E5]'">{{ number_format($sub->subtotal, 0, ',', '.') }}</td>
+        
+        @if(!$isApproved)
+            <td class="text-center">
+                <button wire:click="hapusItem({{ $sub->id }})" wire:loading.class="btn-loading" class="relative transition-colors text-red-400 hover:text-red-600">
+                    <span class="btn-text">&times;</span>
+                    <span class="btn-spinner"><svg class="w-3 h-3 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>
+                </button>
+            </td>
+        @endif
+    </tr>
+@endforeach
+@endforeach
                                     <tr class="font-bold text-[11px]" :class="darkMode ? 'bg-[#F5C518]/5' : 'bg-[#F5C518]/5'">
                                         <td class="px-2 py-2 text-center border-r opacity-50" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">&#931;</td>
                                         <td class="px-3 py-2 border-r italic" :class="darkMode ? 'text-[#F5F5F5] border-[#2A2A2A]' : 'text-[#1A1A1A] border-[#E5E5E5]'" colspan="4">Sub Total Bab {{ $alphabet[$indexKat] ?? ($indexKat+1) }}</td>
@@ -566,10 +559,15 @@
                                     @if(!$isApproved) <td></td> @endif
                                 </tr>
                                 <tr class="border-b" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">
-                                    <td colspan="5" class="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-widest" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">GRAND TOTAL REAL</td>
-                                    <td class="px-4 py-2.5 text-right font-mono text-xs" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">Rp {{ number_format($grandTotal, 2, ',', '.') }}</td>
-                                    @if(!$isApproved) <td></td> @endif
-                                </tr>
+    <td colspan="5" class="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-widest" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">GRAND TOTAL REAL</td>
+    
+    <!-- GANTI BARIS INI -->
+    <td class="px-4 py-2.5 text-right font-mono text-xs" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">
+        Rp {{ number_format($grandTotal, 0, ',', '.') }}
+    </td>
+    
+    @if(!$isApproved) <td></td> @endif
+</tr>
                                 <tr>
                                     <td colspan="5" class="px-4 py-4 text-right text-xs font-black uppercase tracking-widest text-[#F5C518]">GRAND TOTAL DIBULATKAN (RIBUAN KE BAWAH)</td>
                                     <td class="px-4 py-4 text-right font-mono text-base font-black text-[#F5C518]">Rp {{ number_format(floor($grandTotal/1000)*1000, 2, ',', '.') }}</td>

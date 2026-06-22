@@ -1,5 +1,5 @@
 <div class="min-h-screen font-sans transition-colors duration-300" style="font-family: 'Inter', sans-serif;" x-data="{ darkMode: false }" :class="darkMode ? 'bg-[#0A0A0A] text-[#F5F5F5]' : 'bg-[#FAFAFA] text-[#1A1A1A]'">
-    
+
     @if (session()->has('sukses'))
         <div class="max-w-[95rem] mx-auto pt-6 px-4 md:px-6">
             <div class="p-4 rounded-xl font-semibold flex items-center gap-3 shadow-xl border-2 text-xs tracking-wide uppercase" :class="darkMode ? 'bg-[#F5C518]/10 border-[#F5C518]/40 text-[#F5C518]' : 'bg-[#F5C518]/15 border-[#F5C518]/50 text-[#1A1A1A]'">
@@ -15,7 +15,7 @@
                 <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Kembali ke Board
             </button>
-            
+
             <div class="flex items-center gap-1 p-1 rounded-lg border-2 shadow-sm" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333]' : 'bg-white border-[#E5E5E5]'">
                 <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-[#F5C518] text-[#1A1A1A] font-bold shadow-md' : 'text-[#888888] hover:text-[#F5C518]'" class="px-5 py-2 text-xs font-semibold rounded-md transition-all uppercase tracking-wider">Terang</button>
                 <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-[#F5C518] text-[#1A1A1A] font-bold shadow-md' : 'text-[#888888] hover:text-[#F5C518]'" class="px-5 py-2 text-xs font-semibold rounded-md transition-all uppercase tracking-wider">Gelap</button>
@@ -23,7 +23,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            
+
             @if(!$rabAktif)
                 <div class="rounded-2xl border-2 overflow-hidden shadow-xl" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'">
                     <div class="p-4 border-b-2 flex justify-between items-center" :class="darkMode ? 'bg-[#F5C518] border-[#F5C518] text-[#1A1A1A]' : 'bg-[#F5C518] border-[#F5C518] text-[#1A1A1A]'">
@@ -33,7 +33,7 @@
                         </span>
                         <span class="text-[10px] font-bold bg-[#1A1A1A]/10 px-2 py-0.5 rounded uppercase">Inisiasi</span>
                     </div>
-                    
+
                     <div class="overflow-y-auto" style="max-height: calc(100vh - 220px);">
                         <div class="p-5">
                             @include('components.dokumen-inisiasi', ['proyek' => $selectedProject])
@@ -43,8 +43,8 @@
             @else
                 <div class="rounded-2xl border-2 overflow-hidden shadow-xl" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'">
                     @php $stat = strtolower($rabAktif->status_rab ?? ''); @endphp
-                    
-                    <div class="p-4 border-b-2 flex justify-between items-center transition-colors" 
+
+                    <div class="p-4 border-b-2 flex justify-between items-center transition-colors"
                          :class="'{{ $stat }}' === 'revision' ? 'bg-red-600 border-red-600 text-white' : 'bg-[#F5C518] border-[#F5C518] text-[#1A1A1A]'">
                         <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -52,7 +52,7 @@
                         </span>
                         <span class="text-[10px] font-black uppercase bg-black/10 px-2.5 py-0.5 rounded">DIREKTUR</span>
                     </div>
-                    
+
                     <div class="p-6 space-y-6 overflow-y-auto" style="max-height: calc(100vh - 220px);">
                         @if($stat === 'revision')
                             <div class="p-5 rounded-xl bg-red-500/10 border-2 border-red-500/20 text-red-500">
@@ -61,7 +61,7 @@
                                     Instruksi Perbaikan Dokumen:
                                 </p>
                                 <p class="text-xs font-medium leading-relaxed font-mono">
-                                    "{{ $rabAktif->catatan_revisi ?? 'Periksa kembali kalkulasi harga material pendukung dan sesuaikan nilai overhead operasional agar rasio HPP tetap logis.' }}"
+                                    "{{ $latestRevisiComment ?? 'Periksa kembali kalkulasi harga material pendukung dan sesuaikan nilai overhead operasional agar rasio HPP tetap logis.' }}"
                                 </p>
                             </div>
                         @elseif($stat === 'approved')
@@ -100,7 +100,7 @@
                         <p class="text-sm mb-8 max-w-md mx-auto leading-relaxed" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">
                             Silakan review dokumen referensi marketing di panel kiri, kemudian buat workspace RAB baru untuk memulai.
                         </p>
-                        
+
                         <button wire:click="editRab" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-sm font-bold uppercase tracking-wide rounded-xl transition-all shadow-lg text-[#1A1A1A] bg-[#F5C518] hover:bg-[#FFD700] hover:shadow-xl hover:shadow-[#F5C518]/40 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#F5C518]/30">
                             <span wire:loading.remove wire:target="editRab" class="flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -117,7 +117,7 @@
                         $isRevisi = strtolower($rabAktif->status_rab ?? '') === 'revision';
                         $isApproved = strtolower($rabAktif->status_rab ?? '') === 'approved';
                     @endphp
-                    
+
                     <div class="rounded-2xl p-6 md:p-8 border-2 shadow-xl" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b-2" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">
                             <div>
@@ -127,7 +127,7 @@
                             </div>
                             <div class="text-left sm:text-right">
                                 <span class="text-[10px] font-semibold uppercase tracking-wider block mb-2" :class="darkMode ? 'text-[#888888]' : 'text-[#888888]'">Status Persetujuan</span>
-                                <span class="inline-flex items-center gap-1.5 text-sm font-bold uppercase px-4 py-2 rounded-xl border-2" 
+                                <span class="inline-flex items-center gap-1.5 text-sm font-bold uppercase px-4 py-2 rounded-xl border-2"
                                       :class="$isApproved ? 'bg-[#F5C518]/15 text-[#1A1A1A] border-[#F5C518]/50' : ($isRevisi ? 'bg-red-500/10 text-red-500 border-red-500/30' : 'bg-[#F5C518]/10 text-[#1A1A1A] border-[#F5C518]/30')">
                                     <span class="w-2 h-2 rounded-full" :class="$isApproved ? 'bg-[#F5C518]' : ($isRevisi ? 'bg-red-500' : 'bg-[#F5C518]')"></span>
                                     {{ $rabAktif->status_rab ?? 'DRAFT' }}
@@ -157,19 +157,12 @@
                                     Memuat...
                                 </span>
                             </button>
-                            
-                            @if(!$isApproved)
-                                <button onclick="return confirm('Yakin ingin menghapus dokumen ini?')" wire:click="hapusDokumenRab" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold uppercase tracking-wide rounded-xl transition-all border-2 text-red-600 border-red-500/30 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-lg hover:shadow-red-500/20 focus:outline-none focus:ring-4 focus:ring-red-500/30">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    Hapus
-                                </button>
-                            @endif
                         </div>
 
                         @if($latestCommit)
                             <div class="mt-6 pt-6 border-t-2" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">
                                 <p class="text-[10px] font-bold uppercase tracking-widest mb-3" :class="darkMode ? 'text-[#888888]' : 'text-[#888888]'">Opsi Cetak Final / Ekspor Data</p>
-                                
+
                                 <iframe id="iframe-cetak-pdf" src="{{ route('engineering.cetak.versi', $latestCommit->id) }}#toolbar=0&navpanes=0" class="hidden"></iframe>
 
                                 <div class="flex flex-col sm:flex-row gap-3">
@@ -177,7 +170,7 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                         Cetak PDF
                                     </button>
-                                    
+
                                     <a href="{{ route('engineering.export.excel', $latestCommit->id) }}" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold uppercase tracking-wide rounded-xl transition-all flex-1 border-2 shadow-sm" :class="darkMode ? 'bg-[#F5C518]/10 text-[#F5C518] border-[#F5C518]/30 hover:bg-[#F5C518]/20' : 'bg-[#F5C518]/10 text-[#B8860B] border-[#F5C518]/30 hover:bg-[#F5C518]/20 hover:shadow-md'">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                         Export Excel

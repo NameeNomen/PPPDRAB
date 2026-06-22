@@ -15,16 +15,12 @@ return new class extends Migration
     $table->text('deskripsi')->nullable();
 
     $table->string('satuan', 50);
-    $table->integer('jumlah')->default(0);
+    $table->BigInteger('jumlah')->default(0);
 
-    $table->decimal('harga', 15, 2);
-
-    $table->string('supplier');
-
+    $table->decimal('harga', 35, 2);
     $table->foreignId('id_user')
         ->constrained('users')
         ->onDelete('cascade');
-
     $table->timestamps();
 });
     }

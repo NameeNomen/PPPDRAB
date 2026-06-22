@@ -22,29 +22,163 @@
     </div>
 @endif
 
-<!-- SEARCH & FILTER BAR -->
-<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 items-center">
-    <div class="relative flex-1 w-full">
-        <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama proyek, no request, atau pelanggan..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#E8BF00] outline-none text-sm">
+<!-- SEARCH & FILTER BAR - INTEGRATED WITH LIVEWIRE -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-6">
+    <div class="flex flex-col md:flex-row gap-4 items-center">
+        <!-- Search Input -->
+        <div class="relative flex-1 w-full">
+            <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input 
+                type="text" 
+                wire:model.live.debounce.300ms="search" 
+                placeholder="Cari nama proyek, no request, atau pelanggan..." 
+                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#E8BF00] focus:border-[#E8BF00] outline-none text-sm transition-all"
+            >
+        </div>
+        
+        <!-- Dropdown Filter Status - INTEGRATED WITH LIVEWIRE -->
+        <div class="relative w-full md:w-auto" x-data="{ open: false }">
+            <button 
+                @click="open = !open" 
+                class="w-full md:w-auto px-4 py-2.5 border border-gray-300 rounded-xl outline-none text-sm bg-white hover:border-[#E8BF00] focus:ring-2 focus:ring-[#E8BF00] transition-all flex items-center justify-between gap-2"
+            >
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-[#003057]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span x-text="$wire.filterStatus ? $wire.filterStatus.charAt(0).toUpperCase() + $wire.filterStatus.slice(1).replace('_', ' ') : 'Semua Status'"></span>
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div 
+                x-show="open" 
+                @click.away="open = false"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 translate-y-2"
+                class="absolute z-50 mt-2 w-full md:w-56 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+                style="display: none;"
+            >
+                <div class="py-1">
+                    <button 
+                        @click="$wire.set('filterStatus', '', true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': !$wire.filterStatus}"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        Semua Status
+                    </button>
+                    <button 
+                        @click="$wire.set('filterStatus', 'pending', true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': $wire.filterStatus === 'pending'}"
+                    >
+                        <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+                        Pending
+                    </button>
+                    <button 
+                        @click="$wire.set('filterStatus', 'draft', true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': $wire.filterStatus === 'draft'}"
+                    >
+                        <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+                        Draft
+                    </button>
+                    <button 
+                        @click="$wire.set('filterStatus', 'approved', true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': $wire.filterStatus === 'approved'}"
+                    >
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        Approved
+                    </button>
+                    <button 
+                        @click="$wire.set('filterStatus', 'on_progress', true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': $wire.filterStatus === 'on_progress'}"
+                    >
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        On Progress
+                    </button>
+                    <button 
+                        @click="$wire.set('filterStatus', 'completed', true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': $wire.filterStatus === 'completed'}"
+                    >
+                        <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                        Completed
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dropdown Filter Kategori - INTEGRATED WITH LIVEWIRE -->
+        <div class="relative w-full md:w-auto" x-data="{ open: false }">
+            <button 
+                @click="open = !open" 
+                class="w-full md:w-auto px-4 py-2.5 border border-gray-300 rounded-xl outline-none text-sm bg-white hover:border-[#E8BF00] focus:ring-2 focus:ring-[#E8BF00] transition-all flex items-center justify-between gap-2"
+            >
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-[#003057]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    <span x-text="$wire.filterCategory ? 'Kategori Terpilih' : 'Semua Kategori'"></span>
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div 
+                x-show="open" 
+                @click.away="open = false"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 translate-y-2"
+                class="absolute z-50 mt-2 w-full md:w-56 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+                style="display: none;"
+            >
+                <div class="py-1 max-h-64 overflow-y-auto">
+                    <button 
+                        @click="$wire.set('filterCategory', '', true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': !$wire.filterCategory}"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        Semua Kategori
+                    </button>
+                    @foreach($listKategori as $kat)
+                    <button 
+                        @click="$wire.set('filterCategory', {{ $kat->id }}, true); open = false" 
+                        class="w-full px-4 py-2.5 text-left text-sm hover:bg-[#F2F2F2] transition-colors flex items-center gap-2"
+                        :class="{'bg-[#F2F2F2] text-[#003057] font-semibold': $wire.filterCategory == {{ $kat->id }}}"
+                    >
+                        <span class="w-2 h-2 rounded-full bg-[#E8BF00]"></span>
+                        {{ $kat->nama_kategori }}
+                    </button>
+                    @endforeach
+                </div>
+            </div>
+        </div>
     </div>
-    <select wire:model.live="filterStatus" class="px-4 py-2.5 border border-gray-300 rounded-xl outline-none text-sm w-full md:w-auto bg-white">
-        <option value="">Semua Status</option>
-        <option value="pending">Pending</option>
-        <option value="draft">Draft</option>
-        <option value="bidding">Bidding</option>
-        <option value="approved">Approved</option>
-        <option value="on_progress">On Progress</option>
-        <option value="completed">Completed</option>
-    </select>
-    <select wire:model.live="filterCategory" class="px-4 py-2.5 border border-gray-300 rounded-xl outline-none text-sm w-full md:w-auto bg-white">
-        <option value="">Semua Kategori</option>
-        @foreach($listKategori as $kat)
-            <option value="{{ $kat->id }}">{{ $kat->nama_kategori }}</option>
-        @endforeach
-    </select>
 </div>
-
 <!-- TABLE DATA -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="overflow-x-auto">

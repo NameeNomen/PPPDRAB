@@ -21,7 +21,7 @@ return new class extends Migration
     $table->text('deskripsi')->nullable();
     
     // 2. KUANTITAS: Purchasing butuh tau butuhnya berapa buat nego harga
-    $table->decimal('estimasi_kebutuhan', 10, 2)->nullable();
+    $table->BigInteger('estimasi_kebutuhan')->nullable();
     $table->string('satuan', 50);
     
     // 3. DEADLINE: Biar Purchasing tau kapan barangnya harus ready

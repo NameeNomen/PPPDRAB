@@ -22,6 +22,7 @@ class DocumentCommit extends Model
     'komentar_commit',
     'user_name',
     'total_penawaran',
+    'grand_total',
     'created_at',
     'snapshot_data'
 ];

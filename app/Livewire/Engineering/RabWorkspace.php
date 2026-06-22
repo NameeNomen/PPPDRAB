@@ -18,6 +18,8 @@ class RabWorkspace extends Component
 
     public $rabId;
     public $no_boq;
+    public $proyek;
+
     public $tanggal_dokumen;
     public $overhead_cost = 0;
 
@@ -92,13 +94,20 @@ class RabWorkspace extends Component
     }
 
     // INSTANT AUTO-SAVE: Dipicu pas user klik luar (blur) atau tekan Enter
-    public function updateInline($itemId, $field, $value)
+   public function updateInline($itemId, $field, $value)
     {
         $item = RabItem::find($itemId);
         if ($item) {
+            // Bersihkan format kalau user iseng ngetik koma
+            $value = str_replace(',', '.', $value);
+            // Pastikan data di-cast jadi float biar perhitungan desimal nggak hancur
+            $value = is_numeric($value) ? (float) $value : $value;
+            
             $item->$field = $value;
+
+            // Kalkulasi ulang subtotal secara real-time
             if (in_array($field, ['qty', 'harga_awal'])) {
-                $item->subtotal = (float)$item->qty * (int)$item->harga_awal;
+                $item->subtotal = (float)$item->qty * (float)$item->harga_awal;
             }
             $item->save();
             $this->hitungTotal();
@@ -128,7 +137,9 @@ class RabWorkspace extends Component
         $query->where(function($q) use ($word) {
             $q->where('nama_barang', 'like', "%{$word}%")
               ->orWhere('deskripsi', 'like', "%{$word}%")
-              ->orWhere('merk', 'like', "%{$word}%");
+              ->orWhere('harga', 'like', "%{$word}%")
+              ->orWhere('satuan', 'like', "%{$word}%");
+
         });
     }
 
@@ -141,20 +152,24 @@ class RabWorkspace extends Component
         $item = RabItem::find($itemId);
         
         if ($mat && $item) {
-            $ratio = $mat->jumlah > 0 ? $mat->jumlah : 1;
-            $hargaSatuanMurni = $mat->harga / $ratio;
+            // Ambil QTY patokan dari Purchasing (misal 12), kalau 0 ya anggap 1
+            $qtyDefault = $mat->jumlah > 0 ? $mat->jumlah : 1;
+            
+            // Hitung harga satuan murni (Harga Total / Jumlah)
+            $hargaSatuanMurni = $mat->harga / $qtyDefault;
 
+            // UPDATE KESELURUHAN (Termasuk QTY ngikutin Purchasing)
             $item->update([
                 'id_material' => $mat->id,
+                'qty' => $qtyDefault,
                 'harga_awal' => $hargaSatuanMurni,
-                'subtotal' => $item->qty * $hargaSatuanMurni
+                'subtotal' => $qtyDefault * $hargaSatuanMurni
             ]);
             
             $this->searchMaterialId = null;
             $this->hitungTotal();
         }
     }
-
     public function hapusItem($itemId)
     {
         $item = RabItem::find($itemId);
@@ -199,7 +214,7 @@ public function ajukanMaterialBaru()
 
         // 1. Simpan data request material ke tabel utama
         MaterialRequest::create([
-            'r_project_id' => $this->projectId,
+            'id_r_project' => $this->projectId,
             'nama_material' => $this->reqNamaMaterial,
             'deskripsi' => $this->reqDeskripsi,
             'estimasi_kebutuhan' => $this->reqKebutuhan,
@@ -216,8 +231,7 @@ public function ajukanMaterialBaru()
                 'id_user' => $purchasing->id,
                 'judul' => 'Permintaan Material Baru',
                 'pesan' => "Dibutuhkan: {$this->reqNamaMaterial} ({$this->reqKebutuhan} {$this->reqSatuan}) untuk proyek.",
-'url_tujuan' => route('direktur.persetujuan.detail', ['id' => $this->projectId]),                'is_read' => false,
-                'created_at' => now()
+'url_tujuan' => route('purchasing.material-review'),                'created_at' => now()
             ]);
         }
 
@@ -254,25 +268,32 @@ public function ajukanMaterialBaru()
             'id_r_project' => $this->projectId,
             'jenis_aksi' => 'submitted', 
             'komentar_commit' => $this->commit_message,
-            'total_nilai' => $this->rabAktif->grand_total,
+            'grand_total' => $this->rabAktif->grand_total,
             'snapshot_data' => $snapshotKategori->toArray(), 
             'created_at' => now()
         ]);
 
         // 3. Ubah status utama RAB jadi nunggu bos
         $this->rabAktif->update(['status_rab' => 'pending']);
-
-        // 4. TEMBAK NOTIFIKASI KE DIREKTUR BIAR LONCENGNYA BUNYI
-        $direktur = \App\Models\User::where('role', 'direktur')->first();
-        if ($direktur) {
-            \App\Models\Notification::create([
-                'id_user' => $direktur->id,
-                'judul' => 'Pengajuan RAB Membutuhkan Review',
-                'pesan' => "RAB telah disubmit oleh {$this->nama_editor}. Catatan: {$this->commit_message}",
-                'url_tujuan' => route('direktur.persetujuan.detail', $this->proyek->id),
-                'is_read' => false,
-                'created_at' => now()
-            ]);
+// 4. TEMBAK NOTIFIKASI KE DIREKTUR BIAR LONCENGNYA BUNYI
+        // Tarik semua user yang rolenya direktur
+        $penerimaNotif = \App\Models\User::where('role', 'direktur')->get();
+        
+        // Ceknya pakai $this->projectId, jangan ngarang bikin variabel baru!
+        if ($penerimaNotif->count() > 0 && $this->projectId) { 
+            foreach ($penerimaNotif as $bos) {
+                \App\Models\Notification::create([
+                    'id_user' => $bos->id,
+                    'judul' => 'Pengajuan RAB Membutuhkan Review',
+                    'pesan' => "RAB telah disubmit oleh {$this->nama_editor}. Catatan: {$this->commit_message}",
+                    
+                    // Gunakan variabel yang benar: $this->projectId
+                    'url_tujuan' => route('direktur.persetujuan.detail', $this->projectId),
+                    
+                    'is_read' => false,
+                    'created_at' => now()
+                ]);
+            }
         }
 
         // 5. Kembalikan ke halaman depan
@@ -280,7 +301,7 @@ public function ajukanMaterialBaru()
         return $this->redirectRoute('engineering.rab.index', navigate: true);
     }
 
-    public function render()
+   public function render()
     {
         $kategoris = RabItem::where('id_rab', $this->rabId)
             ->where('tipe', 'kategori')
@@ -288,6 +309,8 @@ public function ajukanMaterialBaru()
             ->with(['children' => function($q) {
                 $q->with('children.material', 'material');
             }])->get();
+
+            
 
         $totalPekerjaan = RabItem::where('id_rab', $this->rabId)
             ->where(function($q) {
@@ -299,12 +322,17 @@ public function ajukanMaterialBaru()
 
         $overhead = (int)($this->overhead_cost ?? 0);
 
+        // LOGIKA PENGUNCIAN ABSOLUT: 
+        // Selain 'draft' dan 'revision', semuanya WAJIB dikunci (termasuk pending & approved)
+        $statusRab = strtolower($this->rabAktif->status_rab);
+        $isLocked = !in_array($statusRab, ['draft', 'revision']);
+
         return view('livewire.engineering.rab-workspace', [
             'kategoris' => $kategoris,
             'totalPekerjaan' => $totalPekerjaan,
             'overhead' => $overhead,
             'grandTotal' => $totalPekerjaan + $overhead,
-            'isApproved' => strtolower($this->rabAktif->status_rab) === 'approved'
+            'isApproved' => $isLocked // Tetep pakai variabel isApproved biar kodingan UI Blade lu nggak perlu dirombak
         ])->layout('components.layouts.app');
     }
 }

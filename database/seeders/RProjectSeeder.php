@@ -15,66 +15,80 @@ class RProjectSeeder extends Seeder
         $user = User::first();
 
         $projects = [
-            [
-                'request_no' => 'REQ-2026-001',
-                'nama_projek' => 'Pembangunan Gudang Produksi',
-                'nama_pelanggan' => 'PT Astra Otoparts',
-                'kategori' => 'Konstruksi Bangunan',
-                'deskripsi' => 'Pembangunan gudang produksi baru seluas ±1500 m².',
-                'images' => [
-                    'https://images.unsplash.com/photo-1517048676732-d65bc937f952',
-                    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab'
-                ]
-            ],
 
-            [
-                'request_no' => 'REQ-2026-002',
-                'nama_projek' => 'Fabrikasi Struktur Baja Workshop',
-                'nama_pelanggan' => 'PT Indomobil',
-                'kategori' => 'Fabrikasi Baja',
-                'deskripsi' => 'Pembuatan struktur baja workshop bentang 20 meter.',
-                'images' => [
-                    'https://images.unsplash.com/photo-1504307651254-35680f356dfd',
-                    'https://images.unsplash.com/photo-1503387762-592deb58ef4e'
-                ]
-            ],
+    [
+        'request_no' => 'REQ-2026-001',
+        'nama_projek' => 'Pembuatan Conveyor Line Assembly',
+        'nama_pelanggan' => 'PT Astra Otoparts',
+        'kategori' => 'Conveyor System',
+        'deskripsi' => 'Pembuatan conveyor line assembly untuk area produksi.',
+        'images' => [
+            'https://images.unsplash.com/photo-1565008447742-97f6f38c985c',
+            'https://images.unsplash.com/photo-1581094794329-c8112a89af12'
+        ]
+    ],
 
-            [
-                'request_no' => 'REQ-2026-003',
-                'nama_projek' => 'Maintenance Conveyor Line',
-                'nama_pelanggan' => 'PT Yamaha Indonesia',
-                'kategori' => 'Instalasi & Maintenance',
-                'deskripsi' => 'Perbaikan conveyor dan gearbox line produksi.',
-                'images' => [
-                    'https://images.unsplash.com/photo-1565008447742-97f6f38c985c',
-                    'https://images.unsplash.com/photo-1581094794329-c8112a89af12'
-                ]
-            ],
+    [
+        'request_no' => 'REQ-2026-002',
+        'nama_projek' => 'Fabrikasi Tanki Mixing 5000 Liter',
+        'nama_pelanggan' => 'PT Nestle Indonesia',
+        'kategori' => 'Fabrication',
+        'deskripsi' => 'Pembuatan tanki mixing stainless steel kapasitas 5000 liter.',
+        'images' => [
+            'https://images.unsplash.com/photo-1513828583688-c52646db42da',
+            'https://images.unsplash.com/photo-1509395176047-4a66953fd231'
+        ]
+    ],
 
-            [
-                'request_no' => 'REQ-2026-004',
-                'nama_projek' => 'Renovasi Interior Kantor Direksi',
-                'nama_pelanggan' => 'PT Denso Indonesia',
-                'kategori' => 'Interior & Finishing',
-                'deskripsi' => 'Renovasi ruang direktur dan meeting room.',
-                'images' => [
-                    'https://images.unsplash.com/photo-1497366754035-f200968a6e72',
-                    'https://images.unsplash.com/photo-1497366412874-3415097a27e7'
-                ]
-            ],
+    [
+        'request_no' => 'REQ-2026-003',
+        'nama_projek' => 'Machining Shaft Conveyor',
+        'nama_pelanggan' => 'PT Yamaha Indonesia',
+        'kategori' => 'Machining',
+        'deskripsi' => 'Pembuatan shaft conveyor menggunakan proses bubut dan milling.',
+        'images' => [
+            'https://images.unsplash.com/photo-1565793298595-6a879b1d9492',
+            'https://images.unsplash.com/photo-1517048676732-d65bc937f952'
+        ]
+    ],
 
-            [
-                'request_no' => 'REQ-2026-005',
-                'nama_projek' => 'Platform Maintenance dan Tangga Akses',
-                'nama_pelanggan' => 'PT Nestle Indonesia',
-                'kategori' => 'Fabrikasi Baja',
-                'deskripsi' => 'Pembuatan platform maintenance galvanis sesuai drawing.',
-                'images' => [
-                    'https://images.unsplash.com/photo-1513828583688-c52646db42da',
-                    'https://images.unsplash.com/photo-1509395176047-4a66953fd231'
-                ]
-            ]
-        ];
+    [
+        'request_no' => 'REQ-2026-004',
+        'nama_projek' => 'Pembuatan Jig Welding Frame',
+        'nama_pelanggan' => 'PT Denso Indonesia',
+        'kategori' => 'Jig & Dies',
+        'deskripsi' => 'Pembuatan jig welding untuk proses produksi frame.',
+        'images' => [
+            'https://images.unsplash.com/photo-1503387762-592deb58ef4e',
+            'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab'
+        ]
+    ],
+
+    [
+        'request_no' => 'REQ-2026-005',
+        'nama_projek' => 'Automatic Leak Tester Machine',
+        'nama_pelanggan' => 'PT Honda Prospect Motor',
+        'kategori' => 'Special Purpose Machine',
+        'deskripsi' => 'Pembuatan mesin leak tester otomatis untuk quality control.',
+        'images' => [
+            'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789',
+            'https://images.unsplash.com/photo-1581092160607-ee22621dd758'
+        ]
+    ],
+
+    [
+        'request_no' => 'REQ-2026-006',
+        'nama_projek' => 'Renovasi Area Produksi',
+        'nama_pelanggan' => 'PT Toyota Motor Manufacturing Indonesia',
+        'kategori' => 'Civil Project',
+        'deskripsi' => 'Renovasi area produksi dan pembangunan pondasi mesin.',
+        'images' => [
+            'https://images.unsplash.com/photo-1504307651254-35680f356dfd',
+            'https://images.unsplash.com/photo-1497366754035-f200968a6e72'
+        ]
+    ],
+
+];
 
         foreach ($projects as $item) {
 

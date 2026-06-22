@@ -19,14 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
 {
-    URL::forceScheme('https');
-    if (env('CODESPACE_NAME')) {
-            URL::forceRootUrl('https://' . env('CODESPACE_NAME') . '-8000.app.github.dev');
-            URL::forceScheme('https');
-        }
+    URL::forceScheme('http');
+    // if (env('CODESPACE_NAME')) {
+    //         URL::forceRootUrl('https://' . env('CODESPACE_NAME') . '-8000.app.github.dev');
+    //         URL::forceScheme('https');
+    //     }
 
         if (!file_exists(public_path('storage'))) {
-        symlink(storage_path('app/public'), public_path('storage'));
+        // symlink(storage_path('app/public'), public_path('storage'));
     }
     
 }

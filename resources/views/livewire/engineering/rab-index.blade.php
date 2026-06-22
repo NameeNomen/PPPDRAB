@@ -19,7 +19,7 @@
                 </h1>
                 <p class="text-xs font-medium mt-1 text-[#888888]">Sistem manajemen estimasi penawaran harga.</p>
             </div>
-            
+
             <div class="flex items-center gap-1 p-1 rounded-lg border-2 shadow-sm transition-colors" :class="darkMode ? 'bg-[#1A1A1A] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'">
                 <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-[#F5C518] text-[#1A1A1A] font-bold shadow-md' : 'text-[#888888] hover:text-[#F5C518]'" class="px-4 py-1.5 text-xs font-semibold rounded-md transition-all uppercase tracking-wider">Terang</button>
                 <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-[#F5C518] text-[#1A1A1A] font-bold shadow-md' : 'text-[#888888] hover:text-[#F5C518]'" class="px-4 py-1.5 text-xs font-semibold rounded-md transition-all uppercase tracking-wider">Gelap</button>
@@ -50,25 +50,21 @@
         </div>
 
         @php
-            // REVOLUSI LOGIKA RENDER UI
             $isSpecificFilter = !in_array($filterStatus, ['all', 'needs_action']);
-            
+
             if (!$isSpecificFilter) {
-                // Mode Dashboard Biasa (Pisahin yang butuh Action di atas)
                 $revisionTasks = $daftarProyek->filter(fn($p) => strtolower($p->rab->status_rab ?? '') === 'revision')->values();
                 $draftTasks = $daftarProyek->filter(fn($p) => !$p->rab || strtolower($p->rab->status_rab ?? '') === 'draft')->values();
-                
-                // Sisanya (Pending & Approved) taruh di bawah
-                $displayProjects = $filterStatus === 'all' 
-                    ? $daftarProyek->filter(fn($p) => in_array(strtolower($p->rab->status_rab ?? ''), ['pending', 'approved']))->values() 
+
+                $displayProjects = $filterStatus === 'all'
+                    ? $daftarProyek->filter(fn($p) => in_array(strtolower($p->rab->status_rab ?? ''), ['pending', 'approved']))->values()
                     : collect();
             } else {
-                // Mode Filter Spesifik (Nggak usah pake layout atas bawah, hajar di Grid utama)
                 $revisionTasks = collect();
                 $draftTasks = collect();
-                $displayProjects = $daftarProyek; // Controller udah ngefilter ini dengan akurat!
+                $displayProjects = $daftarProyek; 
             }
-            
+
             $hasPrioritySection = $revisionTasks->count() > 0 || $draftTasks->count() > 0;
         @endphp
 
@@ -86,7 +82,7 @@
 
                 <div class="space-y-4">
                     @foreach($revisionTasks as $proyek)
-                        <div class="rounded-2xl p-6 border-2 transition-all hover:-translate-y-0.5 shadow-xl" 
+                        <div class="rounded-2xl p-6 border-2 transition-all hover:-translate-y-0.5 shadow-xl"
                              :class="darkMode ? 'bg-[#111111] border-red-500/30 hover:border-red-500/60' : 'bg-white border-red-500/30 hover:border-red-500/60'">
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div class="flex-1">
@@ -100,7 +96,7 @@
                                     <h3 class="font-black text-lg" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $proyek->nama_pelanggan }}</h3>
                                     <p class="text-xs text-[#888888] mt-1">Status RAB: <span class="font-bold text-red-500">Revision</span></p>
                                 </div>
-                                <button wire:click="lihatDetail({{ $proyek->id }})" 
+                                <button wire:click="lihatDetail({{ $proyek->id }})"
                                         class="px-6 py-3 text-xs font-bold uppercase tracking-wider rounded-xl border-2 transition-all hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-500/30 bg-red-500 text-white hover:bg-red-600 border-red-500 shadow-lg shadow-red-500/30 whitespace-nowrap">
                                     Kerjakan Revisi RAB
                                 </button>
@@ -109,7 +105,7 @@
                     @endforeach
 
                     @foreach($draftTasks as $proyek)
-                        <div class="rounded-2xl p-6 border-2 transition-all hover:-translate-y-0.5 shadow-xl" 
+                        <div class="rounded-2xl p-6 border-2 transition-all hover:-translate-y-0.5 shadow-xl"
                              :class="darkMode ? 'bg-[#111111] border-[#F5C518]/30 hover:border-[#F5C518]/60' : 'bg-white border-[#F5C518]/30 hover:border-[#F5C518]/60'">
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div class="flex-1">
@@ -123,7 +119,7 @@
                                     <h3 class="font-black text-lg" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $proyek->nama_pelanggan }}</h3>
                                     <p class="text-xs text-[#888888] mt-1">Status: <span class="font-bold text-[#F5C518]">{{ $proyek->rab ? 'Draft' : 'Perlu Pembuatan RAB' }}</span></p>
                                 </div>
-                                <button wire:click="lihatDetail({{ $proyek->id }})" 
+                                <button wire:click="lihatDetail({{ $proyek->id }})"
                                         class="px-6 py-3 text-xs font-bold uppercase tracking-wider rounded-xl border-2 shadow-md transition-all hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#F5C518]/30 bg-[#F5C518] border-[#F5C518] text-[#1A1A1A] hover:bg-[#FFD700] whitespace-nowrap">
                                     Kerjakan RAB
                                 </button>
@@ -161,9 +157,10 @@
                                 'approved' => ['label' => 'Approved', 'color' => 'bg-emerald-500', 'text' => 'text-emerald-600', 'bg' => 'bg-emerald-500/10', 'border' => 'border-emerald-500/30'],
                             ];
                             $config = $statusConfig[$status] ?? $statusConfig['draft'];
+                            $isLocked = in_array($status, ['pending', 'approved']);
                         @endphp
 
-                        <div class="rounded-2xl p-6 border-2 transition-all hover:-translate-y-0.5 hover:shadow-xl" 
+                        <div class="rounded-2xl p-6 border-2 transition-all hover:-translate-y-0.5 hover:shadow-xl"
                              :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'">
                             <div class="flex justify-between items-start mb-3">
                                 <span class="text-[10px] font-bold font-mono text-[#888888]">{{ $proyek->request_no ?? '-' }}</span>
@@ -173,11 +170,12 @@
                                 </span>
                             </div>
                             <h3 class="font-black text-sm mb-1 truncate" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $proyek->nama_pelanggan }}</h3>
+                            
                             <div class="mt-4 pt-4 border-t-2" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">
-                                <button wire:click="lihatDetail({{ $proyek->id }})" 
-                                        class="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-colors hover:-translate-x-1" 
+                                <button wire:click="lihatDetail({{ $proyek->id }})"
+                                        class="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-colors hover:-translate-x-1"
                                         :class="darkMode ? 'text-[#F5C518]' : 'text-[#9A7B0A]'">
-                                    Lihat Detail RAB
+                                    {{ $isLocked ? '👁️ Lihat Dokumen (Read-Only)' : 'Edit RAB WBS' }}
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                                 </button>
                             </div>

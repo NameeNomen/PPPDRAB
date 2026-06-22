@@ -1,9 +1,14 @@
 <?php
+
 namespace App\Livewire\Purchasing;
 
 use Livewire\Component;
-use App\Models\RProject; // Asumsi nama model dari tabel r_project
 use Livewire\WithPagination;
+use App\Models\MaterialRequest;
+use App\Models\Material;
+use App\Models\Notification; // Pastikan model ini di-import
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewRequest extends Component
 {
@@ -11,12 +16,12 @@ class ReviewRequest extends Component
 
     public $detailRequest = null;
     public $isModalOpen = false;
+    public $catatan_purchasing = '';
 
-    // Buka detail untuk di-review
     public function lihatDetail($id)
     {
-        // Load data berserta file attachment-nya
-        $this->detailRequest = RProject::with('attachments', 'engineer')->findOrFail($id);
+        $this->detailRequest = MaterialRequest::findOrFail($id);
+        $this->catatan_purchasing = $this->detailRequest->catatan_purchasing ?? '';
         $this->isModalOpen = true;
     }
 
@@ -24,36 +29,79 @@ class ReviewRequest extends Component
     {
         $this->isModalOpen = false;
         $this->detailRequest = null;
+        $this->catatan_purchasing = '';
     }
 
     public function setujuiRequest($id)
     {
-        $request = RProject::findOrFail($id);
-        $request->update(['status' => 'approved_by_purchasing']);
+        $this->validate(['catatan_purchasing' => 'nullable|string|max:1000']);
+
+        $request = MaterialRequest::findOrFail($id);
         
-        // Opsional: Kirim notifikasi balik ke Engineering
-        
+        $request->update([
+            'status' => 'approved',
+            'catatan_purchasing' => $this->catatan_purchasing
+        ]);
+
+        // LOGIKA NOTIFIKASI KE ENGINEERING (Pola yang lu minta)
+        $engineer = User::find($request->requested_by);
+        if ($engineer) {
+            Notification::create([
+                'id_user'    => $engineer->id,
+                'judul'      => 'Request Material Disetujui',
+                'pesan'      => "Silahkan Kembali Kerjakan RAB anda karena Material {$request->nama_material} telah disetujui Purchasing. Catatan: {$this->catatan_purchasing}",
+                'url_tujuan' => route('engineering.rab.index'), // Sesuaikan route-nya sama punya lu
+                'is_read'    => false,
+                'created_at' => now()
+            ]);
+        }
+
         $this->tutupModal();
-        session()->flash('sukses', 'Request material berhasil disetujui. Siap untuk proses PO.');
+        session()->flash('sukses', 'Request disetujui! Notifikasi terkirim ke Engineer.');
+        
+        return redirect()->route('purchasing.material-create', ['request_id' => $request->id]);
     }
 
     public function tolakRequest($id)
     {
-        $request = RProject::findOrFail($id);
-        $request->update(['status' => 'rejected']);
+        $this->validate([
+            'catatan_purchasing' => 'required|string|min:5|max:1000'
+        ]);
+
+        $request = MaterialRequest::findOrFail($id);
         
+        $request->update([
+            'status' => 'rejected',
+            'catatan_purchasing' => $this->catatan_purchasing
+        ]);
+
+        // LOGIKA NOTIFIKASI KE ENGINEERING (Pola yang lu minta)
+        $engineer = User::find($request->requested_by);
+        if ($engineer) {
+            Notification::create([
+                'id_user'    => $engineer->id,
+                'judul'      => 'Request Material Ditolak',
+                'pesan'      => "Material {$request->nama_material} ditolak. Alasan: {$this->catatan_purchasing}",
+                'url_tujuan' => route('engineering.rab.index'), // Sesuaikan route-nya
+                'is_read'    => false,
+                'created_at' => now()
+            ]);
+        }
+
         $this->tutupModal();
-        session()->flash('error', 'Request dikembalikan ke Engineering.');
+        session()->flash('error', 'Request ditolak dan notifikasi terkirim.');
     }
 
     public function render()
     {
-        // Ambil request yang butuh diproses purchasing
-        $requests = RProject::whereIn('status', ['pending', 'submitted'])
-                            ->orderBy('created_at', 'asc')
-                            ->paginate(10);
+        $requests = MaterialRequest::where('status', 'pending')
+            ->orderBy('created_at', 'asc')
+            ->paginate(10);
 
-        return view('livewire.purchasing.review-request', compact('requests'))
-               ->layout('components.layouts.app');
+        $countMaterial = Material::count();
+        $countRequest = MaterialRequest::where('status', 'pending')->count();
+
+        return view('livewire.purchasing.review-request', compact('requests', 'countMaterial', 'countRequest'))
+            ->layout('components.layouts.app');
     }
 }

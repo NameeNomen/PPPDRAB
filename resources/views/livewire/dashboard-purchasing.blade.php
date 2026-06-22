@@ -1,7 +1,7 @@
-<div class="min-h-screen pb-10 font-sans transition-colors duration-500 bg-[#F2F7F5]">
-    <div class="max-w-7xl mx-auto space-y-8 p-6 md:p-10">
-        
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[1.5rem] border border-[#02462E]/10 shadow-sm">
+<div class="min-h-screen pb-12 font-sans transition-colors duration-500 bg-[#F2F7F5]">
+    <div class="max-w-7xl mx-auto space-y-8 p-4 md:p-8">
+
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 md:p-8 rounded-[1.5rem] border border-[#02462E]/10 shadow-sm">
             <div>
                 <div class="flex items-center gap-3 mb-2">
                     <span class="px-3 py-1 bg-[#02462E]/10 text-[#02462E] text-[10px] font-bold uppercase tracking-widest rounded-lg">Modul Pembelian</span>
@@ -9,7 +9,7 @@
                         <span class="w-1.5 h-1.5 rounded-full bg-[#FEC700] animate-pulse"></span> Sistem Aktif
                     </span>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-black text-[#02462E] tracking-tight">Purchasing Dashboard</h1>
+                <h1 class="text-2xl md:text-3xl font-black text-[#02462E] tracking-tight">Dashboard Purchasing</h1>
             </div>
             <div class="text-left md:text-right">
                 <p class="text-[10px] font-bold text-[#02462E]/60 uppercase tracking-widest">Pembaruan Terakhir</p>
@@ -18,172 +18,233 @@
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-[#02462E]/10 shadow-sm hover:shadow-md transition-shadow group">
+            <div class="bg-white p-6 rounded-2xl border border-[#02462E]/10 shadow-sm hover:shadow-md transition-all group">
                 <div class="flex justify-between items-start mb-4">
-                    <p class="text-[10px] font-bold text-[#02462E]/60 uppercase tracking-widest">Katalog Material</p>
+                    <p class="text-[10px] font-bold text-[#02462E]/60 uppercase tracking-widest">Master Material</p>
                     <div class="p-2 bg-[#02462E]/5 rounded-xl text-[#02462E] group-hover:bg-[#FEC700]/20 group-hover:scale-110 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16.811c0 .864-.471 1.623-1.211 2.02l-6.718 3.624a2.198 2.198 0 01-2.142 0l-6.718-3.624A2.194 2.194 0 013 16.811V7.189a2.194 2.194 0 011.211-2.02l6.718-3.624a2.198 2.198 0 012.142 0l6.718 3.624A2.194 2.194 0 0121 7.189v9.622zm-12-6.32v8.941m6-8.941v8.941m-6-8.941l-5.656-3.051m11.656 3.051l5.656-3.051m-11.656-3.051L12 2.25l5.656 3.051"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     </div>
                 </div>
-                <p class="text-3xl font-black text-[#02462E] font-mono">{{ number_format($totalMaterial, 0, ',', '.') }}</p>
-                <p class="text-[11px] font-medium text-[#02462E]/70 mt-2 flex items-center gap-1"><svg class="w-3.5 h-3.5 text-[#FEC700]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Terdaftar di Sistem</p>
+                <p class="text-3xl font-black text-[#02462E] font-mono">{{ number_format($kpiMaterial, 0, ',', '.') }}</p>
             </div>
-            
-            <div class="bg-white p-6 rounded-2xl border border-[#02462E]/10 shadow-sm hover:shadow-md transition-shadow group">
+
+            <div class="bg-white p-6 rounded-2xl border border-[#02462E]/10 shadow-sm hover:shadow-md transition-all group">
                 <div class="flex justify-between items-start mb-4">
                     <p class="text-[10px] font-bold text-[#02462E]/60 uppercase tracking-widest">Supplier Aktif</p>
                     <div class="p-2 bg-[#02462E]/5 rounded-xl text-[#02462E] group-hover:bg-[#FEC700]/20 group-hover:scale-110 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.25 8.25h-10.5m10.5 0c.621 0 1.125.504 1.125 1.125v10.5c0 .621-.504 1.125-1.125 1.125h-10.5c-.621 0-1.125-.504-1.125-1.125v-10.5c0-.621.504-1.125 1.125-1.125h10.5z"></path></svg>
                     </div>
                 </div>
-                <p class="text-3xl font-black text-[#02462E] font-mono">{{ number_format($totalSupplier, 0, ',', '.') }}</p>
-                <p class="text-[11px] font-medium text-[#02462E]/70 mt-2 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#FEC700]"></span> Mitra Terverifikasi</p>
+                <p class="text-3xl font-black text-[#02462E] font-mono">{{ number_format($kpiSupplier, 0, ',', '.') }}</p>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl border border-[#02462E]/10 shadow-sm hover:shadow-md transition-shadow group">
+            <div class="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-2xl border border-red-100 shadow-sm hover:shadow-md transition-all group">
                 <div class="flex justify-between items-start mb-4">
-                    <p class="text-[10px] font-bold text-[#02462E]/60 uppercase tracking-widest">Total Transaksi</p>
-                    <div class="p-2 bg-[#02462E]/5 rounded-xl text-[#02462E] group-hover:bg-[#FEC700]/20 group-hover:scale-110 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5"></path></svg>
+                    <p class="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">Menunggu Review</p>
+                    <div class="p-2 bg-red-100 rounded-xl text-red-600 group-hover:scale-110 transition-all animate-pulse">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                 </div>
-                <p class="text-3xl font-black text-[#02462E] font-mono">{{ number_format($trxBulanIni, 0, ',', '.') }}</p>
-                <p class="text-[11px] font-medium text-[#02462E]/70 mt-2">Penerbitan PO Bulan Ini</p>
+                <p class="text-3xl font-black text-red-600 font-mono">{{ number_format($kpiRequestPending, 0, ',', '.') }}</p>
             </div>
 
             <div class="bg-gradient-to-br from-[#02462E] to-[#03593B] p-6 rounded-2xl shadow-md relative overflow-hidden group">
                 <div class="absolute right-0 bottom-0 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                    <svg class="w-32 h-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <svg class="w-32 h-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
                 <div class="relative z-10 flex flex-col h-full justify-between">
-                    <p class="text-[10px] font-bold text-[#FEC700] uppercase tracking-widest mb-4">Total Nilai Pembelian</p>
-                    <div>
-                        <p class="text-xl md:text-2xl font-black text-white font-mono">Rp {{ number_format($pembelianBulanIni, 0, ',', '.') }}</p>
-                        <p class="text-[11px] font-medium text-white/70 mt-2">Pengeluaran Bulan Ini</p>
-                    </div>
+                    <p class="text-[10px] font-bold text-[#FEC700] uppercase tracking-widest mb-4">Request Disetujui</p>
+                    <p class="text-3xl font-black text-white font-mono">{{ number_format($kpiRequestApproved, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <div class="lg:col-span-2 bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm p-6 md:p-8 flex flex-col">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Grafik Pengeluaran Material</h2>
-                    <select class="text-xs font-medium bg-[#F2F7F5] border border-[#02462E]/10 py-2 px-4 rounded-lg text-[#02462E] focus:outline-none focus:border-[#02462E] focus:ring-2 focus:ring-[#02462E]/10 transition-all cursor-pointer">
-                        <option>Tahun Ini</option>
-                        <option>6 Bulan Terakhir</option>
-                    </select>
-                </div>
-                <div class="flex-1 min-h-[250px] w-full bg-[#F2F7F5] rounded-xl flex items-center justify-center border border-dashed border-[#02462E]/20">
-                    <span class="text-[#02462E]/50 text-xs font-medium uppercase tracking-widest">Area Integrasi Chart.js</span>
-                </div>
+        <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Grafik Request Material ({{ date('Y') }})</h2>
             </div>
-            
-            <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm flex flex-col overflow-hidden">
-                <div class="p-6 md:p-8 border-b border-[#02462E]/5">
-                    <h2 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Trend Harga Terakhir</h2>
-                </div>
-                <div class="divide-y divide-[#02462E]/5 px-4 pb-4">
-                    <div class="py-4 hover:bg-[#F2F7F5] rounded-xl px-4 transition-colors flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-bold text-[#02462E]">Semen Tonasa 50kg</p>
-                            <p class="text-[11px] text-[#02462E]/60 font-mono mt-1">Rp 65.000 / Sak</p>
-                        </div>
-                        <div class="flex items-center gap-1 text-[#02462E] font-bold text-[10px] bg-[#FEC700]/30 px-2.5 py-1.5 rounded-lg">
-                            <svg class="w-3 h-3 text-[#02462E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg> +2.5%
-                        </div>
-                    </div>
-                    <div class="py-4 hover:bg-[#F2F7F5] rounded-xl px-4 transition-colors flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-bold text-[#02462E]">Besi Beton Ulir 12mm</p>
-                            <p class="text-[11px] text-[#02462E]/60 font-mono mt-1">Rp 112.000 / Btg</p>
-                        </div>
-                        <div class="flex items-center gap-1 text-white font-bold text-[10px] bg-[#02462E] px-2.5 py-1.5 rounded-lg">
-                            <svg class="w-3 h-3 text-[#FEC700]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> -1.2%
-                        </div>
-                    </div>
-                    <div class="py-4 hover:bg-[#F2F7F5] rounded-xl px-4 transition-colors flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-bold text-[#02462E]">Kabel NYM 3x2.5mm</p>
-                            <p class="text-[11px] text-[#02462E]/60 font-mono mt-1">Rp 850.000 / Roll</p>
-                        </div>
-                        <div class="flex items-center gap-1 text-[#02462E]/70 font-bold text-[10px] bg-[#02462E]/10 px-2.5 py-1.5 rounded-lg">
-                            STABIL
-                        </div>
-                    </div>
-                </div>
+            <div class="relative w-full h-72">
+                <canvas id="requestChart"></canvas>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
-            <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm flex flex-col overflow-hidden">
-                <div class="p-6 border-b border-[#02462E]/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Referensi Harga Material</h3>
-                    <div class="relative w-full sm:w-56">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="w-4 h-4 text-[#02462E]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </div>
-                        <input type="text" wire:model.live.debounce.300ms="searchMaterial" placeholder="Cari material..." class="w-full text-xs pl-9 pr-4 py-2 bg-[#F2F7F5] border border-[#02462E]/10 rounded-lg text-[#02462E] focus:outline-none focus:border-[#02462E] focus:ring-2 focus:ring-[#02462E]/20 transition-all">
-                    </div>
+        <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-[#02462E]/5 flex justify-between items-center bg-[#F2F7F5]/50">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Request Material Pending (Urgent)</h3>
+                <a href="{{ route('purchasing.material-review') }}" class="text-[10px] px-4 py-2 bg-white text-[#02462E] font-bold rounded-lg border border-[#02462E]/20 hover:bg-[#02462E] hover:text-[#FEC700] transition-colors">Lihat Semua</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-white text-[#02462E]/60 uppercase tracking-widest text-[10px] border-b border-[#02462E]/10">
+                        <tr>
+                            <th class="px-6 py-4 font-bold">Nama Material</th>
+                            <th class="px-6 py-4 text-center font-bold">Kuantitas</th>
+                            <th class="px-6 py-4 font-bold">Target Waktu</th>
+                            <th class="px-6 py-4 text-center font-bold">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#02462E]/5">
+                        @forelse($requestPending as $req)
+                            @php $isOverdue = \Carbon\Carbon::parse($req->target_waktu_dibutuhkan)->isPast(); @endphp
+                            <tr class="hover:bg-[#F2F7F5]/50 transition-colors {{ $isOverdue ? 'bg-red-50/30' : '' }}">
+                                <td class="px-6 py-4 font-bold text-[#02462E]">{{ $req->nama_material }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
+                                        {{ rtrim(rtrim(number_format($req->estimasi_kebutuhan, 2, ',', '.'), '0'), ',') }} {{ $req->satuan }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-xs font-bold {{ $isOverdue ? 'text-red-600' : 'text-[#02462E]' }}">
+                                    {{ \Carbon\Carbon::parse($req->target_waktu_dibutuhkan)->format('d M Y') }}
+                                    @if($isOverdue) <span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-[9px] rounded uppercase">Overdue</span> @endif
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ route('purchasing.material-review') }}" class="text-[10px] font-bold uppercase tracking-wider text-[#02462E] hover:text-[#FEC700] underline">Review</a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="px-6 py-10 text-center text-[#02462E]/50 font-bold text-sm">Tidak ada request pending. Tim engineering sedang tidur.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-[#02462E]/5">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Supplier Teratas</h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-[#F2F7F5] text-[#02462E]/70 uppercase tracking-widest border-b border-[#02462E]/10">
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-[#F2F7F5] text-[#02462E]/60 uppercase tracking-widest text-[10px] border-b border-[#02462E]/10">
                             <tr>
-                                <th class="px-6 py-4 font-medium">Nama Item</th>
-                                <th class="px-6 py-4 text-right font-medium">Harga Terakhir</th>
-                                <th class="px-6 py-4 text-center font-medium">Update</th>
+                                <th class="px-6 py-4 font-bold">Nama Supplier</th>
+                                <th class="px-6 py-4 text-center font-bold">Item Disuplai</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#02462E]/5">
-                            @forelse($daftarMaterial as $mat)
-                            <tr class="hover:bg-[#F2F7F5]/50 transition-colors">
-                                <td class="px-6 py-4 font-semibold text-[#02462E]">{{ $mat->nama_barang }}</td>
-                                <td class="px-6 py-4 text-right font-mono font-medium text-[#02462E]">Rp {{ number_format($mat->harga, 0, ',', '.') }}</td>
-                                <td class="px-6 py-4 text-center text-[11px] text-[#02462E]/60">{{ $mat->updated_at->format('d M Y') }}</td>
-                            </tr>
+                            @forelse($supplierTeratas as $sup)
+                                <tr class="hover:bg-[#F2F7F5]/50 transition-colors">
+                                    <td class="px-6 py-4 font-bold text-[#02462E]">{{ $sup->nama_supplier }}</td>
+                                    <td class="px-6 py-4 text-center font-mono font-bold text-[#02462E]">{{ $sup->materials_count }}</td>
+                                </tr>
                             @empty
-                            <tr><td colspan="3" class="px-6 py-10 text-center text-[#02462E]/50 font-medium">Data material kosong.</td></tr>
+                                <tr><td colspan="2" class="px-6 py-8 text-center text-xs text-[#02462E]/50">Belum ada data supplier.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm flex flex-col overflow-hidden">
-                <div class="p-6 border-b border-[#02462E]/5 flex justify-between items-center">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Supplier Utama Aktif</h3>
-                    <button class="text-[10px] px-4 py-2 bg-[#F2F7F5] text-[#02462E] font-semibold rounded-lg border border-[#02462E]/10 hover:bg-[#02462E]/5 transition-colors">Lihat Semua</button>
+            <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-[#02462E]/5">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Material Terpopuler (Sering Direquest)</h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-[#F2F7F5] text-[#02462E]/70 uppercase tracking-widest border-b border-[#02462E]/10">
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-[#F2F7F5] text-[#02462E]/60 uppercase tracking-widest text-[10px] border-b border-[#02462E]/10">
                             <tr>
-                                <th class="px-6 py-4 font-medium">Nama Supplier</th>
-                                <th class="px-6 py-4 text-center font-medium">Status</th>
-                                <th class="px-6 py-4 text-center font-medium">Total PO</th>
+                                <th class="px-6 py-4 font-bold">Nama Material</th>
+                                <th class="px-6 py-4 text-center font-bold">Total Request</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#02462E]/5">
-                            <tr class="hover:bg-[#F2F7F5]/50 transition-colors">
-                                <td class="px-6 py-4 font-semibold text-[#02462E]">PT Bangun Baja Perkasa</td>
-                                <td class="px-6 py-4 text-center"><span class="px-2.5 py-1 bg-[#02462E]/10 text-[#02462E] text-[10px] font-bold rounded-md">Aktif</span></td>
-                                <td class="px-6 py-4 text-center font-mono text-[#02462E]">124</td>
-                            </tr>
-                            <tr class="hover:bg-[#F2F7F5]/50 transition-colors">
-                                <td class="px-6 py-4 font-semibold text-[#02462E]">CV Semen Indo Makmur</td>
-                                <td class="px-6 py-4 text-center"><span class="px-2.5 py-1 bg-[#02462E]/10 text-[#02462E] text-[10px] font-bold rounded-md">Aktif</span></td>
-                                <td class="px-6 py-4 text-center font-mono text-[#02462E]">89</td>
-                            </tr>
-                            <tr class="hover:bg-[#F2F7F5]/50 transition-colors">
-                                <td class="px-6 py-4 font-semibold text-[#02462E]">Toko Listrik Sinar Abadi</td>
-                                <td class="px-6 py-4 text-center"><span class="px-2.5 py-1 bg-[#FEC700]/20 text-[#02462E] text-[10px] font-bold rounded-md">Pending</span></td>
-                                <td class="px-6 py-4 text-center font-mono text-[#02462E]">32</td>
-                            </tr>
+                            @forelse($materialTerpopuler as $mat)
+                                <tr class="hover:bg-[#F2F7F5]/50 transition-colors">
+                                    <td class="px-6 py-4 font-bold text-[#02462E]">{{ $mat->nama_material }}</td>
+                                    <td class="px-6 py-4 text-center font-mono font-bold text-[#02462E]">
+                                        <span class="px-2 py-1 bg-[#FEC700]/20 rounded-lg">{{ $mat->total_request }}x</span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="2" class="px-6 py-8 text-center text-xs text-[#02462E]/50">Belum ada riwayat material.</td></tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
+        <div class="bg-white rounded-[1.5rem] border border-[#02462E]/10 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-[#02462E]/5">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-[#02462E]">Aktivitas Terbaru</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-[#02462E]/10 before:to-transparent">
+                    @forelse($aktivitasTerbaru as $index => $aktivitas)
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white {{ $aktivitas->status === 'approved' ? 'bg-[#02462E] text-[#FEC700]' : ($aktivitas->status === 'rejected' ? 'bg-red-500 text-white' : 'bg-[#FEC700] text-[#02462E]') }} shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                @if($aktivitas->status === 'approved')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                @elseif($aktivitas->status === 'rejected')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                @else
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                @endif
+                            </div>
+                            
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-[#02462E]/10 bg-[#F2F7F5]/50 shadow-sm">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[10px] font-bold text-[#02462E]/50 uppercase tracking-wider">{{ $aktivitas->updated_at->diffForHumans() }}</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase border {{ $aktivitas->status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ($aktivitas->status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200') }}">
+                                        {{ $aktivitas->status }}
+                                    </span>
+                                </div>
+                                <p class="text-sm font-bold text-[#02462E]">Request: {{ $aktivitas->nama_material }}</p>
+                                <p class="text-xs text-[#02462E]/70 mt-1">Status material diupdate ke {{ strtoupper($aktivitas->status) }}.</p>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-sm font-bold text-[#02462E]/50 py-4">Belum ada aktivitas terekam.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        const ctx = document.getElementById('requestChart');
+        const dataBulan = @json($grafikRequest); // Narik data array 12 bulan dari PHP
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                datasets: [{
+                    label: 'Jumlah Request',
+                    data: dataBulan,
+                    borderColor: '#02462E',
+                    backgroundColor: 'rgba(2, 70, 46, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#FEC700',
+                    pointBorderColor: '#02462E',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { stepSize: 1, color: '#02462E80', font: { family: 'sans-serif', size: 10, weight: 'bold' } },
+                        grid: { color: 'rgba(2, 70, 46, 0.05)' }
+                    },
+                    x: {
+                        ticks: { color: '#02462E80', font: { family: 'sans-serif', size: 11, weight: 'bold' } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    });
+</script>

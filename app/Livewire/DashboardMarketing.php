@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Livewire;
 
 use Livewire\Component;
@@ -12,39 +13,98 @@ class DashboardMarketing extends Component
 {
     public function render()
     {
+        // Mengambil ID user yang sedang login untuk keamanan isolasi data
         $userId = Auth::id();
 
-        // 1. Data Kotak Metrik
-        $totalProyek = RProject::where('id_user', $userId)->count();
-        $menungguEngineering = RProject::where('id_user', $userId)->where('status_proyek', 'waiting_rab')->count();
-        $biddingAktif = Bidding::where('id_user', $userId)->whereIn('status_bidding', ['draft', 'sent'])->count();
-        $proyekWon = RProject::where('id_user', $userId)->where('status_proyek', 'won')->count();
+        // ==========================================
+        // 1. DATA KOTAK METRIK (ATAS)
+        // ==========================================
 
-        // 2. Data Grafik Doughnut (Win Rate)
-        $winRate = $totalProyek > 0 ? round(($proyekWon / $totalProyek) * 100) : 0;
-        $sisaRate = 100 - $winRate;
+        // Total RFQ Masuk: Menghitung semua baris di tabel r_project milik user ini
+$totalRfq = RProject::count();
 
-        // 3. Data Grafik Garis (Tren 6 Bulan)
+        // Siap Dibuat Bidding: Cross-check ke tabel rabs
+        // PERINGATAN: Pastikan kolom di database RAB kamu benar bernama 'status_rab'. 
+        // Kalau namanya cuma 'status', ganti kata 'status_rab' di bawah menjadi 'status'.
+        $siapBidding = RProject::where('id_user', $userId)
+            ->whereHas('rab', function ($query) {
+                $query->where('status_rab', 'approved'); 
+            })
+            ->count();
+
+        // Menunggu Approval Direktur: Hitung bidding user ini yang statusnya 'pending'
+        $menungguApproval = Bidding::where('id_user', $userId)
+            ->where('status_bidding', 'pending')
+            ->count();
+
+        // Nilai Potensi Penjualan: Akumulasi nilai uang dari penawaran yang masih "hidup"
+        $potensiPenjualan = Bidding::where('id_user', $userId)
+            ->whereIn('status_bidding', ['draft', 'pending', 'approved', 'sent', 'won'])
+            ->sum('total_penawaran');
+
+
+        // ==========================================
+        // 2. DATA LIST & TABEL (TENGAH & BAWAH)
+        // ==========================================
+
+        // RFQ Terbaru: Ambil 5 data terbaru yang diurutkan dari waktu pembuatan (created_at)
+        $rfqTerbaru = RProject::with('category')
+            ->where('id_user', $userId)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Proyek Siap Dibidding: Ambil 5 data riil yang RAB-nya sudah di-approve
+        $proyekSiapBidding = RProject::where('id_user', $userId)
+            ->whereHas('rab', function ($query) {
+                $query->where('status_rab', 'approved');
+            })
+            ->orderBy('updated_at', 'desc')
+            ->take(5)
+            ->get();
+
+
+        // ==========================================
+        // 3. ENGINE GRAFIK (WON VS LOST)
+        // ==========================================
+        
         $chartBulan = [];
-        $chartDataProyek = [];
+        $chartWon = [];
+        $chartLost = [];
+
+        // Looping mundur dari 5 bulan lalu sampai bulan ini (Total 6 bulan)
         for ($i = 5; $i >= 0; $i--) {
+            // Ambil titik waktu (bulan dan tahun) yang sedang diproses
             $bulanIni = Carbon::today()->startOfMonth()->subMonths($i);
-            $chartBulan[] = $bulanIni->isoFormat('MMM'); 
-            $chartDataProyek[] = RProject::where('id_user', $userId)
-                                ->whereYear('created_at', $bulanIni->year)
-                                ->whereMonth('created_at', $bulanIni->month)
-                                ->count();
+            $chartBulan[] = $bulanIni->isoFormat('MMM');
+
+            // Hitung jumlah Won di bulan spesifik tersebut
+            $chartWon[] = Bidding::where('id_user', $userId)
+                ->where('status_bidding', 'won')
+                ->whereYear('created_at', $bulanIni->year)
+                ->whereMonth('created_at', $bulanIni->month)
+                ->count();
+
+            // Hitung jumlah Lost di bulan spesifik tersebut
+            $chartLost[] = Bidding::where('id_user', $userId)
+                ->where('status_bidding', 'lost')
+                ->whereYear('created_at', $bulanIni->year)
+                ->whereMonth('created_at', $bulanIni->month)
+                ->count();
         }
 
-        // 4. Data Tabel Histori
-        $historiTerbaru = RProject::where('id_user', $userId)
-                            ->orderBy('created_at', 'desc')
-                            ->take(5)
-                            ->get();
-
+        // Kirim semua variabel ke file view Blade
         return view('livewire.dashboard-marketing', compact(
-            'totalProyek', 'menungguEngineering', 'biddingAktif', 'proyekWon', 
-            'historiTerbaru', 'winRate', 'sisaRate', 'chartBulan', 'chartDataProyek'
+            'totalRfq',
+            'siapBidding',
+            'menungguApproval',
+            'potensiPenjualan',
+            'rfqTerbaru',
+            'proyekSiapBidding',
+            'chartBulan',
+            'chartWon',
+            'chartLost'
         ))->layout('components.layouts.app');
     }
 }
+

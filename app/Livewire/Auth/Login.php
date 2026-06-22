@@ -11,43 +11,46 @@ class Login extends Component
     public $password;
 
     public function login()
-    {
-        $this->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ], [
-            'username.required' => 'Username wajib diisi bos.',
-            'password.required' => 'Password jangan dikosongin.',
-        ]);
+{
+    $this->validate([
+        'username' => 'required',
+        'password' => 'required',
+    ]);
 
-        // Cek ke database pake kolom username
-        if (Auth::attempt(['username' => $this->username, 'password' => $this->password])) {
-            session()->regenerate();
-            
-            $user = Auth::user();
-            
-            // AMAN UNTUK ENUM: Ambil string value dari enum-nya
-            $roleValue = method_exists($user->role, 'value') ? $user->role->value : $user->role;
-            
-            // Redirect otomatis sesuai dengan 4 jabatan menggunakan Switch Case biar rapi
-            switch ($roleValue) {
-                case 'marketing':
-                    return redirect()->route('marketing.dashboard');
-                case 'purchasing':
-                    return redirect()->route('purchasing.dashboard');
-                case 'engineering':
-                    return redirect()->route('engineering.dashboard');
-                case 'direktur':
-                    return redirect()->route('direktur.dashboard');
-                default:
-                    return redirect('/');
-            }
+    if (Auth::attempt([
+        'username' => $this->username,
+        'password' => $this->password
+    ])) {
+
+        session()->regenerate();
+
+        $user = Auth::user();
+
+        $roleValue = method_exists($user->role, 'value')
+            ? $user->role->value
+            : $user->role;
+
+        switch ($roleValue) {
+            case 'marketing':
+                return $this->redirectRoute('marketing.dashboard');
+
+            case 'purchasing':
+                return $this->redirectRoute('purchasing.dashboard');
+
+            case 'engineering':
+                return $this->redirectRoute('engineering.dashboard');
+
+            case 'direktur':
+                return $this->redirectRoute('direktur.dashboard');
+
+            default:
+                return $this->redirect('/');
         }
-
-        $this->addError('username', 'Username atau password salah! Cek lagi.');
     }
 
-    public function render()
+    $this->addError('username', 'Username atau password salah! Cek lagi.');
+}
+   public function render()
     {
         // Pakai layout polos khusus halaman login
         return view('livewire.auth.login')->layout('components.layouts.guest');

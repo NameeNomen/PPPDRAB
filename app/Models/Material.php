@@ -13,7 +13,7 @@ class Material extends Model
         'deskripsi',
         'satuan',
         'harga',
-        'supplier',
+        'jumlah',
         'id_user'
     ];
 
@@ -25,5 +25,27 @@ class Material extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
+    }
+
+    // Relasi ke pivot
+    public function materialSuppliers()
+    {
+        return $this->hasMany(MaterialSupplier::class, 'material_id');
+    }
+
+    // Relasi many-to-many ke supplier
+    public function suppliers()
+    {
+        return $this->belongsToMany(
+            Supplier::class,
+            'material_suppliers',
+            'material_id',
+            'supplier_id'
+        )->withPivot([
+            'harga',
+            'lead_time_hari',
+            'is_preferred',
+            'catatan'
+        ])->withTimestamps();
     }
 }

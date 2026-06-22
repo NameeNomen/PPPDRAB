@@ -44,25 +44,29 @@ class RabDetail extends Component
         return $this->redirectRoute('engineering.rab.workspace', ['id' => $this->projectId], navigate: true);
     }
 
-    public function hapusDokumenRab()
-    {
-        if ($this->rabAktif) {
-            $this->rabAktif->delete();
-            $this->rabAktif = null;
-            session()->flash('sukses', 'Dokumen RAB berhasil dihapus dari sistem.');
-        }
-    }
-
     public function render()
     {
-        // Ambil data commit versi terakhir untuk keperluan cetak cetak-rab murni
+        // Ambil data commit versi terakhir untuk keperluan cetak
         $latestCommit = null;
+        $latestRevisiComment = null;
+
         if ($this->rabAktif) {
             $latestCommit = DocumentCommit::where('id_rab', $this->rabAktif->id)->latest()->first();
+
+            // Tangkap instruksi revisi dari Direktur
+            $revisi = DocumentCommit::where('id_rab', $this->rabAktif->id)
+                ->where('jenis_aksi', 'revised')
+                ->latest()
+                ->first();
+                
+            if ($revisi) {
+                $latestRevisiComment = $revisi->komentar_commit;
+            }
         }
 
         return view('livewire.engineering.rab-detail', [
-            'latestCommit' => $latestCommit
+            'latestCommit' => $latestCommit,
+            'latestRevisiComment' => $latestRevisiComment
         ])->layout('components.layouts.app');
     }
 }

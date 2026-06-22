@@ -17,7 +17,9 @@ return new class extends Migration
             $table->enum('jenis_aksi', ['created', 'updated', 'submitted', 'revised', 'approved']); 
             $table->text('komentar_commit'); // Isi komentar revisi atau alasan komitan data
              $table->decimal('total_penawaran', 20, 2)->default(0);
-            $table->string('user_name');
+
+             $table->decimal('grand_total', 20, 2)->default(0);
+             $table->string('user_name');
             $table->json('snapshot_data')->nullable(); // Isi komentar revisi atau alasan komitan data
 
             $table->timestamp('created_at')->useCurrent();

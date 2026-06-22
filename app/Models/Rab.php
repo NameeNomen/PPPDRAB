@@ -30,6 +30,12 @@ class Rab extends Model
         return $this->belongsTo(User::class, 'id_user', 'id');
     }
 
+    // Di dalam class Rab extends Model
+public function getGrandTotalRealAttribute()
+{
+    // Total pekerjaan + overhead
+    return $this->items->sum('subtotal') + $this->overhead_cost;
+}
     // Relasi ke Item RAB
     public function items()
     {

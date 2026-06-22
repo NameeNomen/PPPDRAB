@@ -10,23 +10,53 @@ class ProjectCategorySeeder extends Seeder
     public function run(): void
     {
         ProjectCategory::updateOrCreate(
-            ['nama_kategori' => 'Konstruksi Bangunan'],
-            ['deskripsi' => 'Proyek pembangunan gedung, rumah, pabrik']
+            ['nama_kategori' => 'Fabrication'],
+            ['deskripsi' => 'Pembuatan tanki, conveyor, pallet, ducting dan struktur fabrikasi']
         );
 
         ProjectCategory::updateOrCreate(
-            ['nama_kategori' => 'Fabrikasi Baja'],
-            ['deskripsi' => 'Pembuatan struktur baja, kanopi, rangka']
+            ['nama_kategori' => 'Machining'],
+            ['deskripsi' => 'Pengerjaan komponen menggunakan proses bubut, milling dan machining']
         );
 
         ProjectCategory::updateOrCreate(
-            ['nama_kategori' => 'Instalasi & Maintenance'],
-            ['deskripsi' => 'Pemasangan dan perawatan mesin atau sistem']
+            ['nama_kategori' => 'Stamping Part'],
+            ['deskripsi' => 'Produksi komponen stamping untuk kebutuhan industri manufaktur']
         );
 
         ProjectCategory::updateOrCreate(
-            ['nama_kategori' => 'Interior & Finishing'],
-            ['deskripsi' => 'Pekerjaan finishing dan estetika bangunan']
+            ['nama_kategori' => 'Jig & Dies'],
+            ['deskripsi' => 'Pembuatan jig, fixture dan dies untuk proses produksi']
+        );
+
+        ProjectCategory::updateOrCreate(
+            ['nama_kategori' => 'Special Purpose Machine'],
+            ['deskripsi' => 'Perancangan dan pembuatan mesin otomatisasi khusus']
+        );
+
+        ProjectCategory::updateOrCreate(
+            ['nama_kategori' => 'Conveyor System'],
+            ['deskripsi' => 'Pembuatan dan instalasi conveyor industri']
+        );
+
+        ProjectCategory::updateOrCreate(
+            ['nama_kategori' => 'Tank Fabrication'],
+            ['deskripsi' => 'Pembuatan tangki stainless steel dan carbon steel']
+        );
+
+        ProjectCategory::updateOrCreate(
+            ['nama_kategori' => 'Ducting System'],
+            ['deskripsi' => 'Pembuatan dan pemasangan ducting industri']
+        );
+
+        ProjectCategory::updateOrCreate(
+            ['nama_kategori' => 'Electrical Panel'],
+            ['deskripsi' => 'Pembuatan panel kontrol dan panel distribusi']
+        );
+
+        ProjectCategory::updateOrCreate(
+            ['nama_kategori' => 'Civil Project'],
+            ['deskripsi' => 'Pekerjaan sipil dan konstruksi pendukung industri']
         );
     }
 }

@@ -5,35 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAB - {{ $rabAktif->no_boq ?? 'Dokumen' }}</title>
     <style>
+        /* Standarisasi Kertas A4 Mutlak */
         @page { size: A4; margin: 10mm; }
-        body { font-family: 'Arial', sans-serif; font-size: 11px; color: #000; background: #FFF; margin: 0; padding: 20px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        .page { background: #fff; width: 100%; margin: 0 auto; position: relative; }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            font-size: 11px; 
+            color: #333; 
+            margin: 0; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+        }
+
+        /* Isolasi Layar Iframe (Biar nggak melar dan ada shadow kertasnya) */
+        @media screen {
+            body { background: #525659; padding: 20px; display: flex; justify-content: center; }
+            .page { 
+                background: #fff; 
+                width: 210mm; 
+                min-height: 297mm; 
+                padding: 15mm 20mm; 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+                box-sizing: border-box; 
+                position: relative; 
+            }
+        }
+
+        /* Mode Print Native */
+        @media print { 
+            body { background: #FFF; padding: 0; display: block; }
+            .page { width: 100%; box-shadow: none; padding: 0; } 
+        }
         
-        .kop-surat { display: flex; justify-content: space-between; align-items: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; }
+        /* KOP SURAT (Tanpa kotak, murni logo dan garis bawah tebal) */
+        .kop-surat { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #4A7256; padding-bottom: 10px; margin-bottom: 25px; }
         .kop-logo { width: 120px; object-fit: contain; }
         .kop-teks { text-align: center; flex-grow: 1; padding: 0 15px; }
-        .kop-teks h1 { margin: 0; color: #00CC00; font-size: 24px; font-weight: 900; letter-spacing: 1px; text-shadow: 1px 1px #000; }
-        .kop-teks h2 { margin: 5px 0; font-size: 12px; font-weight: bold; color: #000; letter-spacing: 0.5px; }
-        .kop-teks p { margin: 0; font-size: 9px; font-weight: bold; }
+        .kop-teks h1 { margin: 0; color: #4A7256; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+        .kop-teks h2 { margin: 5px 0; font-size: 12px; font-weight: bold; color: #444; letter-spacing: 0.5px; }
+        .kop-teks p { margin: 0; font-size: 9px; font-weight: bold; color: #666; }
 
+        /* Tabel Info */
         .info-table { width: 60%; font-weight: bold; margin-bottom: 20px; font-size: 11px; }
         .info-table td { padding: 3px 5px; vertical-align: top; }
         .info-table td:first-child { width: 120px; }
 
-        .table-rab { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; border: 2px solid #000; }
-        .table-rab th, .table-rab td { border: 1px solid #000; padding: 6px; }
-        .table-rab th { background-color: #2E7D32; color: #FFF; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 10px; }
+        /* Tabel RAB (Warna Pastel Elegan) */
+        .table-rab { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; border: 1px solid #B4CDBF; }
+        .table-rab th, .table-rab td { border: 1px solid #B4CDBF; padding: 6px; }
+        .table-rab th { background-color: #4A7256; color: #FFF; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 10px; }
         
-        .row-kategori { background-color: #A5D6A7; font-weight: 900; text-transform: uppercase; }
-        .row-grandtotal { background-color: #1B5E20; color: white; font-weight: 900; font-size: 12px; text-transform: uppercase; }
+        .row-kategori { background-color: #E2EFE7; font-weight: 900; color: #2A402B; text-transform: uppercase; }
+        .row-grandtotal { background-color: #4A7256; color: white; font-weight: 900; font-size: 12px; text-transform: uppercase; }
         
         .text-right { text-align: right; }
         .text-center { text-align: center; }
 
         .ttd-container { width: 100%; display: flex; justify-content: flex-end; margin-top: 40px; }
         .ttd-box { width: 200px; text-align: center; }
-        
-        @media print { body { padding: 0; } }
     </style>
 </head>
 <body>
@@ -76,11 +104,10 @@
 
                 @foreach($kategoris as $indexKat => $kat)
                     @php
-                        // ALGORITMA FLATTEN & ROWSPAN MATRIX
+                        // ALGORITMA FLATTEN & ROWSPAN MATRIX (Tidak disentuh)
                         $childrenKat = $kat->children ?? [];
                         $subtotalKat = 0;
                         
-                        // Hitung subtotal valid
                         foreach($childrenKat as $item) {
                             $childrenItem = $item->children ?? [];
                             if(count($childrenItem) > 0) {
@@ -95,17 +122,15 @@
 
                         $flatRows = [];
                         
-                        // 1. Array Kategori
                         $flatRows[] = [
                             'is_kat' => true, 'is_sub' => false, 'is_item_with_child' => false,
                             'no' => $alphabet[$indexKat] ?? ($indexKat+1),
                             'desc' => $kat->deskripsi_pekerjaan ?? '',
                             'qty_sat' => '', 'harga' => '',
                             'jumlah' => number_format($subtotalKat, 0, ',', '.'),
-                            'mat_name' => '' // Kategori default kosong materialnya
+                            'mat_name' => ''
                         ];
 
-                        // 2. Array Items & Sub-items
                         $itemNo = 1;
                         foreach($childrenKat as $item) {
                             $childrenItem = $item->children ?? [];
@@ -147,7 +172,6 @@
                             }
                         }
 
-                        // 3. Kalkulasi Rowspan Otomatis
                         $currentMat = null;
                         $groupStartIndex = 0;
 
@@ -206,6 +230,12 @@
                     $grandTotalReal = $totalPekerjaan + $rabAktif->overhead_cost;
                     $grandTotalBulat = floor($grandTotalReal / 1000) * 1000;
                 @endphp
+                {{-- Tambahin baris ini biar kelihatan nilai aslinya sebelum dibuletin --}}
+                <tr style="background-color: #E8F5E9; font-weight: 900;">
+                    <td colspan="5" class="text-right">GRAND TOTAL REAL</td>
+                    <td class="text-right">Rp {{ number_format($grandTotalReal, 0, ',', '.') }}</td>
+                </tr>
+                
                 <tr class="row-grandtotal">
                     <td colspan="5" class="text-right">GRAND TOTAL DIBULATKAN</td>
                     <td class="text-right">Rp {{ number_format($grandTotalBulat, 0, ',', '.') }}</td>
@@ -219,13 +249,13 @@
                 <br><br><br><br>
                 <div style="border-bottom: 1px solid #000; width: 100%; margin: 5px 0;"></div>
                 <p style="margin: 0; font-weight: bold; font-size: 12px; text-transform: uppercase;">@php
-    $pembuat = \App\Models\DocumentCommit::where('id_rab', $rabAktif->id)
-        ->where('jenis_aksi', 'submitted')
-        ->orderBy('created_at', 'asc')
-        ->first();
-@endphp
+                    $pembuat = \App\Models\DocumentCommit::where('id_rab', $rabAktif->id)
+                        ->where('jenis_aksi', 'submitted')
+                        ->orderBy('created_at', 'asc')
+                        ->first();
+                @endphp
 
-{{ strtoupper($pembuat->user_name ?? '-') }}</p>
+                {{ strtoupper($pembuat->user_name ?? '-') }}</p>
                 <p style="margin: 3px 0 0 0; font-weight: bold; font-size: 10px;">Engineering Dept.</p>
             </div>
         </div>

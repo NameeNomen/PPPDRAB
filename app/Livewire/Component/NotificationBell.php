@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationBell extends Component
 {
-    // Pake Polling biar otomatis nge-check ke database tiap 30 detik tanpa refresh halaman
     public function render()
     {
         $idUser = Auth::id();
@@ -27,20 +26,19 @@ class NotificationBell extends Component
         return view('livewire.component.notification-bell', compact('notifikasi', 'jumlahUnread'));
     }
 
-    // Fungsi pas list notifikasinya di-klik (VERSI TERBARU DENGAN read_at)
     public function bacaNotif($id)
     {
-        $notif = Notification::find($id);
+        $notif = Notification::where('id_user', Auth::id())->find($id);
         
         if ($notif) {
-            // Ubah status jadi sudah dibaca dan catat waktunya
             $notif->update([
                 'is_read' => true,
-                'read_at' => now() // PENTING: Ini buat patokan hapus otomatis 3 hari
+                'read_at' => now() 
             ]);
 
-            // Tendang user langsung ke halaman tujuan revisi bawaan notif
-            return redirect()->to($notif->url_tujuan);
+            // DI LIVEWIRE 3, CARA REDIRECT YANG BENAR ITU BEGINI:
+            // Pakai navigate: true biar transisinya mulus ala Single Page Application (SPA)
+            $this->redirect($notif->url_tujuan, navigate: true);
         }
     }
 }

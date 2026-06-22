@@ -140,7 +140,7 @@
                                 </td>
                                 <td class="px-8 py-5 font-bold" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">{{ $c->user_name ?? 'Sistem' }}</td>
                                 <td class="px-8 py-5 font-mono text-xs font-bold text-[#888888]">{{ \Carbon\Carbon::parse($c->created_at)->format('d M Y, H:i') }}</td>
-                                <td class="px-8 py-5 font-mono font-bold text-right" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">Rp {{ number_format($c->total_nilai, 0, ',', '.') }}</td>
+                                <td class="px-8 py-5 font-mono font-bold text-right" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">Rp {{ number_format($c->grand_total ?? 0, 0, ',', '.') }}</td>
                                 <td class="px-8 py-5 text-center">
                                     <button wire:click="showDetail({{ $c->id }})" class="inline-flex items-center gap-2 px-5 py-2 font-bold text-[10px] tracking-widest rounded-xl transition-all border-2 shadow-sm focus:outline-none focus:ring-4 focus:ring-[#F5C518]/30 hover:-translate-y-0.5"
                                             :class="darkMode ? 'bg-[#1A1A1A] hover:bg-[#F5C518] text-[#F5C518] hover:text-[#1A1A1A] border-[#F5C518]/50' : 'bg-white hover:bg-[#F5C518] text-[#9A7B0A] hover:text-[#1A1A1A] border-[#9A7B0A]/50'">
@@ -205,7 +205,7 @@
                             <div class="p-4 rounded-xl border-2 transition-colors"
                                  :class="darkMode ? 'border-[#F5C518]/50 bg-[#F5C518]/5' : 'border-[#9A7B0A]/30 bg-[#F5C518]/10'">
                                 <p class="text-[10px] font-bold uppercase tracking-wider" :class="darkMode ? 'text-[#F5C518]' : 'text-[#8B6914]'">Nilai Terkalkulasi (Versi Ini)</p>
-                                <p class="text-xl font-black font-mono mt-1" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">Rp {{ number_format($selectedCommit->total_nilai, 0, ',', '.') }}</p>
+                                <p class="text-xl font-black font-mono mt-1" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">Rp {{ number_format($selectedCommit->total_nilai ?? $selectedCommit->grand_total ?? 0, 0, ',', '.') }}</p>
                             </div>
                         </div>
                     </div>

@@ -46,7 +46,7 @@ class KelolaProyek extends Component
     public $priority = 'medium';
     public $alamat;
 
-    // File Uploads (Wajib diinisialisasi sebagai array kosong)
+    // File Uploads
     public $file_rfq;
     public $file_referensi = [];
     public $file_lokasi = [];
@@ -116,7 +116,6 @@ class KelolaProyek extends Component
             'proyekId', 'existingAttachments', 'replaceFile', 'replaceAttachmentId'
         ]);
         
-        // Reset array file secara manual biar aman di Livewire
         $this->file_referensi = [];
         $this->file_lokasi = [];
         $this->file_drawing = [];
@@ -138,12 +137,7 @@ class KelolaProyek extends Component
 
     // --- CREATE & UPDATE ---
     public function simpanProyek() {
-        try { 
-            $this->validateRules(); 
-        } catch (ValidationException $e) {
-            session()->flash('gagal', 'Validasi gagal: ' . collect($e->validator->errors()->all())->first());
-            return;
-        }
+        $this->validateRules(); 
 
         $requestNo = 'REQ/TJT/' . date('Y/m') . '/' . str_pad(
             RProject::whereYear('created_at', date('Y'))->whereMonth('created_at', date('m'))->count() + 1, 4, '0', STR_PAD_LEFT
@@ -151,44 +145,39 @@ class KelolaProyek extends Component
 
         DB::beginTransaction();
         $storedFiles = [];
-        
+
         try {
             $proyek = RProject::create([
-                'request_no' => $requestNo, 
-                'tanggal_request' => now(), 
-                'id_user' => Auth::id() ?? 1,
-                'nama_projek' => $this->nama_projek, 
+                'request_no' => $requestNo,
+                'tanggal_request' => now(),
+                'id_user' => Auth::id(), 
+                'nama_projek' => $this->nama_projek,
                 'category_id' => $this->category_id,
-                'nama_pelanggan' => $this->nama_pelanggan, 
+                'nama_pelanggan' => $this->nama_pelanggan,
                 'pic_pelanggan' => $this->pic_pelanggan,
-                'no_hp' => $this->no_hp, 
+                'no_hp' => $this->no_hp,
                 'deskripsi_proyek' => $this->metode_input === 'rfq' ? 'Berdasarkan Proposal/RFQ Terlampir' : $this->deskripsi_proyek,
-                'target_waktu' => $this->target_waktu, 
+                'target_waktu' => $this->target_waktu,
                 'estimasi_budget' => $this->estimasi_budget,
-                'priority' => $this->priority, 
+                'priority' => $this->priority,
                 'alamat' => $this->alamat,
-                'status_proyek' => 'pending', 
+                'status_proyek' => 'pending',
                 'requires_site_survey' => $this->metode_input === 'manual',
             ]);
 
             $storedFiles = $this->uploadSemuaLampiran($proyek->id);
-                        \Log::info('DEBUG UPLOAD:', [
-                    'file_rfq' => $this->file_rfq ? 'Ada' : 'Kosong',
-                    'file_ref_count' => count($this->file_referensi),
-                    'file_lokasi_count' => count($this->file_lokasi),
-                    'metode' => $this->metode_input
-                ]);
-
-                $savedPaths = [];
-$this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->nama_projek);            DB::commit();
+            $this->kirimNotifikasi($proyek->id, $proyek->request_no, $proyek->nama_projek);            
+            
+            DB::commit();
 
             session()->flash('sukses', "Proyek {$requestNo} berhasil dibuat!");
             $this->tutupModal();
-            $this->loadData();
+            $this->loadData(); 
+
         } catch (\Throwable $e) {
             DB::rollBack();
-            foreach ($storedFiles as $p) { 
-                if ($p && Storage::disk('public')->exists($p)) Storage::disk('public')->delete($p); 
+            foreach ($storedFiles as $p) {
+                if ($p && Storage::disk('public')->exists($p)) Storage::disk('public')->delete($p);
             }
             session()->flash('gagal', 'Gagal menyimpan: ' . $e->getMessage());
         }
@@ -198,19 +187,19 @@ $this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->na
         $proyek = RProject::with(['category', 'attachments'])->findOrFail($id);
         $this->proyekId = $id;
         $this->isEdit = true;
-        $this->replaceFile = null; 
+        $this->replaceFile = null;
         $this->replaceAttachmentId = null;
 
-        $this->nama_projek = $proyek->nama_projek; 
+        $this->nama_projek = $proyek->nama_projek;
         $this->category_id = $proyek->category_id;
         $this->nama_kategori_terpilih = $proyek->category->nama_kategori ?? '';
-        $this->nama_pelanggan = $proyek->nama_pelanggan; 
+        $this->nama_pelanggan = $proyek->nama_pelanggan;
         $this->pic_pelanggan = $proyek->pic_pelanggan;
-        $this->no_hp = $proyek->no_hp; 
+        $this->no_hp = $proyek->no_hp;
         $this->deskripsi_proyek = $proyek->deskripsi_proyek;
-        $this->target_waktu = $proyek->target_waktu; 
+        $this->target_waktu = $proyek->target_waktu;
         $this->estimasi_budget = $proyek->estimasi_budget;
-        $this->priority = $proyek->priority; 
+        $this->priority = $proyek->priority;
         $this->alamat = $proyek->alamat;
 
         $this->existingAttachments = [
@@ -225,27 +214,22 @@ $this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->na
     }
 
     public function updateProyek() {
-        try { 
-            $this->validateRules(); 
-        } catch (ValidationException $e) {
-            session()->flash('gagal', 'Validasi gagal: ' . collect($e->validator->errors()->all())->first());
-            return;
-        }
+        $this->validateRules();
 
         DB::beginTransaction();
         $storedFiles = [];
         try {
             $proyek = RProject::findOrFail($this->proyekId);
             $proyek->update([
-                'nama_projek' => $this->nama_projek, 
+                'nama_projek' => $this->nama_projek,
                 'category_id' => $this->category_id,
-                'nama_pelanggan' => $this->nama_pelanggan, 
+                'nama_pelanggan' => $this->nama_pelanggan,
                 'pic_pelanggan' => $this->pic_pelanggan,
-                'no_hp' => $this->no_hp, 
+                'no_hp' => $this->no_hp,
                 'deskripsi_proyek' => $this->deskripsi_proyek,
-                'target_waktu' => $this->target_waktu, 
+                'target_waktu' => $this->target_waktu,
                 'estimasi_budget' => $this->estimasi_budget,
-                'priority' => $this->priority, 
+                'priority' => $this->priority,
                 'alamat' => $this->alamat,
             ]);
 
@@ -257,8 +241,8 @@ $this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->na
             $this->loadData();
         } catch (\Throwable $e) {
             DB::rollBack();
-            foreach ($storedFiles as $p) { 
-                if ($p && Storage::disk('public')->exists($p)) Storage::disk('public')->delete($p); 
+            foreach ($storedFiles as $p) {
+                if ($p && Storage::disk('public')->exists($p)) Storage::disk('public')->delete($p);
             }
             session()->flash('gagal', 'Gagal update: ' . $e->getMessage());
         }
@@ -311,16 +295,16 @@ $this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->na
 
     private function uploadSemuaLampiran($proyekId) {
         $savedPaths = [];
-        
+
         if ($this->file_rfq) {
             $saved = $this->simpanSingleFile($proyekId, $this->file_rfq, 'proposal');
             if ($saved) $savedPaths[] = $saved;
         }
-        
+
         if ($this->metode_input === 'manual') {
             $kategoriMapping = [
-                'file_referensi' => 'reference_image', 
-                'file_lokasi' => 'location_photo', 
+                'file_referensi' => 'reference_image',
+                'file_lokasi' => 'location_photo',
                 'file_drawing' => 'technical_drawing'
             ];
 
@@ -338,28 +322,27 @@ $this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->na
 
     private function simpanSingleFile($proyekId, $file, $category) {
         if (!$file) return null;
-        
-        // Simpan file ke storage/app/public/gambarProyek
+
         $path = $file->store('gambarProyek', 'public');
-        
+
         ProjectAttachment::create([
-            'r_project_id' => $proyekId, 
+            'id_r_project' => $proyekId, // Sesuai dengan foreign key di model ProjectAttachment
             'file_name' => $file->getClientOriginalName(),
-            'file_path' => $path, 
-            'file_type' => $file->extension(), 
+            'file_path' => $path,
+            'file_type' => $file->extension(),
             'attachment_category' => $category,
         ]);
-        
+
         return $path;
     }
 
     private function validateRules() {
         $rules = [
-            'nama_projek' => 'required|string|max:255', 
+            'nama_projek' => 'required|string|max:255',
             'category_id' => 'required|exists:project_categories,id',
-            'nama_pelanggan' => 'required|string|max:255', 
+            'nama_pelanggan' => 'required|string|max:255',
             'pic_pelanggan' => 'required|string|max:255',
-            'no_hp' => 'required|string|max:30', 
+            'no_hp' => 'required|string|max:30',
             'priority' => 'required|in:low,medium,high',
         ];
 
@@ -381,42 +364,27 @@ $this->kirimNotifikasi($proyekBaru->id, $proyekBaru->request_no, $proyekBaru->na
             }
         }
 
-        Validator::make([
-            'nama_projek' => $this->nama_projek, 
-            'category_id' => $this->category_id,
-            'nama_pelanggan' => $this->nama_pelanggan, 
-            'pic_pelanggan' => $this->pic_pelanggan,
-            'no_hp' => $this->no_hp, 
-            'deskripsi_proyek' => $this->deskripsi_proyek,
-            'target_waktu' => $this->target_waktu, 
-            'estimasi_budget' => $this->estimasi_budget,
-            'priority' => $this->priority, 
-            'alamat' => $this->alamat,
-            'file_rfq' => $this->file_rfq, 
-            'file_referensi' => $this->file_referensi,
-            'file_lokasi' => $this->file_lokasi, 
-            'file_drawing' => $this->file_drawing,
-        ], $rules)->validate();
+        $this->validate($rules);
     }
 
-   private function kirimNotifikasi($idProyek, $requestNo, $namaProjek) {
-    $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
-    
-    foreach ($penerimaNotif as $user) {
-        // Logika URL: Kalau direktur ke halaman persetujuan, kalau engineering ke detail RAB
-        $urlTujuan = $user->role === 'direktur' 
-            ? '/direktur/persetujuan/' . $idProyek 
-            : '/engineering/kelola-rab/' . $idProyek . '/detail';
+    private function kirimNotifikasi($idProyek, $requestNo, $namaProjek) {
+        $penerimaNotif = User::whereIn('role', ['direktur', 'engineering'])->get();
 
-        Notification::create([
-            'id_user' => $user->id, 
-            'judul' => 'Inisiasi Proyek Baru',
-            'pesan' => "Proyek {$requestNo} ({$namaProjek}) diajukan oleh " . (Auth::user()->username ?? 'Marketing'),
-            'url_tujuan' => $urlTujuan,
-            'is_read' => false,
-        ]);
+        foreach ($penerimaNotif as $user) {
+            $urlTujuan = $user->role === 'direktur'
+                ? '/direktur/persetujuan/' . $idProyek
+                : '/engineering/kelola-rab/' . $idProyek . '/detail';
+
+            Notification::create([
+                'id_user' => $user->id,
+                'judul' => 'Inisiasi Proyek Baru',
+                'pesan' => "Proyek {$requestNo} ({$namaProjek}) diajukan oleh " . (Auth::user()->username ?? 'Marketing'),
+                'url_tujuan' => $urlTujuan,
+                'is_read' => false,
+            ]);
+        }
     }
-}
+
     public function render() {
         return view('livewire.marketing.kelola-proyek')->layout('components.layouts.app');
     }

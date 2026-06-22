@@ -40,7 +40,6 @@ return new class extends Migration
             ])->default('pending');
 
             $table->foreignId('category_id')->nullable()->constrained('project_categories')->nullOnDelete();
-                        $table->foreign('category_id')->references('id')->on('project_categories')->onDelete('set null'); 
 
             $table->timestamps(); 
         });

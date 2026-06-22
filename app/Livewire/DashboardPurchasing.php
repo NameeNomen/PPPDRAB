@@ -1,49 +1,65 @@
 <?php
-
 namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Material;
-// Asumsi model ini bakal lu bikin nanti
-use App\Models\Supplier; 
-use App\Models\PurchaseTransaction; 
+use App\Models\Supplier;
+use App\Models\MaterialRequest;
+use Illuminate\Support\Facades\DB;
 
 class DashboardPurchasing extends Component
 {
-    public $searchMaterial = '';
-
     public function render()
     {
-        // 1. TOP CARDS DATA (MURNI PURCHASING)
-        $totalMaterial = Material::count();
-        
-        $totalSupplier = class_exists(Supplier::class) ? Supplier::count() : 0;
-        
-        // Total Nilai Pembelian Bulan Ini
-        $pembelianBulanIni = class_exists(PurchaseTransaction::class) 
-            ? PurchaseTransaction::whereMonth('created_at', now()->month)->sum('total_harga') 
-            : 0;
+        // 1. DATA KPI CARDS
+        $kpiMaterial = Material::count();
+        $kpiSupplier = Supplier::count();
+        $kpiRequestPending = MaterialRequest::where('status', 'pending')->count();
+        $kpiRequestApproved = MaterialRequest::where('status', 'approved')->count();
 
-        // Total Frekuensi Transaksi (PO) Bulan Ini
-        $trxBulanIni = class_exists(PurchaseTransaction::class)
-            ? PurchaseTransaction::whereMonth('created_at', now()->month)->count()
-            : 0;
+        // 2. DATA GRAFIK (Request Material per Bulan Tahun Ini)
+        $chartData = MaterialRequest::select(
+            DB::raw('MONTH(created_at) as bulan'),
+            DB::raw('COUNT(*) as total')
+        )
+        ->whereYear('created_at', date('Y'))
+        ->groupBy('bulan')
+        ->pluck('total', 'bulan')
+        ->toArray();
 
-        // 2. TABLE DATA: Material (Live Database, Tanpa Stok)
-        $queryMaterial = Material::orderBy('updated_at', 'desc');
-        if (!empty($this->searchMaterial)) {
-            $queryMaterial->where('nama_barang', 'like', '%' . $this->searchMaterial . '%');
+        // Format array agar selalu berisi 12 elemen (Januari - Desember)
+        $grafikRequest = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $grafikRequest[] = $chartData[$i] ?? 0;
         }
-        $daftarMaterial = $queryMaterial->take(5)->get();
 
-        // 3. TABLE DATA: Supplier 
-        $daftarSupplier = class_exists(Supplier::class) 
-            ? Supplier::withCount('transactions')->orderBy('transactions_count', 'desc')->take(5)->get() 
-            : collect([]);
+        // 3. DATA REQUEST PENDING (Prioritas berdasarkan deadline terdekat)
+        $requestPending = MaterialRequest::where('status', 'pending')
+            ->orderBy('target_waktu_dibutuhkan', 'asc')
+            ->take(5)
+            ->get();
+
+        // 4. DATA SUPPLIER TERATAS (Berdasarkan jumlah material yang disuplai)
+        $supplierTeratas = Supplier::withCount('materials')
+            ->orderBy('materials_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // 5. DATA MATERIAL TERPOPULER (Paling sering direquest)
+        $materialTerpopuler = MaterialRequest::select('nama_material', DB::raw('COUNT(id) as total_request'))
+            ->groupBy('nama_material')
+            ->orderBy('total_request', 'desc')
+            ->take(5)
+            ->get();
+
+        // 6. AKTIVITAS TERBARU (Riwayat pergerakan request)
+        $aktivitasTerbaru = MaterialRequest::orderBy('updated_at', 'desc')
+            ->take(6)
+            ->get();
 
         return view('livewire.dashboard-purchasing', compact(
-            'totalMaterial', 'totalSupplier', 'pembelianBulanIni', 'trxBulanIni',
-            'daftarMaterial', 'daftarSupplier'
+            'kpiMaterial', 'kpiSupplier', 'kpiRequestPending', 'kpiRequestApproved',
+            'grafikRequest', 'requestPending', 'supplierTeratas', 'materialTerpopuler', 'aktivitasTerbaru'
         ))->layout('components.layouts.app');
     }
 }

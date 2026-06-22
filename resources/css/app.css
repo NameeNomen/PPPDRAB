@@ -1,4 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.bunny.net/css?family=instrument-sans:400,500,600');
+
+
+@layer base {
+    /* Set Body (16px) secara default ke seluruh halaman */
+    body {
+        @apply text-base text-[#02462E] bg-[#F2F7F5] font-sans;
+    }
+
+    /* Set Label Form (14px) */
+    label {
+        @apply text-sm font-bold tracking-widest uppercase;
+    }
+
+    /* Set Input Form (14px di HP, 16px di PC) */
+    input, textarea, select {
+        @apply text-sm md:text-base p-3 rounded-xl border border-[#02462E]/20 outline-none;
+    }
+
+    /* Set Page Title (24px - 30px) */
+    h1 {
+        @apply text-2xl md:text-3xl font-black tracking-tight;
+    }
+
+    /* Set Card Title (18px) */
+    h2, h3 {
+        @apply text-lg font-bold;
+    }
+
+    /* Set Tabel Text (14px) */
+    table {
+        @apply text-sm;
+    }
+}

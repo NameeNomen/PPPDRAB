@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERD Melengkung - Estetik</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #ffffff; text-align: center; margin: 0; padding: 20px; }
+        #network_canvas { width: 100%; height: 80vh; border: 1px dashed #ccc; background-color: #ffffff; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <h2 style="color: #1a5f7a;">ERD Gaya Melengkung (Vis.js)</h2>
+    <p>Scroll untuk Zoom In/Out. Bisa di-drag manual.</p>
+    
+    <div id="network_canvas"></div>
+
+    <script>
+        // Warna persis kayak referensi gambar lu (Teal/Biru Gelap)
+        const COLOR_TEAL = '#185f7a'; 
+        const COLOR_WHITE = '#ffffff';
+
+        // Setting default untuk node (kotak dan oval)
+        const styleEntity = { 
+            shape: 'box', 
+            color: { background: COLOR_TEAL, border: COLOR_TEAL }, 
+            font: { color: COLOR_WHITE, face: 'Arial', size: 20 }, 
+            margin: 25, 
+            shapeProperties: { borderRadius: 0 } // Bikin kotak tajem
+        };
+        const styleAttribute = { 
+            shape: 'ellipse', 
+            color: { background: COLOR_TEAL, border: COLOR_TEAL }, 
+            font: { color: COLOR_WHITE, face: 'Arial', size: 16 },
+            margin: 15
+        };
+
+        // Setting default untuk garis (Melengkung & pakai panah)
+        const edgeStyle = { 
+            color: { color: COLOR_TEAL }, 
+            width: 2, 
+            arrows: 'to', // Panah menuju atribut
+            smooth: { 
+                type: 'curvedCW', // Jenis lengkungan searah jarum jam
+                roundness: 0.3 
+            } 
+        };
+
+        // Bikin Node (Kotak User & Oval Atributnya)
+        const nodes = new vis.DataSet([
+            { id: 'E_User', label: 'Users', x: 0, y: 0, ...styleEntity },
+            { id: 'A_User_1', label: 'Username', x: -300, y: -150, ...styleAttribute },
+            { id: 'A_User_2', label: 'id_user', x: 300, y: -150, ...styleAttribute },
+            { id: 'A_User_3', label: 'role', x: -300, y: 150, ...styleAttribute },
+            { id: 'A_User_4', label: 'password', x: 300, y: 150, ...styleAttribute },
+        ]);
+
+        // Bikin Garis Relasi
+        const edges = new vis.DataSet([
+            { from: 'E_User', to: 'A_User_1', ...edgeStyle },
+            { from: 'E_User', to: 'A_User_2', ...edgeStyle },
+            { from: 'E_User', to: 'A_User_3', ...edgeStyle },
+            { from: 'E_User', to: 'A_User_4', ...edgeStyle }
+        ]);
+
+        const container = document.getElementById('network_canvas');
+        const data = { nodes: nodes, edges: edges };
+        
+        // Matikan gaya gravitasi (physics) biar nggak goyang-goyang dan posisinya kaku
+        const options = {
+            physics: false,
+            interaction: { dragNodes: true, zoomView: true, dragView: true }
+        };
+
+        const network = new vis.Network(container, data, options);
+    </script>
+</body>
+</html>
