@@ -18,15 +18,14 @@ class DashboardPurchasing extends Component
         $kpiRequestPending = MaterialRequest::where('status', 'pending')->count();
         $kpiRequestApproved = MaterialRequest::where('status', 'approved')->count();
 
-        // =====================================================================
-        // PERBAIKAN: Deteksi database otomatis biar jalan di lokal (MySQL) & Railway (SQLite)
+        // 2. DETEKSI DATABASE OTOMATIS (JANGAN DIUBAH LAGI!)
+        // Kalau SQLite pakai strftime, kalau MySQL pakai MONTH
         $driver = DB::connection()->getDriverName();
         $bulanRaw = $driver === 'sqlite' ? "CAST(strftime('%m', created_at) AS INTEGER)" : 'MONTH(created_at)';
-        // =====================================================================
 
-        // 2. DATA GRAFIK (Request Material per Bulan Tahun Ini)
+        // 3. DATA GRAFIK (Request Material per Bulan Tahun Ini)
         $chartData = MaterialRequest::select(
-            DB::raw("$bulanRaw as bulan"), // Panggil variabel dinamis di sini
+            DB::raw("$bulanRaw as bulan"), 
             DB::raw('COUNT(*) as total')
         )
         ->whereYear('created_at', date('Y'))
@@ -40,33 +39,40 @@ class DashboardPurchasing extends Component
             $grafikRequest[] = $chartData[$i] ?? 0;
         }
 
-        // 3. DATA REQUEST PENDING (Prioritas berdasarkan deadline terdekat)
+        // 4. DATA REQUEST PENDING
         $requestPending = MaterialRequest::where('status', 'pending')
             ->orderBy('target_waktu_dibutuhkan', 'asc')
             ->take(5)
             ->get();
 
-        // 4. DATA SUPPLIER TERATAS (Berdasarkan jumlah material yang disuplai)
+        // 5. DATA SUPPLIER TERATAS
         $supplierTeratas = Supplier::withCount('materials')
             ->orderBy('materials_count', 'desc')
             ->take(5)
             ->get();
 
-        // 5. DATA MATERIAL TERPOPULER (Paling sering direquest)
+        // 6. DATA MATERIAL TERPOPULER
         $materialTerpopuler = MaterialRequest::select('nama_material', DB::raw('COUNT(id) as total_request'))
             ->groupBy('nama_material')
             ->orderBy('total_request', 'desc')
             ->take(5)
             ->get();
 
-        // 6. AKTIVITAS TERBARU (Riwayat pergerakan request)
+        // 7. AKTIVITAS TERBARU
         $aktivitasTerbaru = MaterialRequest::orderBy('updated_at', 'desc')
             ->take(6)
             ->get();
 
         return view('livewire.dashboard-purchasing', compact(
-            'kpiMaterial', 'kpiSupplier', 'kpiRequestPending', 'kpiRequestApproved',
-            'grafikRequest', 'requestPending', 'supplierTeratas', 'materialTerpopuler', 'aktivitasTerbaru'
+            'kpiMaterial', 
+            'kpiSupplier', 
+            'kpiRequestPending', 
+            'kpiRequestApproved',
+            'grafikRequest', 
+            'requestPending', 
+            'supplierTeratas', 
+            'materialTerpopuler', 
+            'aktivitasTerbaru'
         ))->layout('components.layouts.app');
     }
 }
