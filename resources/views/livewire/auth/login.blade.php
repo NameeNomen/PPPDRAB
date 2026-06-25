@@ -186,7 +186,6 @@ function slider() {
         interval: null,
         progressInterval: null,
         duration: 10000,
-
         slides: [
             {
                 badge: 'Slide 01 — RFQ',
@@ -202,14 +201,14 @@ function slider() {
                 </svg>`
             },
             {
-                badge: 'Slide 02 — Budget Planning',
-                title: 'Perencanaan Anggaran dan Material yang Akurat',
-                description: 'Susun Rencana Anggaran Biaya (RAB), estimasi kebutuhan material, serta kontrol biaya proyek secara sistematis.',
-                keywords: ['RAB', 'Material Estimation', 'Cost Planning'],
-                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>`
+                badge: 'Slide 02 — PT Tri Jaya Teknik',
+                title: 'Mendukung Ekosistem Smart Factory',
+                description: 'Sistem terintegrasi untuk menyusun anggaran, mengelola proyek komersial, dan mempercepat alur kerja di PT Tri Jaya Teknik Karawang.',
+                keywords: ['TJT Karawang', 'Smart Factory', 'Integration'],
+                // Ini logonya udah gw bungkus div putih pakai efek shadow 3D ala logo CPS
+                icon: `<div class="bg-white rounded-2xl p-2 shadow-lg shadow-black/20 w-full h-full flex items-center justify-center transform transition-all hover:scale-105">
+                           <img src="{{ asset('gambar/tjt.png') }}" alt="TJT Logo" class="w-full h-full object-contain" />
+                       </div>`
             },
             {
                 badge: 'Slide 03 — Approval',
@@ -222,38 +221,31 @@ function slider() {
                 </svg>`
             }
         ],
-
         init() {
             this.startAutoPlay();
         },
-
         startAutoPlay() {
             this.stopAutoPlay();
             this.progress = 0;
             let elapsed = 0;
             const tick = 50;
-
             this.progressInterval = setInterval(() => {
                 elapsed += tick;
                 this.progress = elapsed / this.duration;
             }, tick);
-
             this.interval = setInterval(() => {
                 this.next();
             }, this.duration);
         },
-
         stopAutoPlay() {
             if (this.interval) clearInterval(this.interval);
             if (this.progressInterval) clearInterval(this.progressInterval);
         },
-
         next() {
             this.current = (this.current + 1) % this.slides.length;
             this.progress = 0;
             this.startAutoPlay();
         },
-
         goTo(index) {
             this.current = index;
             this.progress = 0;
