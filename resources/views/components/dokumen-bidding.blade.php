@@ -189,10 +189,46 @@ ol.syarat-list li { margin-bottom: 5px; }
 p { font-size: 12pt; margin-bottom: 10px; }
 
 @media print {
-    body * { visibility: hidden; }
-    #pdf-bidding-container, #pdf-bidding-container * { visibility: visible; }
-    #pdf-bidding-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
-    .paper-a4 { margin: 0; box-shadow: none; page-break-after: always; }
+    /* 1. Sembunyikan semua elemen di luar container */
+    body * { 
+        visibility: hidden; 
+    }
+    
+    /* 2. Tampilkan HANYA area surat dan seluruh isinya */
+    #pdf-bidding-container, #pdf-bidding-container * { 
+        visibility: visible; 
+    }
+    
+    /* 3. Paksa posisi kertas ke ujung layar, hancurkan kungkungan layout parent */
+    #pdf-bidding-container { 
+        position: absolute !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 100% !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+    }
+
+    /* 4. ANTI-GAIB: Paksa browser mencetak warna background (Penting buat tabel hijau!) */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 5. Bebaskan tinggi halaman biar gak kepotong cuma 1 halaman */
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background-color: #fff !important;
+    }
+
+    /* 6. Hilangkan margin buatan saat masuk kertas asli */
+    .paper-a4 { 
+        margin: 0 !important; 
+        padding: 10mm 15mm !important; /* Kasih jarak aman biar teks gak nabrak ujung kertas */
+        box-shadow: none !important; 
+        page-break-after: always; 
+    }
 }
 </style>
 
