@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use Livewire\Component;
@@ -17,9 +18,15 @@ class DashboardPurchasing extends Component
         $kpiRequestPending = MaterialRequest::where('status', 'pending')->count();
         $kpiRequestApproved = MaterialRequest::where('status', 'approved')->count();
 
+        // =====================================================================
+        // PERBAIKAN: Deteksi database otomatis biar jalan di lokal (MySQL) & Railway (SQLite)
+        $driver = DB::connection()->getDriverName();
+        $bulanRaw = $driver === 'sqlite' ? "CAST(strftime('%m', created_at) AS INTEGER)" : 'MONTH(created_at)';
+        // =====================================================================
+
         // 2. DATA GRAFIK (Request Material per Bulan Tahun Ini)
         $chartData = MaterialRequest::select(
-            DB::raw('MONTH(created_at) as bulan'),
+            DB::raw("$bulanRaw as bulan"), // Panggil variabel dinamis di sini
             DB::raw('COUNT(*) as total')
         )
         ->whereYear('created_at', date('Y'))
