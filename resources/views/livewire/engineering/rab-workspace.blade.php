@@ -602,91 +602,96 @@
             </div>
         </div>
 
-        @if($showRequestModal)
-            <div class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-data="{
-                 validateAndSubmit() {
-                     let hasError = false;
-                     const fields = [
-                         { id: 'modal-reqNamaMaterial', name: 'Nama Barang' },
-                         { id: 'modal-reqKebutuhan', name: 'Kuantitas' },
-                         { id: 'modal-reqSatuan', name: 'Satuan' },
-                         { id: 'modal-reqTargetWaktu', name: 'Target Waktu' }
-                     ];
-                     
-                     fields.forEach(f => {
-                         const el = document.getElementById(f.id);
-                         if (el) {
-                             el.classList.remove('field-error');
-                             void el.offsetWidth;
-                         }
-                     });
-                     
-                     fields.forEach(f => {
-                         const el = document.getElementById(f.id);
-                         if (el && (!el.value || el.value.trim() === '')) {
-                             hasError = true;
-                             if (el) el.classList.add('field-error');
-                         }
-                     });
-                     
-                     if (hasError) {
-                         window.dispatchEvent(new CustomEvent('validation-failed'));
-                         return false;
-                     }
-                     return true;
-                 }
-             }">
-                <div class="w-full max-w-lg rounded-xl p-6 border-2 shadow-2xl" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'">
-                    <div class="flex justify-between items-center mb-5 border-b-2 pb-3" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">
-                        <h2 class="text-base font-bold uppercase tracking-wide" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">Material Request Form</h2>
-                        <button wire:click="$set('showRequestModal', false)" class="text-[#888888] hover:text-red-500 text-2xl font-bold transition-colors cursor-pointer">&times;</button>
-                    </div>
+       @if($showRequestModal)
+<div class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-data="{
+    validateAndSubmit() {
+        let hasError = false;
+        const fields = [
+            { id: 'modal-reqNamaMaterial', name: 'Nama Barang' },
+            { id: 'modal-reqKebutuhan', name: 'Kuantitas' },
+            { id: 'modal-reqSatuan', name: 'Satuan' },
+            { id: 'modal-reqTargetWaktu', name: 'Target Waktu' }
+        ];
 
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Nama Barang / Material <span class="text-red-500">*</span></label>
-                            <input type="text" wire:model="reqNamaMaterial" id="modal-reqNamaMaterial" placeholder="Cth: Besi Tahan Panas" class="w-full text-xs font-bold p-2.5 rounded-lg border-2 outline-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Keterangan Spesifikasi / Merk</label>
-                            <textarea wire:model="reqDeskripsi" rows="2" placeholder="Cth: SNI, Grade A" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none resize-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'"></textarea>
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="w-1/2">
-                                <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Kuantitas <span class="text-red-500">*</span></label>
-                                <input type="number" step="0.1" wire:model="reqKebutuhan" id="modal-reqKebutuhan" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none font-mono focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Satuan <span class="text-red-500">*</span></label>
-                                <input type="text" wire:model="reqSatuan" id="modal-reqSatuan" placeholder="Cth: Pcs, Kg, Sak" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Target Batas Waktu Disediakan <span class="text-red-500">*</span></label>
-                            <input type="datetime-local" wire:model="reqTargetWaktu" id="modal-reqTargetWaktu" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
-                        </div>
-                        
-                        <button @click="if(!validateAndSubmit()) return; $wire.ajukanMaterialBaru()"
-                                wire:loading.class="btn-loading"
-                                class="relative w-full py-3 mt-4 text-xs font-bold uppercase tracking-widest rounded-lg shadow-lg transition-all flex items-center justify-center gap-2 text-[#1A1A1A] bg-[#F5C518] hover:bg-[#FFD700] hover:shadow-xl hover:shadow-[#F5C518]/30 focus:outline-none focus:ring-4 focus:ring-[#F5C518]/30 disabled:opacity-50">
-                            <span class="btn-text flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                </svg>
-                                KIRIM KE PURCHASING
-                            </span>
-                            <span class="btn-spinner hidden">
-                                <svg class="w-4 h-4 spinner mr-2" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span class="text-[10px]">MENGIRIM...</span>
-                            </span>
-                        </button>
+        fields.forEach(f => {
+            const el = document.getElementById(f.id);
+            if (el) {
+                el.classList.remove('field-error');
+                void el.offsetWidth;
+            }
+        });
+
+        fields.forEach(f => {
+            const el = document.getElementById(f.id);
+            if (el && (!el.value || el.value.trim() === '')) {
+                hasError = true;
+                if (el) el.classList.add('field-error');
+            }
+        });
+
+        if (hasError) {
+            window.dispatchEvent(new CustomEvent('validation-failed'));
+            return false;
+        }
+        return true;
+    }
+}">
+    <div class="w-full max-w-lg rounded-xl p-6 border-2 shadow-2xl flex flex-col max-h-[90vh]" :class="darkMode ? 'bg-[#111111] border-[#2A2A2A]' : 'bg-white border-[#E5E5E5]'">
+        
+        <div class="flex justify-between items-center mb-5 border-b-2 pb-3 flex-shrink-0" :class="darkMode ? 'border-[#2A2A2A]' : 'border-[#E5E5E5]'">
+            <h2 class="text-base font-bold uppercase tracking-wide" :class="darkMode ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'">Material Request Form</h2>
+            <button wire:click="$set('showRequestModal', false)" class="text-[#888888] hover:text-red-500 text-2xl font-bold transition-colors cursor-pointer">&times;</button>
+        </div>
+
+        <div class="overflow-y-auto pr-2 custom-scrollbar flex-grow">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Nama Barang / Material <span class="text-red-500">*</span></label>
+                    <input type="text" wire:model="reqNamaMaterial" id="modal-reqNamaMaterial" placeholder="Cth: Besi Tahan Panas" class="w-full text-xs font-bold p-2.5 rounded-lg border-2 outline-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Keterangan Spesifikasi / Merk</label>
+                    <textarea wire:model="reqDeskripsi" rows="2" placeholder="Cth: SNI, Grade A" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none resize-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'"></textarea>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-1/2">
+                        <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Kuantitas <span class="text-red-500">*</span></label>
+                        <input type="number" step="0.1" wire:model="reqKebutuhan" id="modal-reqKebutuhan" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none font-mono focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Satuan <span class="text-red-500">*</span></label>
+                        <input type="text" wire:model="reqSatuan" id="modal-reqSatuan" placeholder="Cth: Pcs, Kg, Sak" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
                     </div>
                 </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase mb-1.5" :class="darkMode ? 'text-[#888888]' : 'text-[#666666]'">Target Batas Waktu Disediakan <span class="text-red-500">*</span></label>
+                    <input type="datetime-local" wire:model="reqTargetWaktu" id="modal-reqTargetWaktu" class="w-full text-xs p-2.5 rounded-lg border-2 outline-none focus:ring-2 focus:ring-[#F5C518]/50 focus:border-[#F5C518] transition-all" :class="darkMode ? 'bg-[#1A1A1A] border-[#333333] text-[#F5F5F5]' : 'bg-[#FAFAFA] border-[#E5E5E5] text-[#1A1A1A]'">
+                </div>
             </div>
-        @endif
+        </div>
+
+        <div class="mt-6 flex-shrink-0">
+            <button @click="if(!validateAndSubmit()) return; $wire.ajukanMaterialBaru()"
+                wire:loading.class="btn-loading"
+                class="relative w-full py-3 text-xs font-bold uppercase tracking-widest rounded-lg shadow-lg transition-all flex items-center justify-center gap-2 text-[#1A1A1A] bg-[#F5C518] hover:bg-[#FFD700] hover:shadow-xl hover:shadow-[#F5C518]/30 focus:outline-none focus:ring-4 focus:ring-[#F5C518]/30 disabled:opacity-50">
+                <span class="btn-text flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                    KIRIM KE PURCHASING
+                </span>
+                <span class="btn-spinner hidden">
+                    <svg class="w-4 h-4 spinner mr-2" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-[10px]">MENGIRIM...</span>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+@endif
 
     </div>
 </div>

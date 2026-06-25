@@ -42,7 +42,7 @@ class DashboardDirektur extends Component
         
         $topProyek = RProject::with('rab')
             ->whereHas('rab')
-            ->orderByDesc(Rab::select('grand_total')->whereColumn('id_r_project', 'r_projects.id'))
+            ->orderByDesc(Rab::select('grand_total')->whereColumn('id_r_project', 'r_project.id'))
             ->take(5)
             ->get();
 
