@@ -1,5 +1,4 @@
-<div class="min-h-screen p-4 md:p-8 font-sans bg-[#FAFAFA] text-[#1A1A1A]">
-
+<div class="min-h-screen p-4 md:p-8 font-sans bg-[#FAFAFA] text-[#1A1A1A] print:p-0 print:m-0 print:block">
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -178,8 +177,16 @@
         @else
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-                <div class="print:w-full print:h-auto print:block print:overflow-visible print:border-none print:shadow-none lg:col-span-2 rounded-2xl shadow-xl border-2 border-[#E5E5E5] bg-white h-[750px] flex flex-col overflow-hidden">
-
+               <!-- Detail View -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start print:block print:m-0 print:p-0">
+               
+                <!-- Detail View -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start print:block print:m-0 print:p-0">
+               
+                <!-- Preview Panel (Scrollable) -->
+                <!-- Tambahin print:static print:m-0 print:p-0 di sini -->
+                <div class="print:static print:w-full print:h-auto print:block print:overflow-visible print:border-none print:shadow-none print:m-0 print:p-0 lg:col-span-2 rounded-2xl shadow-xl border-2 border-[#E5E5E5] bg-white h-[750px] flex flex-col overflow-hidden">
+                   
                     <div class="print:hidden flex justify-between items-center px-4 py-3 border-b-2 border-[#E5E5E5] bg-[#4A7256]">
                         <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,8 +199,12 @@
                         </span>
                     </div>
 
-                    <div class="print:overflow-visible print:bg-white flex-grow overflow-auto custom-scrollbar relative bg-[#FAFAFA]">
-                        <div class="p-6 min-h-full">
+                    <!-- Container Scroll -->
+                    <!-- INI BIANG KEROKNYA: Tambahin print:static print:p-0 buat netralisir class 'relative' -->
+                    <div class="print:static print:overflow-visible print:bg-white print:p-0 flex-grow overflow-auto custom-scrollbar relative bg-[#FAFAFA]">
+                       
+                        <!-- INI JUGA PENTING: Netralisir p-6 jadi print:p-0 -->
+                        <div class="p-6 min-h-full print:p-0 print:m-0">
                             @include('components.dokumen-bidding', [
                                 'proyek' => $selectedProject,
                                 'bidding' => $biddingData,
@@ -201,8 +212,7 @@
                             ])
                         </div>
                     </div>
-                </div>
-
+                </div> 
                 <div class="print:hidden lg:col-span-1 space-y-6">
 
                     <div class="p-6 rounded-2xl shadow-xl border-2 border-[#E5E5E5] bg-white space-y-5">
