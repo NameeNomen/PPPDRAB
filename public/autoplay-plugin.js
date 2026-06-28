@@ -1,57 +1,56 @@
 document.addEventListener("DOMContentLoaded", function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const currentRole = urlParams.get('role'); // Contoh: 'marketing', 'direktur', dst
+    const currentRole = urlParams.get('role');
 
     if (!currentRole) return; 
 
-    console.log("Sistem Autoplay Aktif untuk Role: " + currentRole);
+    console.log("Sistem Autoplay: Simulasi Workflow untuk " + currentRole);
 
-    // Akun demo (WAJIB SESUAIKAN DENGAN DB LU!)
+    // KREDENSIAL FINAL (Sesuai permintaan lu)
     const credentials = {
-        'marketing':   { username: 'marketing_mancap', pass: 'marketing123' },
-        'engineering': { username: 'eng_team01',       pass: 'engineering123' },
-        'direktur':    { username: 'pak_bos_direktur', pass: 'direktursuper123' },
-        'purchasing':  { username: 'purchasing_div',   pass: 'purchasing123' }
+        'marketing':   { username: 'marketing',   pass: 'marketing123', path: '/marketing/proyek' },
+        'engineering': { username: 'engineering', pass: 'marketing123', path: '/engineering/kelola-rab' },
+        'direktur':    { username: 'direktur',    pass: 'marketing123', path: '/direktur/persetujuan' },
+        'purchasing':  { username: 'purchasing',  pass: 'marketing123', path: '/purchasing/material-index' }
     };
 
     const activeAccount = credentials[currentRole.toLowerCase()];
     if (!activeAccount) {
-        console.error("Role " + currentRole + " tidak ditemukan!");
+        console.error("Role " + currentRole + " tidak terdaftar di brankas!");
         return;
     }
 
-    // Interval pencarian form login
-    const interval = setInterval(() => {
-        const userInput = document.querySelector('input[type="email"], input[name*="user"], input[type="text"]');
+    // --- PROSES LOGIN & WORKFLOW ---
+    const loginLoop = setInterval(() => {
+        const userInput = document.querySelector('input[name*="user"], input[type="text"]');
         const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
         const btn = document.querySelector('button[type="submit"], input[type="submit"]');
 
         if (userInput && passInput && btn) {
-            clearInterval(interval);
+            clearInterval(loginLoop);
             
-            // Isi Form
+            // Isi data
             userInput.value = activeAccount.username;
             passInput.value = activeAccount.pass;
+            
             userInput.dispatchEvent(new Event('input', { bubbles: true }));
             passInput.dispatchEvent(new Event('input', { bubbles: true }));
 
-            // Klik Login
             setTimeout(() => {
                 btn.click();
                 
-                // --- LOGIKA OTOMATISASI NAVIGASI SETELAH LOGIN ---
-                // Laravel lu udah ada redirect di root ('/'), 
-                // tapi kalau mau bot-nya masuk ke menu spesifik, pake ini:
+                // --- NAVIGASI WORKFLOW ---
                 setTimeout(() => {
-                    const dashboardLink = `/ ${currentRole} /dashboard`.replace(/\s/g, ''); 
-                    const menu = document.querySelector(`a[href*="${dashboardLink}"]`);
-                    
+                    // Cari menu berdasarkan path yang sudah ditentukan
+                    const menu = document.querySelector(`a[href*="${activeAccount.path}"]`);
                     if (menu) {
-                        console.log("Bot mengklik menu dashboard: " + currentRole);
+                        console.log("Bot masuk ke workflow: " + activeAccount.path);
                         menu.click();
+                    } else {
+                        console.warn("Menu target tidak ditemukan: " + activeAccount.path);
                     }
-                }, 2500); // Tunggu 2.5 detik buat Laravel proses redirect login
-                
+                }, 3000); // Waktu tunggu setelah login (tambah jika web lemot)
+
             }, 1000);
         }
     }, 500);
