@@ -1,16 +1,12 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Web porto lu bakal nembak URL pake parameter, misal: ?role=marketing
     const urlParams = new URLSearchParams(window.location.search);
-    const currentRole = urlParams.get('role');
+    const currentRole = urlParams.get('role'); // Contoh: 'marketing', 'direktur', dst
 
-    // Pengaman: Kalau user biasa yang buka (tanpa parameter ?role), script ini langsung mati (tidur)
     if (!currentRole) return; 
 
-    console.log("Sistem Autoplay Mendeteksi Akses untuk Role: " + currentRole);
+    console.log("Sistem Autoplay Aktif untuk Role: " + currentRole);
 
-    // 2. KONEKSI KE DATABASE LU (Secara Logis)
-    // Lu wajib ganti isi 'username' dan 'pass' di bawah ini dengan akun ASLI 
-    // yang beneran terdaftar di tabel users database aplikasi lu!
+    // Akun demo (WAJIB SESUAIKAN DENGAN DB LU!)
     const credentials = {
         'marketing':   { username: 'marketing_mancap', pass: 'marketing123' },
         'engineering': { username: 'eng_team01',       pass: 'engineering123' },
@@ -18,52 +14,45 @@ document.addEventListener("DOMContentLoaded", function() {
         'purchasing':  { username: 'purchasing_div',   pass: 'purchasing123' }
     };
 
-    // Script mencocokkan: parameter URL lu apa? misal 'marketing', 
-    // maka dia ngambil data akun marketing dari brankas di atas.
     const activeAccount = credentials[currentRole.toLowerCase()];
-    
-    // Kalau lu nembak role yang kagak ada di brankas (misal ?role=admin), script berhenti biar gak error
     if (!activeAccount) {
-        console.error("Role " + currentRole + " tidak terdaftar di konfigurasi script!");
+        console.error("Role " + currentRole + " tidak ditemukan!");
         return;
     }
 
-    // 3. PROSES EKSEKUSI FORM LOGIN (GAIB)
-    setTimeout(() => {
-        // Cari kolom input username & password di halaman login web lu
-        const userInput = document.querySelector('input[type="email"]') || 
-                          document.querySelector('input[name*="user"]') || 
-                          document.querySelector('input[name*="email"]') ||
-                          document.querySelector('input[type="text"]');
-                           
-        const passwordInput = document.querySelector('input[type="password"]') || 
-                              document.querySelector('input[name*="pass"]');
-                              
-        const loginForm = document.querySelector('form');
-        const submitButton = document.querySelector('button[type="submit"]') || 
-                             document.querySelector('input[type="submit"]');
+    // Interval pencarian form login
+    const interval = setInterval(() => {
+        const userInput = document.querySelector('input[type="email"], input[name*="user"], input[type="text"]');
+        const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
+        const btn = document.querySelector('button[type="submit"], input[type="submit"]');
 
-        // Kalau form-nya ketemu di layar, bot mulai beraksi
-        if (userInput && passwordInput) {
+        if (userInput && passInput && btn) {
+            clearInterval(interval);
             
-            // Bot ngetikin data akun yang sinkron sama database tadi
+            // Isi Form
             userInput.value = activeAccount.username;
-            passwordInput.value = activeAccount.pass;
-
-            // Trigger event biar framework gak bingung pas form-nya keisi otomatis
+            passInput.value = activeAccount.pass;
             userInput.dispatchEvent(new Event('input', { bubbles: true }));
-            passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+            passInput.dispatchEvent(new Event('input', { bubbles: true }));
 
-            // Delay 1.5 detik biar HRD sempet ngeliat proses ngetik gaib ini, baru klik login
+            // Klik Login
             setTimeout(() => {
-                localStorage.setItem('autoplay_role', currentRole); // Simpan status buat di dashboard nanti
+                btn.click();
                 
-                if (submitButton) {
-                    submitButton.click(); // Klik tombol login
-                } else if (loginForm) {
-                    loginForm.submit(); // Submit form paksa kalau tombolnya ga ada id
-                }
-            }, 1500);
+                // --- LOGIKA OTOMATISASI NAVIGASI SETELAH LOGIN ---
+                // Laravel lu udah ada redirect di root ('/'), 
+                // tapi kalau mau bot-nya masuk ke menu spesifik, pake ini:
+                setTimeout(() => {
+                    const dashboardLink = `/ ${currentRole} /dashboard`.replace(/\s/g, ''); 
+                    const menu = document.querySelector(`a[href*="${dashboardLink}"]`);
+                    
+                    if (menu) {
+                        console.log("Bot mengklik menu dashboard: " + currentRole);
+                        menu.click();
+                    }
+                }, 2500); // Tunggu 2.5 detik buat Laravel proses redirect login
+                
+            }, 1000);
         }
-    }, 1000); // Tunggu 1 detik setelah halaman kebuka sempurna
+    }, 500);
 });
