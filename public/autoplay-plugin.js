@@ -12,19 +12,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const credentials = {
         'marketing': { 
             user: 'marketing', pass: 'marketing123', 
-            tour: ['/marketing/dashboard', '/marketing/proyek', '/marketing/bidding'] 
+            tour: ['/marketing/dashboard', '/marketing/kelola-proyek/partials/table', '/marketing/kelola-proyek/partials/modal-form', '/marketing/kelola-proyek/partials/detail-popup', '/marketing/bidding-index', '/marketing/bidding-detail','/marketing/log-bidding', '/marketing/histori-revisi-bidding'] 
         },
         'engineering': { 
             user: 'engineering', pass: 'marketing123', 
-            tour: ['/engineering/dashboard', '/engineering/kelola-rab', '/engineering/rab/histori'] 
+            tour: ['/engineering/dashboard', '/engineering/rab-index','/engineering/rab-detail', '/engineering/rab-workspace','/engineering/histori'] 
         },
         'direktur': { 
             user: 'direktur', pass: 'marketing123', 
-            tour: ['/direktur/dashboard', '/direktur/persetujuan'] 
+            tour: ['/direktur/dashboard', '/direktur/persetujuan-index', '/direktur/persetujuan-detail'] 
         },
         'purchasing': { 
             user: 'purchasing', pass: 'marketing123', 
-            tour: ['/purchasing/dashboard', '/purchasing/material-index', '/purchasing/material-review'] 
+            tour: ['/purchasing/dashboard', '/purchasing/material-index', '/purchasing/review-request'] 
         }
     };
 
