@@ -71,7 +71,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const userInput = document.querySelector('input[wire\\:model="username"]') || document.querySelector('input[type="text"]');
         const passInput = document.querySelector('input[wire\\:model="password"]') || document.querySelector('input[type="password"]');
         const submitButton = document.querySelector('button[type="submit"]');
-
+console.log("User:", userInput);
+console.log("Pass:", passInput);
+console.log("Button:", submitButton);
         if (userInput && passInput && submitButton) {
             // 🔥 CARA NGETIK: Pakai Native Setter biar Livewire ngerasa ada yang ngetik manual
             const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
