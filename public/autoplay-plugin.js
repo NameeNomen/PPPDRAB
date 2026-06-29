@@ -1,57 +1,80 @@
 document.addEventListener("DOMContentLoaded", function() {
+    // 1. Cek parameter URL atau ingatan bot sebelumnya
     const urlParams = new URLSearchParams(window.location.search);
-    const currentRole = urlParams.get('role');
+    let currentRole = urlParams.get('role');
 
-    if (!currentRole) return; 
+    if (!currentRole) {
+        currentRole = sessionStorage.getItem('bot_active_role');
+    }
 
-    console.log("Sistem Autoplay: Simulasi Workflow untuk " + currentRole);
+    // Kalau bener-bener gak ada role, skrip mati (mode user biasa)
+    if (!currentRole) return;
 
-    // KREDENSIAL FINAL (Sesuai permintaan lu)
+    // 2. Brankas Akun & Rute Tour (Sesuai Route Laravel lu)
     const credentials = {
-        'marketing':   { username: 'marketing',   pass: 'marketing123', path: '/marketing/proyek' },
-        'engineering': { username: 'engineering', pass: 'marketing123', path: '/engineering/kelola-rab' },
-        'direktur':    { username: 'direktur',    pass: 'marketing123', path: '/direktur/persetujuan' },
-        'purchasing':  { username: 'purchasing',  pass: 'marketing123', path: '/purchasing/material-index' }
+        'marketing': { 
+            user: 'marketing', pass: 'marketing123', 
+            tour: ['/marketing/dashboard', '/marketing/proyek', '/marketing/bidding'] 
+        },
+        'engineering': { 
+            user: 'engineering', pass: 'marketing123', 
+            tour: ['/engineering/dashboard', '/engineering/kelola-rab', '/engineering/rab/histori'] 
+        },
+        'direktur': { 
+            user: 'direktur', pass: 'marketing123', 
+            tour: ['/direktur/dashboard', '/direktur/persetujuan'] 
+        },
+        'purchasing': { 
+            user: 'purchasing', pass: 'marketing123', 
+            tour: ['/purchasing/dashboard', '/purchasing/material-index', '/purchasing/material-review'] 
+        }
     };
 
     const activeAccount = credentials[currentRole.toLowerCase()];
-    if (!activeAccount) {
-        console.error("Role " + currentRole + " tidak terdaftar di brankas!");
-        return;
-    }
+    if (!activeAccount) return;
 
-    // --- PROSES LOGIN & WORKFLOW ---
-    const loginLoop = setInterval(() => {
-        const userInput = document.querySelector('input[name*="user"], input[type="text"]');
-        const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
-        const btn = document.querySelector('button[type="submit"], input[type="submit"]');
+    // 3. DETEKSI LOKASI HALAMAN
+    const userInput = document.querySelector('input[name*="user"], input[type="text"]');
+    const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
+    const btn = document.querySelector('button[type="submit"], input[type="submit"]');
 
-        if (userInput && passInput && btn) {
-            clearInterval(loginLoop);
-            
-            // Isi data
-            userInput.value = activeAccount.username;
-            passInput.value = activeAccount.pass;
-            
-            userInput.dispatchEvent(new Event('input', { bubbles: true }));
-            passInput.dispatchEvent(new Event('input', { bubbles: true }));
+    if (userInput && passInput && btn) {
+        // --- KONDISI A: SEDANG DI HALAMAN LOGIN ---
+        console.log("Bot Mode: Mulai Login sebagai " + currentRole);
 
+        // Tanam ingatan ke otak browser
+        sessionStorage.setItem('bot_active_role', currentRole.toLowerCase());
+        sessionStorage.setItem('bot_tour_step', '0');
+
+        userInput.value = activeAccount.user;
+        passInput.value = activeAccount.pass;
+        userInput.dispatchEvent(new Event('input', { bubbles: true }));
+        passInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+        setTimeout(() => {
+            btn.click();
+        }, 1000);
+
+    } else {
+        // --- KONDISI B: SUDAH LOGIN & DI DALAM APLIKASI ---
+        let currentStep = parseInt(sessionStorage.getItem('bot_tour_step') || '0');
+        let tourPaths = activeAccount.tour;
+
+        if (currentStep < tourPaths.length) {
+            let nextDestination = tourPaths[currentStep];
+            console.log(`Bot Mode: Pindah ke ${nextDestination}`);
+
+            // Jeda 4 detik di tiap halaman biar HRD/Klien bisa lihat desain lu
             setTimeout(() => {
-                btn.click();
-                
-                // --- NAVIGASI WORKFLOW ---
-                setTimeout(() => {
-                    // Cari menu berdasarkan path yang sudah ditentukan
-                    const menu = document.querySelector(`a[href*="${activeAccount.path}"]`);
-                    if (menu) {
-                        console.log("Bot masuk ke workflow: " + activeAccount.path);
-                        menu.click();
-                    } else {
-                        console.warn("Menu target tidak ditemukan: " + activeAccount.path);
-                    }
-                }, 3000); // Waktu tunggu setelah login (tambah jika web lemot)
+                sessionStorage.setItem('bot_tour_step', currentStep + 1);
+                window.location.href = nextDestination; // Teleportasi URL yang aman
+            }, 4000); 
 
-            }, 1000);
+        } else {
+            console.log("Bot Mode: Tour Selesai. Silakan coba fitur secara manual.");
+            // Hapus ingatan biar interaksi klik manual gak diganggu
+            sessionStorage.removeItem('bot_active_role');
+            sessionStorage.removeItem('bot_tour_step');
         }
-    }, 500);
+    }
 });
