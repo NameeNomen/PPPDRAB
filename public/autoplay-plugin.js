@@ -12,19 +12,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const credentials = {
         'marketing': { 
             user: 'marketing', pass: 'marketing123', 
-            tour: ['/marketing/dashboard', '/marketing/kelola-proyek/partials/table', '/marketing/kelola-proyek/partials/modal-form', '/marketing/kelola-proyek/partials/detail-popup', '/marketing/bidding-index', '/marketing/bidding-detail','/marketing/log-bidding', '/marketing/histori-revisi-bidding'] 
+            tour: ['/marketing/dashboard', '/marketing/proyek/detail/1','/marketing/proyek', '/marketing/bidding', '/marketing/bidding/workspace/1', '/marketing/bidding/log/1', '/marketing/bidding/histori'] 
         },
         'engineering': { 
             user: 'engineering', pass: 'marketing123', 
-            tour: ['/engineering/dashboard', '/engineering/rab-index','/engineering/rab-detail', '/engineering/rab-workspace','/engineering/histori'] 
+            tour: ['/engineering/dashboard', '/engineering/kelola-rab','/engineering/kelola-rab/1/detail', '/engineering/kelola-rab/1/workspace','/engineering/rab/histori'] 
         },
         'direktur': { 
             user: 'direktur', pass: 'marketing123', 
-            tour: ['/direktur/dashboard', '/direktur/persetujuan-index', '/direktur/persetujuan-detail'] 
+            tour: ['/direktur/dashboard', '/direktur/persetujuan', '/direktur/persetujuan/proyek/1'] 
         },
         'purchasing': { 
             user: 'purchasing', pass: 'marketing123', 
-            tour: ['/purchasing/dashboard', '/purchasing/material-index', '/purchasing/review-request'] 
+            tour: ['/purchasing/dashboard', '/purchasing/material-index', '/purchasing/material-create', '/purchasing/material/1/edit','/purchasing/material/review-request'] 
         }
     };
 
