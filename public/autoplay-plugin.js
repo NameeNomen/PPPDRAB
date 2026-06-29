@@ -1,24 +1,24 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    // ==================================================
-    // HANYA IZINKAN SCRIPT BERJALAN DI DOMAIN INI
-    // ==================================================
-    const ALLOWED_ORIGIN = "https://web-porto-nameenomen.vercel.app";
+    const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
-    if (window.location.origin !== ALLOWED_ORIGIN) {
-        console.warn("Bot Mode: Unauthorized domain. Script dinonaktifkan.");
-        return;
+    const isDalamIframe = window.self !== window.top;
+
+    const isDariVercel = document.referrer.includes(ALLOWED_REFERRER);
+
+    if (!isDalamIframe || !isDariVercel) {
+        console.log("Bot Mode: Script dinonaktifkan. Lu bukan Vercel gue.");
+        return; 
     }
 
-    // ==================================================
-    // URUTAN ROLE
-    // ==================================================
-    const roleSequence = [
-        "marketing",
-        "engineering",
-        "direktur",
-        "purchasing"
-    ];
+    console.log("Bot Mode: Aktif. Selamat datang dari Vercel!");
+
+        const roleSequence = [
+            "marketing",
+            "engineering",
+            "direktur",
+            "purchasing"
+        ];
 
     // Role saat ini
     let currentRoleIndex = parseInt(
