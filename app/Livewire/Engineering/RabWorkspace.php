@@ -28,7 +28,6 @@ class RabWorkspace extends Component
 
     public $newKategori;
     
-    // Variabel buat Modal Request Material yang lu lupain
     public $showRequestModal = false;
     public $reqNamaMaterial;
     public $reqDeskripsi;
@@ -36,7 +35,6 @@ class RabWorkspace extends Component
     public $reqSatuan;
     public $reqTargetWaktu;
     
-    // State untuk pencarian material per baris
     public $searchMaterialId = null;
     public $materialSearchKeyword = '';
     public $materialResults = [];
@@ -93,7 +91,6 @@ class RabWorkspace extends Component
         $this->hitungTotal();
     }
 
-    // INSTANT AUTO-SAVE: Dipicu pas user klik luar (blur) atau tekan Enter
    public function updateInline($itemId, $field, $value)
     {
         $item = RabItem::find($itemId);
@@ -322,7 +319,7 @@ public function ajukanMaterialBaru()
 
         $overhead = (int)($this->overhead_cost ?? 0);
 
-        // LOGIKA PENGUNCIAN ABSOLUT: 
+       
         // Selain 'draft' dan 'revision', semuanya WAJIB dikunci (termasuk pending & approved)
         $statusRab = strtolower($this->rabAktif->status_rab);
         $isLocked = !in_array($statusRab, ['draft', 'revision']);
@@ -332,7 +329,7 @@ public function ajukanMaterialBaru()
             'totalPekerjaan' => $totalPekerjaan,
             'overhead' => $overhead,
             'grandTotal' => $totalPekerjaan + $overhead,
-            'isApproved' => $isLocked // Tetep pakai variabel isApproved biar kodingan UI Blade lu nggak perlu dirombak
+            'isApproved' => $isLocked 
         ])->layout('components.layouts.app');
     }
 }

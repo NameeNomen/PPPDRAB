@@ -154,7 +154,6 @@
                     @endauth
                 </div>
 
-                {{-- Lonceng Notif Dinamis (Posisi Absolute Mojok Kanan) --}}
                 @auth
                     <div class="absolute right-4 md:right-6 top-1/2 -translate-y-1/2">
                         {{-- PEMANGGILAN KOMPONEN ASLI. JANGAN DIUBAH JADI BUTTON STATIS! --}}
@@ -170,9 +169,6 @@
         {{ $slot }}
     </main>
 
-    {{-- ═══════════════════════════════════════════ --}}
-    {{--  FOOTER                                     --}}
-    {{-- ═══════════════════════════════════════════ --}}
     <footer class="w-full py-6 border-t border-[#B4CDBF]/40 bg-white mt-auto shrink-0">
         <div class="max-w-7xl mx-auto px-6 flex flex-col items-center text-center gap-4">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-2 text-[10px] font-bold text-[#7A9D8C] pt-3 w-full max-w-xs">
@@ -183,7 +179,6 @@
         </div>
     </footer>
 
-    {{-- WAJIB ADA: Untuk memuat JavaScript bawaan Livewire & Alpine --}}
     @livewireScripts
     <script src="{{ asset('autoplay-plugin.js') }}"></script>
 

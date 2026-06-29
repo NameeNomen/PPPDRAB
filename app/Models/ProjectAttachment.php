@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectAttachment extends Model
 {
-    // INI YANG GW MAKSUD, SESUAIIN SAMA GAMBAR LU!
     protected $table = 'project_request_attachments'; 
     
     protected $fillable = [

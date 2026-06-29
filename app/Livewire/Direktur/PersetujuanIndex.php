@@ -15,7 +15,6 @@ class PersetujuanIndex extends Component
 
     public function render()
     {
-        // LOGIKA BENAR: Cari proyek yang RAB-nya 'pending' ATAU Bidding-nya 'pending'
         $proyekPending = RProject::whereHas('rabs', function($q) {
             $q->where('status_rab', 'pending');
         })->orWhereHas('biddings', function($q) {

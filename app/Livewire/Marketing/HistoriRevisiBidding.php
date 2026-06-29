@@ -50,10 +50,9 @@ class HistoriRevisiBidding extends Component
         $this->loadProjects();
     }
 
-    // STATE 2: Menampilkan daftar riwayat perubahan (Commit) dari satu proyek
+    //  Menampilkan daftar riwayat perubahan (Commit) dari satu proyek
     public function showCommits($id_project)
     {
-        // Eager load RAB approved untuk keperluan preview dokumen
         $this->selectedProject = RProject::with(['rabs' => function($q) {
             $q->where('status_rab', 'approved')->latest();
         }])->findOrFail($id_project);

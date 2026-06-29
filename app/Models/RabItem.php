@@ -19,33 +19,23 @@ class RabItem extends Model
         'subtotal'
     ];
 
-    /**
-     * Item ini milik satu dokumen RAB
-     */
+    
     public function rab()
     {
         return $this->belongsTo(Rab::class, 'id_rab', 'id');
     }
 
-    /**
-     * Relasi ke material
-     */
+
     public function material()
     {
         return $this->belongsTo(Material::class, 'id_material', 'id');
     }
 
-    /**
-     * Parent item (hirarki WBS)
-     */
     public function parent()
     {
         return $this->belongsTo(RabItem::class, 'parent_id', 'id');
     }
 
-    /**
-     * Child item (hirarki WBS)
-     */
     public function children()
     {
         return $this->hasMany(RabItem::class, 'parent_id', 'id');

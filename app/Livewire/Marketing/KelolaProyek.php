@@ -97,7 +97,6 @@ class KelolaProyek extends Component
         $this->search_kategori = '';
     }
 
-    // --- MODAL ACTIONS ---
     public function bukaModal() {
         $this->resetForm();
         $this->isEdit = false;
@@ -124,7 +123,6 @@ class KelolaProyek extends Component
         $this->metode_input = 'manual';
     }
 
-    // --- DETAIL POPUP ---
     public function bukaDetail($id) {
         $this->detailProyek = RProject::with(['category', 'attachments', 'user'])->findOrFail($id);
         $this->isDetailOpen = true;
@@ -135,7 +133,6 @@ class KelolaProyek extends Component
         $this->detailProyek = null;
     }
 
-    // --- CREATE & UPDATE ---
     public function simpanProyek() {
         $this->validateRules(); 
 

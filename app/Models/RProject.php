@@ -52,17 +52,13 @@ class RProject extends Model
         return $this->hasMany(Bidding::class, 'id_r_project');
     }
 
-  // app/Models/RProject.php
-
     public function rabs()
     {
-        // Ganti 'id_r_project' jadi 'id_r_project'
         return $this->hasMany(Rab::class, 'id_r_project');
     }
 
     public function rab()
     {
-        // Ganti juga di sini
         return $this->hasOne(Rab::class, 'id_r_project')->latestOfMany();
     }
 

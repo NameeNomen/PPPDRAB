@@ -12,14 +12,11 @@ class DashboardEngineering extends Component
 {
     public function render()
     {
-        // 1. STATISTIK KARTU UTAMA (Berdasarkan lifecycle pembuatan RAB)
         $rfqMasuk = RProject::whereDoesntHave('rab')->count(); // Proyek baru yang belum punya RAB sama sekali
         $rabDraft = Rab::where('status_rab', 'draft')->count(); // Lagi lu kerjain
         $rabPending = Rab::where('status_rab', 'pending')->count(); // Udah di meja direktur
         $rabRevision = Rab::where('status_rab', 'revision')->count(); // Direktur minta revisi
 
-        // 2. DATA LISTING WIDGET
-        // Proyek Prioritas (Yang belum kelar RAB-nya)
         $proyekPrioritas = RProject::whereDoesntHave('rab')
             ->orWhereHas('rab', function($q) {
                 $q->whereIn('status_rab', ['draft', 'revision']);

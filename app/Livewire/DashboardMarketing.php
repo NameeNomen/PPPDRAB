@@ -15,11 +15,7 @@ class DashboardMarketing extends Component
     {
         // Mengambil ID user yang sedang login untuk keamanan isolasi data
         $userId = Auth::id();
-
-        // ==========================================
-        // 1. DATA KOTAK METRIK (ATAS)
-        // ==========================================
-
+       
         // Total RFQ Masuk: Menghitung semua baris di tabel r_project milik user ini
 $totalRfq = RProject::count();
 
@@ -41,12 +37,6 @@ $totalRfq = RProject::count();
         $potensiPenjualan = Bidding::where('id_user', $userId)
             ->whereIn('status_bidding', ['draft', 'pending', 'approved', 'sent', 'won'])
             ->sum('total_penawaran');
-
-
-        // ==========================================
-        // 2. DATA LIST & TABEL (TENGAH & BAWAH)
-        // ==========================================
-
         // RFQ Terbaru: Ambil 5 data terbaru yang diurutkan dari waktu pembuatan (created_at)
         $rfqTerbaru = RProject::with('category')
             ->where('id_user', $userId)
@@ -63,11 +53,6 @@ $totalRfq = RProject::count();
             ->take(5)
             ->get();
 
-
-        // ==========================================
-        // 3. ENGINE GRAFIK (WON VS LOST)
-        // ==========================================
-        
         $chartBulan = [];
         $chartWon = [];
         $chartLost = [];

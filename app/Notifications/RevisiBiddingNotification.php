@@ -11,7 +11,7 @@ class RevisiBiddingNotification extends Notification
 
     public $bidding; // Variabel buat nampung data dokumen yang direvisi
 
-    // Constructor ini buat nerima paket data dari halaman KelolaBidding lu
+    // Constructor ini buat nerima paket data dari halaman KelolaBidding
     public function __construct($biddingData)
     {
         $this->bidding = $biddingData;

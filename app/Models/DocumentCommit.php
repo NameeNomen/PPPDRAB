@@ -30,17 +30,11 @@ protected $casts = [
         'snapshot_data' => 'array', 
     ];
 
-    /**
-     * User yang melakukan commit
-     */
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id');
     }
 
-    /**
-     * Relasi ke dokumen RAB
-     */
     public function rab()
     {
         return $this->belongsTo(Rab::class, 'id_rab', 'id');
@@ -49,9 +43,7 @@ public function project()
     {
         return $this->belongsTo(\App\Models\RProject::class, 'id_r_project', 'id');
     }
-    /**
-     * Relasi ke dokumen bidding
-     */
+   
    public function bidding()
     {
         return $this->belongsTo(\App\Models\Bidding::class, 'id_bidding', 'id');
