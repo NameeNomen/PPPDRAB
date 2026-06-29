@@ -51,19 +51,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const credentials = {
         marketing: {
-            user: "marketing", pass: "marketing123",
+            username: "marketing", password: "marketing123",
             tour: ["/marketing/dashboard", "/marketing/proyek/detail/1", "/marketing/proyek", "/marketing/bidding", "/marketing/bidding/workspace/1", "/marketing/bidding/log/1", "/marketing/bidding/histori"]
         },
         engineering: {
-            user: "engineering", pass: "marketing123",
+            username: "engineering", password: "marketing123",
             tour: ["/engineering/dashboard", "/engineering/kelola-rab", "/engineering/kelola-rab/1/detail", "/engineering/kelola-rab/1/workspace", "/engineering/rab/histori"]
         },
         direktur: {
-            user: "direktur", pass: "marketing123",
+            username: "direktur", password: "marketing123",
             tour: ["/direktur/dashboard", "/direktur/persetujuan", "/direktur/persetujuan/proyek/1"]
         },
         purchasing: {
-            user: "purchasing", pass: "marketing123",
+            username: "purchasing", password: "marketing123",
             tour: ["/purchasing/dashboard", "/purchasing/material-index", "/purchasing/material-create", "/purchasing/material/1/edit", "/purchasing/material/review-request"]
         }
     };
@@ -81,13 +81,13 @@ document.addEventListener("DOMContentLoaded", function () {
         botState.stepIndex = 0;
         window.name = JSON.stringify(botState);
 
-        const userInput = document.querySelector('input[name*="user"], input[name*="email"], input[type="text"], input[type="email"]');
-        const passInput = document.querySelector('input[name*="pass"], input[type="password"]');
+        const userInput = document.querySelector('input[name*="username"], input[name*="email"], input[type="text"], input[type="email"]');
+        const passInput = document.querySelector('input[name*="password"], input[type="password"]');
         const submitButton = document.querySelector('button[type="submit"], input[type="submit"]');
 
         if (userInput && passInput && submitButton) {
-            userInput.value = activeAccount.user;
-            passInput.value = activeAccount.pass;
+            userInput.value = activeAccount.username;
+            passInput.value = activeAccount.password;
             
             userInput.dispatchEvent(new Event("input", { bubbles: true }));
             passInput.dispatchEvent(new Event("input", { bubbles: true }));
