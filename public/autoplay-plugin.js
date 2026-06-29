@@ -75,28 +75,40 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==================================================
     // 5. LOGIKA LOGIN
     // ==================================================
+   
+    // ==================================================
+    // 5. LOGIKA LOGIN (Versi Strict Username & Password)
+    // ==================================================
     if (window.location.pathname.includes("login")) {
         console.log("Bot Login sebagai:", currentRole);
         
         botState.stepIndex = 0;
         window.name = JSON.stringify(botState);
 
-        const userInput = document.querySelector('input[name*="username"], input[name*="email"], input[type="text"], input[type="email"]');
-        const passInput = document.querySelector('input[name*="password"], input[type="password"]');
+        // Cuma nyari input dengan name="username" atau name="user"
+        const userInput = document.querySelector('input[name="username"], input[name="user"]');
+        
+        // Cuma nyari input dengan name="password" atau type="password"
+        const passInput = document.querySelector('input[name="password"], input[type="password"]');
+        
         const submitButton = document.querySelector('button[type="submit"], input[type="submit"]');
 
         if (userInput && passInput && submitButton) {
-            userInput.value = activeAccount.username;
-            passInput.value = activeAccount.password;
+            userInput.value = activeAccount.user;
+            passInput.value = activeAccount.pass;
             
+            // Pancing Livewire/Alpine biar ngerasa ada inputan manusia
             userInput.dispatchEvent(new Event("input", { bubbles: true }));
             passInput.dispatchEvent(new Event("input", { bubbles: true }));
 
             setTimeout(() => {
                 submitButton.click();
             }, 1000);
+        } else {
+            // Kalau botnya bengong di login, error ini bakal ngasih tau alasannya
+            console.error("Bot Mode: Form login nggak ketemu! Pastikan atribut 'name' di tag <input> lu beneran 'username' dan 'password'.");
         }
-    } 
+    }
     // ==================================================
     // 6. LOGIKA TOUR 
     // ==================================================
