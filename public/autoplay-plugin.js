@@ -1,40 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+   
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
     const isDalamIframe = window.self !== window.top;
 
     const isDariVercel = document.referrer.includes(ALLOWED_REFERRER);
 
-    if (!isDalamIframe || !isDariVercel) {
-        console.log("Bot Mode: Script dinonaktifkan. Lu bukan Vercel gue.");
+    if (isDalamIframe && isDariVercel) {
+        sessionStorage.setItem("valid_vercel_session", "true");
+    }
+
+    const isValidSession = sessionStorage.getItem("valid_vercel_session") === "true";
+
+    if (!isDalamIframe || !isValidSession) {
+        console.warn("Bot Mode: Script dinonaktifkan. Lu bukan Vercel gue.");
         return; 
     }
 
-    console.log("Bot Mode: Aktif. Selamat datang dari Vercel!");
-
-        const roleSequence = [
-            "marketing",
-            "engineering",
-            "direktur",
-            "purchasing"
-        ];
-
-    // Role saat ini
-    let currentRoleIndex = parseInt(
-        sessionStorage.getItem("bot_role_index") || "0"
-    );
-
-    // Semua role sudah selesai
-    if (currentRoleIndex >= roleSequence.length) {
-        console.log("Bot Mode: Semua tour selesai.");
-        sessionStorage.clear();
-        return;
-    }
-
-    const currentRole = roleSequence[currentRoleIndex];
-
-    // ==================================================
+    console.log("Bot Mode: Aktif. Melanjutkan tour...");
+        // ==================================================
     // DATA LOGIN & TOUR
     // ==================================================
     const credentials = {
