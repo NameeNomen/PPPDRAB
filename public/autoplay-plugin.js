@@ -1,27 +1,40 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-   
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
-    const isDalamIframe = window.self !== window.top;
-
-    const isDariVercel = document.referrer.includes(ALLOWED_REFERRER);
-
-    if (isDalamIframe && isDariVercel) {
-        sessionStorage.setItem("valid_vercel_session", "true");
-    }
-
-    const isValidSession = sessionStorage.getItem("valid_vercel_session") === "true";
-
-    if (!isDalamIframe || !isValidSession) {
-        console.warn("Bot Mode: Script dinonaktifkan. Lu bukan Vercel gue.");
+    if (window.self === window.top) {
+        console.warn("Bot Mode: Mati. Lu buka web ini langsung, bukan di dalam iframe.");
         return; 
     }
 
-    console.log("Bot Mode: Aktif. Melanjutkan tour...");
-        // ==================================================
-    // DATA LOGIN & TOUR
-    // ==================================================
+    let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
+    
+    try {
+        if (window.name && window.name.includes('roleIndex')) {
+            botState = JSON.parse(window.name);
+        }
+    } catch (e) {
+        console.error("Gagal baca ingatan bot.");
+    }
+
+    if (!botState.isVercel) {
+        // Cek apakah web induknya beneran Vercel lu
+        if (document.referrer.includes(ALLOWED_REFERRER)) {
+            botState.isVercel = true;
+            window.name = JSON.stringify(botState); 
+        } else {
+            console.error("Bot Mode diblokir. Lu nyoba manggil dari:", document.referrer || "Unknown/Direct");
+            return; // Script mati di sini kalau bukan Vercel lu
+        }
+    }
+    if (!botState.active || botState.roleIndex >= 4) { 
+        console.log("Bot Mode: Semua tour selesai. Selamat istirahat.");
+        window.name = ""; 
+        return;
+    }
+
+    console.log("Bot Mode: Aktif. Stempel Vercel valid.");
+
     const credentials = {
 
         marketing: {
