@@ -1,23 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
-    // 1. VALIDASI IFRAME DASAR
+    // 1. VALIDASI IFRAME
     if (window.self === window.top) {
         console.warn("Bot Mode: Nonaktif. Halaman dibuka langsung, bukan di iframe.");
         return;
     }
 
-    // 2. BACA INGATAN DARI WINDOW.NAME
+    // 2. BACA STATE
     let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
     try {
         if (window.name && window.name.includes('roleIndex')) {
             botState = JSON.parse(window.name);
         }
     } catch (e) {
-        console.error("Gagal baca ingatan bot.");
+        console.error("Gagal membaca state bot.");
     }
 
-    // 3. GEMBOK DOMAIN VERCEL
+    // 3. VALIDASI DOMAIN
     if (!botState.isVercel) {
         if (document.referrer.includes(ALLOWED_REFERRER)) {
             botState.isVercel = true;
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // 4. DATA LOGIN & TOUR
+    // 4. DATA AKUN & TOUR
     const roleSequence = ["marketing", "engineering", "direktur", "purchasing"];
 
     if (!botState.active || botState.roleIndex >= roleSequence.length) {
@@ -59,19 +59,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const currentRole = roleSequence[botState.roleIndex];
     const activeAccount = credentials[currentRole];
 
-    // 5. LOGIKA LOGIN (SUDAH DISESUAIKAN DENGAN login.blade.php)
+    // 5. LOGIKA LOGIN
     if (window.location.pathname.includes("login")) {
         console.log("Bot Login sebagai:", currentRole);
         botState.stepIndex = 0;
         window.name = JSON.stringify(botState);
 
-        // Cari input berdasarkan wire:model atau type-nya langsung
+        // 🔥 PERBAIKAN DI SINI: Sesuaikan dengan login.blade.php lu yang pakai wire:model
         const userInput = document.querySelector('input[wire\\:model="username"]') || document.querySelector('input[type="text"]');
         const passInput = document.querySelector('input[wire\\:model="password"]') || document.querySelector('input[type="password"]');
         const submitButton = document.querySelector('button[type="submit"]');
 
         if (userInput && passInput && submitButton) {
-            // Pakai Native Setter biar Livewire ngerasa ada yang ngetik manual
+            // 🔥 PENTING: Pakai Native Setter biar Livewire ngerasa ada yang ngetik
             const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
 
             nativeSetter.call(userInput, activeAccount.username);
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             console.error("Bot Mode: Elemen form login tidak ditemukan. Cek selector inputnya.");
         }
-    }
+    } 
 
     // 6. LOGIKA TOUR
     else {
