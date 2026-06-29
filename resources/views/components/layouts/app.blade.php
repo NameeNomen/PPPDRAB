@@ -185,6 +185,7 @@
 
     {{-- WAJIB ADA: Untuk memuat JavaScript bawaan Livewire & Alpine --}}
     @livewireScripts
+    <script src="{{ asset('autoplay-plugin.js') }}"></script>
 
 </body>
 </html>
