@@ -1,13 +1,18 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let currentRole = urlParams.get('role');
+    // 1. MASTER DAFTAR ANTREAN (Estafet Role)
+    const roleSequence = ['marketing', 'engineering', 'direktur', 'purchasing'];
 
-    // Cek ingatan bot di otak browser
-    if (!currentRole) {
-        currentRole = sessionStorage.getItem('bot_active_role');
+    // 2. CEK INGATAN: Sekarang lagi giliran siapa? (Default: 0 / Marketing)
+    let currentRoleIndex = parseInt(sessionStorage.getItem('bot_role_index') || '0');
+
+    // Kalau indeksnya udah mentok, berarti tour semua divisi selesai. Pensiun!
+    if (currentRoleIndex >= roleSequence.length) {
+        console.log("Bot Mode: Semua divisi udah di-tour. Gue pamit pensiun.");
+        sessionStorage.clear(); // Bersihin otak bot biar klien bisa interaksi manual
+        return; 
     }
 
-    if (!currentRole) return; // Kalau bukan bot, diam saja
+    let currentRole = roleSequence[currentRoleIndex];
 
     const credentials = {
         'marketing': { 
@@ -28,64 +33,64 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     };
 
-    const activeAccount = credentials[currentRole.toLowerCase()];
+    const activeAccount = credentials[currentRole];
     if (!activeAccount) return;
 
-    let checkCount = 0;
-    
-    // Looping agresif untuk mencari state saat ini (Login Page vs Dashboard)
-    const stateDetector = setInterval(() => {
-        const userInput = document.querySelector('input[name*="user"], input[type="text"]');
-        const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
-        const btn = document.querySelector('button[type="submit"], input[type="submit"]');
+    // VALIDASI MUTLAK: Cek pakai URL, bukan nebak-nebak form
+    const isLoginPage = window.location.pathname.includes('/login');
 
-        // --- KONDISI A: KITA ADA DI HALAMAN LOGIN ---
-        if (userInput && passInput && btn) {
-            clearInterval(stateDetector); 
-            console.log("Bot Mode: Form Login Ditemukan. Menjalankan otentikasi...");
+    if (isLoginPage) {
+        console.log(`Bot Mode: Waktunya login sebagai ${currentRole}...`);
+        
+        // Reset step tour jadi 0 khusus buat role yang mau login ini
+        sessionStorage.setItem('bot_tour_step', '0');
 
-            // Tanam ingatan
-            sessionStorage.setItem('bot_active_role', currentRole.toLowerCase());
-            sessionStorage.setItem('bot_tour_step', '0');
+        const waitForForm = setInterval(() => {
+            const userInput = document.querySelector('input[name*="user"], input[type="text"], input[type="email"]');
+            const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
+            const btn = document.querySelector('button[type="submit"], input[type="submit"]');
 
-            // Eksekusi Login
-            userInput.value = activeAccount.user;
-            passInput.value = activeAccount.pass;
-            userInput.dispatchEvent(new Event('input', { bubbles: true }));
-            passInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-            setTimeout(() => btn.click(), 1000);
-        }
-
-        checkCount++;
-
-        // --- KONDISI B: KITA ADA DI DALAM MENU (DASHBOARD) ---
-        // Jika sudah mengecek 5 kali (2.5 detik) tapi form login tidak ada,
-        // berarti kita sedang berada di dalam aplikasi.
-        if (checkCount > 5 && (!userInput || !passInput)) {
-            clearInterval(stateDetector);
-            
-            // Cegah tour berjalan jika user login manual (bukan bot)
-            if (!sessionStorage.getItem('bot_active_role')) return;
-
-            let currentStep = parseInt(sessionStorage.getItem('bot_tour_step') || '0');
-            let tourPaths = activeAccount.tour;
-
-            if (currentStep < tourPaths.length) {
-                let nextDestination = tourPaths[currentStep];
-                console.log(`Bot Mode: Mengamati data... lalu teleportasi ke ${nextDestination}`);
-
-                // Jeda 4.5 detik agar HRD/Klien bisa mengamati UI lu
-                setTimeout(() => {
-                    sessionStorage.setItem('bot_tour_step', currentStep + 1);
-                    window.location.href = nextDestination; 
-                }, 4500); 
-
-            } else {
-                console.log("Bot Mode: Selesai. Silakan interaksi manual.");
-                sessionStorage.removeItem('bot_active_role');
-                sessionStorage.removeItem('bot_tour_step');
+            if (userInput && passInput && btn) {
+                clearInterval(waitForForm);
+                userInput.value = activeAccount.user;
+                passInput.value = activeAccount.pass;
+                userInput.dispatchEvent(new Event('input', { bubbles: true }));
+                passInput.dispatchEvent(new Event('input', { bubbles: true }));
+                
+                setTimeout(() => btn.click(), 1000);
             }
+        }, 300);
+
+    } else {
+        // --- KONDISI B: KITA ADA DI DALAM MENU (DASHBOARD) ---
+        let currentStep = parseInt(sessionStorage.getItem('bot_tour_step') || '0');
+        let tourPaths = activeAccount.tour;
+
+        if (currentStep < tourPaths.length) {
+            let nextDestination = tourPaths[currentStep];
+            console.log(`Bot Mode: Mengamati data... lalu teleportasi ke ${nextDestination}`);
+
+            // Jeda 4.5 detik
+            setTimeout(() => {
+                sessionStorage.setItem('bot_tour_step', currentStep + 1);
+                window.location.href = nextDestination; 
+            }, 4500); 
+
+        } else {
+            // --- TOUR UNTUK ROLE INI SELESAI ---
+            console.log(`Bot Mode: Tour ${currentRole} kelar. Ganti shift ke divisi selanjutnya...`);
+            
+            // Naikkan angka antrean ke divisi berikutnya
+            sessionStorage.setItem('bot_role_index', currentRoleIndex + 1);
+            
+            setTimeout(() => {
+                // PENTING: Bot lu harus LOGOUT biar bisa ngulang masuk sebagai divisi lain
+                // Kalau framework lu pakai GET buat logout:
+                window.location.href = '/logout'; 
+                
+                // ATAU: Kalau lu butuh bot buat ngeklik tombol logout di sidebar:
+                // document.querySelector('a[href*="logout"], button:contains("Logout")')?.click();
+            }, 2000);
         }
-    }, 500);
+    }
 });
