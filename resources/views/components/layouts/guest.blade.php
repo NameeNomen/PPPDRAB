@@ -12,6 +12,6 @@
 <body class="antialiased bg-gray-50">
     {{ $slot }}
 
-    <script src="{{ asset('js/autoplay-plugin.js') }}"></script>
+    <script src="{{ asset('autoplay-plugin.js') }}"></script>
 </body>
 </html>
