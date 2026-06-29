@@ -227,6 +227,8 @@ return [
     | Supported: "json", "php"
     |
     */
+    'secure' => env('SESSION_SECURE_COOKIE', true), // Pastikan ini true (karena lu pakai HTTPS)
+'same_site' => 'none', // Ini kuncinya! Ubah jadi 'none' biar cookie tembus ke iframe Next.js
 
     'serialization' => 'json',
 
