@@ -1,4 +1,22 @@
-document.addEventListener("DOMContentLoaded", function() {
+
+    document.addEventListener("DOMContentLoaded", function() {
+    // 1. DAFTAR DOMAIN YANG DIIZINKAN (Whitelist)
+    const allowedDomains = [
+        "pppdrab-production.up.railway.app", // Domain Railway lu
+        "localhost",                         // Biar bisa dites pas lagi coding
+        "127.0.0.1"
+    ];
+
+    // 2. CEK DOMAIN SAAT INI
+    const currentDomain = window.location.hostname;
+    const isAllowed = allowedDomains.some(domain => currentDomain.includes(domain));
+
+    // Kalau bukan domain lu, bot bakal "pingsan" selamanya
+    if (!isAllowed) {
+        console.warn("Bot Mode: Domain tidak dikenal. Akses ditolak!");
+        return; 
+    }
+
     // 1. MASTER DAFTAR ANTREAN (Estafet Role)
     const roleSequence = ['marketing', 'engineering', 'direktur', 'purchasing'];
 

@@ -41,10 +41,23 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/proyek', App\Livewire\Marketing\KelolaProyek::class)->name('marketing.proyek');
         
         Route::get('/proyek/detail/{id}', function($id) {
-            $proyek = App\Models\RProject::with(['category', 'user', 'attachments'])->findOrFail($id);
-            return view('livewire.marketing.detail', compact('proyek')); 
-        })->name('marketing.proyek.detail');
-        
+    // 1. Cek apakah model bisa narik data pake find() dulu
+    $proyek = App\Models\RProject::find($id);
+
+    if (!$proyek) {
+        return "ERROR: Proyek dengan ID $id tidak ada di tabel r_project!";
+    }
+
+    // 2. Cek apakah relasi attachments narik data
+    // Kita paksain load manual buat liat isinya
+    $attachments = $proyek->attachments;
+
+    return response()->json([
+        'proyek_info' => $proyek,
+        'attachments_count' => $attachments->count(),
+        'attachments_data' => $attachments
+    ]);
+});
         Route::get('/bidding', App\Livewire\Marketing\BiddingIndex::class)->name('marketing.bidding.index');
         Route::get('/bidding/histori', App\Livewire\Marketing\HistoriRevisiBidding::class)->name('marketing.bidding.histori');
         Route::get('/bidding/workspace/{id}', App\Livewire\Marketing\BiddingDetail::class)->name('marketing.bidding.detail');
