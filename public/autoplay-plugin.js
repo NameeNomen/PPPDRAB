@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==================================================
     // HANYA IZINKAN SCRIPT BERJALAN DI DOMAIN INI
     // ==================================================
-    const ALLOWED_ORIGIN = "https://web-porto-nameenomen.vercel.app/";
+    const ALLOWED_ORIGIN = "https://web-porto-nameenomen.vercel.app";
 
     if (window.location.origin !== ALLOWED_ORIGIN) {
         console.warn("Bot Mode: Unauthorized domain. Script dinonaktifkan.");
