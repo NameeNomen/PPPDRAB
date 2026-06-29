@@ -6,14 +6,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==================================================
     if (window.self === window.top) {
         console.warn("Bot Mode: Mati. Lu buka web ini langsung, bukan di dalam iframe.");
-        return; 
+        return;
     }
 
     // ==================================================
     // 2. BACA INGATAN DARI WINDOW.NAME
     // ==================================================
     let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
-    
     try {
         if (window.name && window.name.includes('roleIndex')) {
             botState = JSON.parse(window.name);
@@ -27,11 +26,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==================================================
     if (!botState.isVercel) {
         if (document.referrer.includes(ALLOWED_REFERRER)) {
-            botState.isVercel = true; 
-            window.name = JSON.stringify(botState); 
+            botState.isVercel = true;
+            window.name = JSON.stringify(botState);
         } else {
             console.error("Bot Mode diblokir. Lu nyoba manggil dari:", document.referrer || "Unknown/Direct");
-            return; 
+            return;
         }
     }
 
@@ -39,11 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // 4. DATA LOGIN & TOUR
     // ==================================================
     const roleSequence = ["marketing", "engineering", "direktur", "purchasing"];
-    
-    // Kalau otaknya udah dimatikan atau tour udah beres semua
-    if (!botState.active || botState.roleIndex >= roleSequence.length) { 
+
+    if (!botState.active || botState.roleIndex >= roleSequence.length) {
         console.log("Bot Mode: Semua tour selesai. Selamat istirahat.");
-        window.name = ""; // Bersihkan ingatan biar besok bisa jalan lagi
+        window.name = ""; 
         return;
     }
 
@@ -68,49 +66,50 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    // Dideklarasikan dengan benar di sini biar nggak error 'not defined'
     const currentRole = roleSequence[botState.roleIndex];
     const activeAccount = credentials[currentRole];
 
     // ==================================================
-    // 5. LOGIKA LOGIN
-    // ==================================================
-   
-    // ==================================================
-    // 5. LOGIKA LOGIN (Versi Strict Username & Password)
+    // 5. LOGIKA LOGIN (DISESUAIKAN TANPA UBAH BLADE)
     // ==================================================
     if (window.location.pathname.includes("login")) {
         console.log("Bot Login sebagai:", currentRole);
-        
         botState.stepIndex = 0;
         window.name = JSON.stringify(botState);
 
-        // Cuma nyari input dengan name="username" atau name="user"
-        const userInput = document.querySelector('input[name="username"], input[name="user"]');
+        // 🔥 PERUBAHAN DI SINI BRO 🔥
+        // Kita pakai selector alternatif: wire:model (dengan escape \:) ATAU placeholder-nya.
+        // Jadi nggak perlu lagi maksa nyari name="username".
+        const userInput = document.querySelector('input[wire\\:model="username"], input[placeholder="Masukkan username..."], input[name="username"]');
         
-        // Cuma nyari input dengan name="password" atau type="password"
-        const passInput = document.querySelector('input[name="password"], input[type="password"]');
+        // Untuk password, type="password" udah pasti ketemu, tapi gue tambahin wire:model buat jaga-jaga.
+        const passInput = document.querySelector('input[type="password"], input[wire\\:model="password"], input[name="password"]');
         
         const submitButton = document.querySelector('button[type="submit"], input[type="submit"]');
 
         if (userInput && passInput && submitButton) {
             userInput.value = activeAccount.username;
             passInput.value = activeAccount.password;
-            
+
             // Pancing Livewire/Alpine biar ngerasa ada inputan manusia
             userInput.dispatchEvent(new Event("input", { bubbles: true }));
             passInput.dispatchEvent(new Event("input", { bubbles: true }));
+            
+            // Opsional: dispatch change event juga buat amannya di beberapa versi Livewire
+            userInput.dispatchEvent(new Event("change", { bubbles: true }));
+            passInput.dispatchEvent(new Event("change", { bubbles: true }));
 
             setTimeout(() => {
                 submitButton.click();
             }, 1000);
         } else {
-            // Kalau botnya bengong di login, error ini bakal ngasih tau alasannya
-            console.error("Bot Mode: Form login nggak ketemu! Pastikan atribut 'name' di tag <input> lu beneran 'username' dan 'password'.");
+            console.error("Bot Mode: Form login nggak ketemu! Cek lagi selector di autoplay-plugin.js.");
+            console.log("Status elemen:", { userInput: !!userInput, passInput: !!passInput, submitButton: !!submitButton });
         }
     }
+
     // ==================================================
-    // 6. LOGIKA TOUR 
+    // 6. LOGIKA TOUR
     // ==================================================
     else {
         let currentStep = botState.stepIndex;
@@ -124,17 +123,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 botState.stepIndex = currentStep + 1;
                 window.name = JSON.stringify(botState);
                 window.location.href = destination;
-            }, 4500); 
-        } 
-        else {
+            }, 4500);
+        } else {
             console.log(currentRole + " selesai. Siap-siap ganti role...");
-            
             botState.roleIndex += 1;
-            botState.stepIndex = 0; 
+            botState.stepIndex = 0;
             window.name = JSON.stringify(botState);
 
             setTimeout(() => {
-                window.location.href = "/logout"; 
+                window.location.href = "/logout";
             }, 2000);
         }
     }
