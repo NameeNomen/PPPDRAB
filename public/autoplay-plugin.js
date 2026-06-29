@@ -94,8 +94,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const submitButton = document.querySelector('button[type="submit"], input[type="submit"]');
 
         if (userInput && passInput && submitButton) {
-            userInput.value = activeAccount.user;
-            passInput.value = activeAccount.pass;
+            userInput.value = activeAccount.username;
+            passInput.value = activeAccount.password;
             
             // Pancing Livewire/Alpine biar ngerasa ada inputan manusia
             userInput.dispatchEvent(new Event("input", { bubbles: true }));
