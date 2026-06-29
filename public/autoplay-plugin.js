@@ -1,16 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Cek parameter URL atau ingatan bot sebelumnya
     const urlParams = new URLSearchParams(window.location.search);
     let currentRole = urlParams.get('role');
 
+    // Cek ingatan bot di otak browser
     if (!currentRole) {
         currentRole = sessionStorage.getItem('bot_active_role');
     }
 
-    // Kalau bener-bener gak ada role, skrip mati (mode user biasa)
-    if (!currentRole) return;
+    if (!currentRole) return; // Kalau bukan bot, diam saja
 
-    // 2. Brankas Akun & Rute Tour (Sesuai Route Laravel lu)
     const credentials = {
         'marketing': { 
             user: 'marketing', pass: 'marketing123', 
@@ -33,48 +31,61 @@ document.addEventListener("DOMContentLoaded", function() {
     const activeAccount = credentials[currentRole.toLowerCase()];
     if (!activeAccount) return;
 
-    // 3. DETEKSI LOKASI HALAMAN
-    const userInput = document.querySelector('input[name*="user"], input[type="text"]');
-    const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
-    const btn = document.querySelector('button[type="submit"], input[type="submit"]');
+    let checkCount = 0;
+    
+    // Looping agresif untuk mencari state saat ini (Login Page vs Dashboard)
+    const stateDetector = setInterval(() => {
+        const userInput = document.querySelector('input[name*="user"], input[type="text"]');
+        const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
+        const btn = document.querySelector('button[type="submit"], input[type="submit"]');
 
-    if (userInput && passInput && btn) {
-        // --- KONDISI A: SEDANG DI HALAMAN LOGIN ---
-        console.log("Bot Mode: Mulai Login sebagai " + currentRole);
+        // --- KONDISI A: KITA ADA DI HALAMAN LOGIN ---
+        if (userInput && passInput && btn) {
+            clearInterval(stateDetector); 
+            console.log("Bot Mode: Form Login Ditemukan. Menjalankan otentikasi...");
 
-        // Tanam ingatan ke otak browser
-        sessionStorage.setItem('bot_active_role', currentRole.toLowerCase());
-        sessionStorage.setItem('bot_tour_step', '0');
+            // Tanam ingatan
+            sessionStorage.setItem('bot_active_role', currentRole.toLowerCase());
+            sessionStorage.setItem('bot_tour_step', '0');
 
-        userInput.value = activeAccount.user;
-        passInput.value = activeAccount.pass;
-        userInput.dispatchEvent(new Event('input', { bubbles: true }));
-        passInput.dispatchEvent(new Event('input', { bubbles: true }));
+            // Eksekusi Login
+            userInput.value = activeAccount.user;
+            passInput.value = activeAccount.pass;
+            userInput.dispatchEvent(new Event('input', { bubbles: true }));
+            passInput.dispatchEvent(new Event('input', { bubbles: true }));
 
-        setTimeout(() => {
-            btn.click();
-        }, 1000);
-
-    } else {
-        // --- KONDISI B: SUDAH LOGIN & DI DALAM APLIKASI ---
-        let currentStep = parseInt(sessionStorage.getItem('bot_tour_step') || '0');
-        let tourPaths = activeAccount.tour;
-
-        if (currentStep < tourPaths.length) {
-            let nextDestination = tourPaths[currentStep];
-            console.log(`Bot Mode: Pindah ke ${nextDestination}`);
-
-            // Jeda 4 detik di tiap halaman biar HRD/Klien bisa lihat desain lu
-            setTimeout(() => {
-                sessionStorage.setItem('bot_tour_step', currentStep + 1);
-                window.location.href = nextDestination; // Teleportasi URL yang aman
-            }, 4000); 
-
-        } else {
-            console.log("Bot Mode: Tour Selesai. Silakan coba fitur secara manual.");
-            // Hapus ingatan biar interaksi klik manual gak diganggu
-            sessionStorage.removeItem('bot_active_role');
-            sessionStorage.removeItem('bot_tour_step');
+            setTimeout(() => btn.click(), 1000);
         }
-    }
+
+        checkCount++;
+
+        // --- KONDISI B: KITA ADA DI DALAM MENU (DASHBOARD) ---
+        // Jika sudah mengecek 5 kali (2.5 detik) tapi form login tidak ada,
+        // berarti kita sedang berada di dalam aplikasi.
+        if (checkCount > 5 && (!userInput || !passInput)) {
+            clearInterval(stateDetector);
+            
+            // Cegah tour berjalan jika user login manual (bukan bot)
+            if (!sessionStorage.getItem('bot_active_role')) return;
+
+            let currentStep = parseInt(sessionStorage.getItem('bot_tour_step') || '0');
+            let tourPaths = activeAccount.tour;
+
+            if (currentStep < tourPaths.length) {
+                let nextDestination = tourPaths[currentStep];
+                console.log(`Bot Mode: Mengamati data... lalu teleportasi ke ${nextDestination}`);
+
+                // Jeda 4.5 detik agar HRD/Klien bisa mengamati UI lu
+                setTimeout(() => {
+                    sessionStorage.setItem('bot_tour_step', currentStep + 1);
+                    window.location.href = nextDestination; 
+                }, 4500); 
+
+            } else {
+                console.log("Bot Mode: Selesai. Silakan interaksi manual.");
+                sessionStorage.removeItem('bot_active_role');
+                sessionStorage.removeItem('bot_tour_step');
+            }
+        }
+    }, 500);
 });
