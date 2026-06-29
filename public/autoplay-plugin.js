@@ -1,114 +1,200 @@
+document.addEventListener("DOMContentLoaded", function () {
 
-    document.addEventListener("DOMContentLoaded", function() {
-    // 1. DAFTAR DOMAIN YANG DIIZINKAN (Whitelist)
-    const allowedDomains = [
-        "pppdrab-production.up.railway.app", // Domain Railway lu
-        "localhost",                         // Biar bisa dites pas lagi coding
-        "127.0.0.1"
+    // ==================================================
+    // HANYA IZINKAN SCRIPT BERJALAN DI DOMAIN INI
+    // ==================================================
+    const ALLOWED_ORIGIN = "https://web-porto-nameenomen.vercel.app";
+
+    if (window.location.origin !== ALLOWED_ORIGIN) {
+        console.warn("Bot Mode: Unauthorized domain. Script dinonaktifkan.");
+        return;
+    }
+
+    // ==================================================
+    // URUTAN ROLE
+    // ==================================================
+    const roleSequence = [
+        "marketing",
+        "engineering",
+        "direktur",
+        "purchasing"
     ];
 
-    // 2. CEK DOMAIN SAAT INI
-    const currentDomain = window.location.hostname;
-    const isAllowed = allowedDomains.some(domain => currentDomain.includes(domain));
+    // Role saat ini
+    let currentRoleIndex = parseInt(
+        sessionStorage.getItem("bot_role_index") || "0"
+    );
 
-    // Kalau bukan domain lu, bot bakal "pingsan" selamanya
-    if (!isAllowed) {
-        console.warn("Bot Mode: Domain tidak dikenal. Akses ditolak!");
-        return; 
-    }
-
-    // 1. MASTER DAFTAR ANTREAN (Estafet Role)
-    const roleSequence = ['marketing', 'engineering', 'direktur', 'purchasing'];
-
-    // 2. CEK INGATAN: Sekarang lagi giliran siapa? (Default: 0 / Marketing)
-    let currentRoleIndex = parseInt(sessionStorage.getItem('bot_role_index') || '0');
-
-    // Kalau indeksnya udah mentok, berarti tour semua divisi selesai. Pensiun!
+    // Semua role sudah selesai
     if (currentRoleIndex >= roleSequence.length) {
-        console.log("Bot Mode: Semua divisi udah di-tour. Gue pamit pensiun.");
-        sessionStorage.clear(); // Bersihin otak bot biar klien bisa interaksi manual
-        return; 
+        console.log("Bot Mode: Semua tour selesai.");
+        sessionStorage.clear();
+        return;
     }
 
-    let currentRole = roleSequence[currentRoleIndex];
+    const currentRole = roleSequence[currentRoleIndex];
 
+    // ==================================================
+    // DATA LOGIN & TOUR
+    // ==================================================
     const credentials = {
-        'marketing': { 
-            user: 'marketing', pass: 'marketing123', 
-            tour: ['/marketing/dashboard', '/marketing/proyek/detail/1','/marketing/proyek', '/marketing/bidding', '/marketing/bidding/workspace/1', '/marketing/bidding/log/1', '/marketing/bidding/histori'] 
+
+        marketing: {
+            user: "marketing",
+            pass: "marketing123",
+            tour: [
+                "/marketing/dashboard",
+                "/marketing/proyek/detail/1",
+                "/marketing/proyek",
+                "/marketing/bidding",
+                "/marketing/bidding/workspace/1",
+                "/marketing/bidding/log/1",
+                "/marketing/bidding/histori"
+            ]
         },
-        'engineering': { 
-            user: 'engineering', pass: 'marketing123', 
-            tour: ['/engineering/dashboard', '/engineering/kelola-rab','/engineering/kelola-rab/1/detail', '/engineering/kelola-rab/1/workspace','/engineering/rab/histori'] 
+
+        engineering: {
+            user: "engineering",
+            pass: "marketing123",
+            tour: [
+                "/engineering/dashboard",
+                "/engineering/kelola-rab",
+                "/engineering/kelola-rab/1/detail",
+                "/engineering/kelola-rab/1/workspace",
+                "/engineering/rab/histori"
+            ]
         },
-        'direktur': { 
-            user: 'direktur', pass: 'marketing123', 
-            tour: ['/direktur/dashboard', '/direktur/persetujuan', '/direktur/persetujuan/proyek/1'] 
+
+        direktur: {
+            user: "direktur",
+            pass: "marketing123",
+            tour: [
+                "/direktur/dashboard",
+                "/direktur/persetujuan",
+                "/direktur/persetujuan/proyek/1"
+            ]
         },
-        'purchasing': { 
-            user: 'purchasing', pass: 'marketing123', 
-            tour: ['/purchasing/dashboard', '/purchasing/material-index', '/purchasing/material-create', '/purchasing/material/1/edit','/purchasing/material/review-request'] 
+
+        purchasing: {
+            user: "purchasing",
+            pass: "marketing123",
+            tour: [
+                "/purchasing/dashboard",
+                "/purchasing/material-index",
+                "/purchasing/material-create",
+                "/purchasing/material/1/edit",
+                "/purchasing/material/review-request"
+            ]
         }
+
     };
 
     const activeAccount = credentials[currentRole];
+
     if (!activeAccount) return;
 
-    // VALIDASI MUTLAK: Cek pakai URL, bukan nebak-nebak form
-    const isLoginPage = window.location.pathname.includes('/login');
+    // ==================================================
+    // CEK HALAMAN LOGIN
+    // ==================================================
+    const isLoginPage = window.location.pathname.includes("/login");
 
     if (isLoginPage) {
-        console.log(`Bot Mode: Waktunya login sebagai ${currentRole}...`);
-        
-        // Reset step tour jadi 0 khusus buat role yang mau login ini
-        sessionStorage.setItem('bot_tour_step', '0');
 
-        const waitForForm = setInterval(() => {
-            const userInput = document.querySelector('input[name*="user"], input[type="text"], input[type="email"]');
-            const passInput = document.querySelector('input[type="password"], input[name*="pass"]');
-            const btn = document.querySelector('button[type="submit"], input[type="submit"]');
+        console.log("Bot Login:", currentRole);
 
-            if (userInput && passInput && btn) {
-                clearInterval(waitForForm);
+        sessionStorage.setItem("bot_tour_step", "0");
+
+        const waitForm = setInterval(() => {
+
+            const userInput = document.querySelector(
+                'input[name*="user"], input[name*="email"], input[type="text"], input[type="email"]'
+            );
+
+            const passInput = document.querySelector(
+                'input[name*="pass"], input[type="password"]'
+            );
+
+            const submitButton = document.querySelector(
+                'button[type="submit"], input[type="submit"]'
+            );
+
+            if (userInput && passInput && submitButton) {
+
+                clearInterval(waitForm);
+
                 userInput.value = activeAccount.user;
                 passInput.value = activeAccount.pass;
-                userInput.dispatchEvent(new Event('input', { bubbles: true }));
-                passInput.dispatchEvent(new Event('input', { bubbles: true }));
-                
-                setTimeout(() => btn.click(), 1000);
+
+                userInput.dispatchEvent(new Event("input", {
+                    bubbles: true
+                }));
+
+                passInput.dispatchEvent(new Event("input", {
+                    bubbles: true
+                }));
+
+                setTimeout(() => {
+                    submitButton.click();
+                }, 1000);
             }
+
         }, 300);
 
-    } else {
-        // --- KONDISI B: KITA ADA DI DALAM MENU (DASHBOARD) ---
-        let currentStep = parseInt(sessionStorage.getItem('bot_tour_step') || '0');
-        let tourPaths = activeAccount.tour;
+    }
+
+    // ==================================================
+    // HALAMAN DASHBOARD / MENU
+    // ==================================================
+    else {
+
+        let currentStep = parseInt(
+            sessionStorage.getItem("bot_tour_step") || "0"
+        );
+
+        const tourPaths = activeAccount.tour;
 
         if (currentStep < tourPaths.length) {
-            let nextDestination = tourPaths[currentStep];
-            console.log(`Bot Mode: Mengamati data... lalu teleportasi ke ${nextDestination}`);
 
-            // Jeda 4.5 detik
-            setTimeout(() => {
-                sessionStorage.setItem('bot_tour_step', currentStep + 1);
-                window.location.href = nextDestination; 
-            }, 4500); 
+            const destination = tourPaths[currentStep];
 
-        } else {
-            // --- TOUR UNTUK ROLE INI SELESAI ---
-            console.log(`Bot Mode: Tour ${currentRole} kelar. Ganti shift ke divisi selanjutnya...`);
-            
-            // Naikkan angka antrean ke divisi berikutnya
-            sessionStorage.setItem('bot_role_index', currentRoleIndex + 1);
-            
+            console.log("Bot Tour:", destination);
+
             setTimeout(() => {
-                // PENTING: Bot lu harus LOGOUT biar bisa ngulang masuk sebagai divisi lain
-                // Kalau framework lu pakai GET buat logout:
-                window.location.href = '/logout'; 
-                
-                // ATAU: Kalau lu butuh bot buat ngeklik tombol logout di sidebar:
-                // document.querySelector('a[href*="logout"], button:contains("Logout")')?.click();
-            }, 2000);
+
+                sessionStorage.setItem(
+                    "bot_tour_step",
+                    currentStep + 1
+                );
+
+                window.location.href = destination;
+
+            }, 4500);
+
         }
+
+        // ==================================================
+        // TOUR ROLE SELESAI
+        // ==================================================
+        else {
+
+            console.log(currentRole + " selesai.");
+
+            sessionStorage.setItem(
+                "bot_role_index",
+                currentRoleIndex + 1
+            );
+
+            sessionStorage.removeItem("bot_tour_step");
+
+            setTimeout(() => {
+
+                // Ganti sesuai route logout Laravel kamu
+                window.location.href = "/logout";
+
+            }, 2000);
+
+        }
+
     }
+
 });
