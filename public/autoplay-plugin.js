@@ -1,51 +1,41 @@
 document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
-    // ==================================================
-    // 1. VALIDASI IFRAME DASAR
-    // ==================================================
+    // 1. VALIDASI IFRAME
     if (window.self === window.top) {
-        console.warn("Bot Mode: Mati. Lu buka web ini langsung, bukan di dalam iframe.");
+        console.warn("Bot Mode: Nonaktif. Halaman dibuka langsung, bukan di iframe.");
         return;
     }
 
-    // ==================================================
-    // 2. BACA INGATAN DARI WINDOW.NAME
-    // ==================================================
+    // 2. BACA STATE
     let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
     try {
         if (window.name && window.name.includes('roleIndex')) {
             botState = JSON.parse(window.name);
         }
     } catch (e) {
-        console.error("Gagal baca ingatan bot.");
+        console.error("Gagal membaca state bot.");
     }
 
-    // ==================================================
-    // 3. GEMBOK DOMAIN VERCEL LU
-    // ==================================================
+    // 3. VALIDASI DOMAIN
     if (!botState.isVercel) {
         if (document.referrer.includes(ALLOWED_REFERRER)) {
             botState.isVercel = true;
             window.name = JSON.stringify(botState);
         } else {
-            console.error("Bot Mode diblokir. Lu nyoba manggil dari:", document.referrer || "Unknown/Direct");
+            console.error("Bot Mode diblokir. Referrer tidak valid:", document.referrer || "Direct");
             return;
         }
     }
 
-    // ==================================================
-    // 4. DATA LOGIN & TOUR
-    // ==================================================
+    // 4. DATA AKUN & TOUR
     const roleSequence = ["marketing", "engineering", "direktur", "purchasing"];
 
     if (!botState.active || botState.roleIndex >= roleSequence.length) {
-        console.log("Bot Mode: Semua tour selesai. Selamat istirahat.");
+        console.log("Bot Mode: Semua tour selesai.");
         window.name = ""; 
         return;
     }
-
-    console.log("Bot Mode: Aktif. Stempel Vercel valid.");
 
     const credentials = {
         marketing: {
@@ -69,55 +59,43 @@ document.addEventListener("DOMContentLoaded", function () {
     const currentRole = roleSequence[botState.roleIndex];
     const activeAccount = credentials[currentRole];
 
-    // ==================================================
-    // 5. LOGIKA LOGIN (DISESUAIKAN TANPA UBAH BLADE)
-    // ==================================================
+    // 5. LOGIKA LOGIN
     if (window.location.pathname.includes("login")) {
         console.log("Bot Login sebagai:", currentRole);
         botState.stepIndex = 0;
         window.name = JSON.stringify(botState);
 
-        // 🔥 PERUBAHAN DI SINI BRO 🔥
-        // Kita pakai selector alternatif: wire:model (dengan escape \:) ATAU placeholder-nya.
-        // Jadi nggak perlu lagi maksa nyari name="username".
-        const userInput = document.querySelector('input[wire\\:model="username"], input[placeholder="Masukkan username..."], input[name="username"]');
-        
-        // Untuk password, type="password" udah pasti ketemu, tapi gue tambahin wire:model buat jaga-jaga.
-        const passInput = document.querySelector('input[type="password"], input[wire\\:model="password"], input[name="password"]');
-        
-        const submitButton = document.querySelector('button[type="submit"], input[type="submit"]');
+        // Selector disesuaikan dengan login.blade.php (menggunakan wire:model dan type)
+        const userInput = document.querySelector('input[wire\\:model="username"]') || document.querySelector('input[type="text"]');
+        const passInput = document.querySelector('input[wire\\:model="password"]') || document.querySelector('input[type="password"]');
+        const submitButton = document.querySelector('button[type="submit"]');
 
         if (userInput && passInput && submitButton) {
-            userInput.value = activeAccount.username;
-            passInput.value = activeAccount.password;
+            // Menggunakan native setter agar Livewire mendeteksi perubahan value
+            const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
 
-            // Pancing Livewire/Alpine biar ngerasa ada inputan manusia
-            userInput.dispatchEvent(new Event("input", { bubbles: true }));
-            passInput.dispatchEvent(new Event("input", { bubbles: true }));
-            
-            // Opsional: dispatch change event juga buat amannya di beberapa versi Livewire
-            userInput.dispatchEvent(new Event("change", { bubbles: true }));
-            passInput.dispatchEvent(new Event("change", { bubbles: true }));
+            nativeSetter.call(userInput, activeAccount.username);
+            userInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+            nativeSetter.call(passInput, activeAccount.password);
+            passInput.dispatchEvent(new Event('input', { bubbles: true }));
 
             setTimeout(() => {
                 submitButton.click();
             }, 1000);
         } else {
-            console.error("Bot Mode: Form login nggak ketemu! Cek lagi selector di autoplay-plugin.js.");
-            console.log("Status elemen:", { userInput: !!userInput, passInput: !!passInput, submitButton: !!submitButton });
+            console.error("Bot Mode: Elemen form login tidak ditemukan. Cek kembali selector inputnya.");
         }
-    }
+    } 
 
-    // ==================================================
     // 6. LOGIKA TOUR
-    // ==================================================
     else {
         let currentStep = botState.stepIndex;
         const tourPaths = activeAccount.tour;
 
         if (currentStep < tourPaths.length) {
             const destination = tourPaths[currentStep];
-            console.log("Bot Tour OTW ke:", destination);
+            console.log("Bot Tour ke:", destination);
 
             setTimeout(() => {
                 botState.stepIndex = currentStep + 1;
@@ -125,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href = destination;
             }, 4500);
         } else {
-            console.log(currentRole + " selesai. Siap-siap ganti role...");
+            console.log(currentRole + " selesai. Ganti role...");
             botState.roleIndex += 1;
             botState.stepIndex = 0;
             window.name = JSON.stringify(botState);
