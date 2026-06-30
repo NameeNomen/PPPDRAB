@@ -130,14 +130,39 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href = destination;
             }, 4500);
         } else {
-            console.log(currentRole + " selesai. Siap-siap ganti role...");
-            botState.roleIndex += 1;
-            botState.stepIndex = 0;
-            window.name = JSON.stringify(botState);
+    console.log(currentRole + " selesai. Siap-siap ganti role...");
+    botState.roleIndex += 1;
+    botState.stepIndex = 0;
+    window.name = JSON.stringify(botState);
 
-            setTimeout(() => {
-                window.location.href = "/logout";
-            }, 2000);
+    setTimeout(() => {
+        console.log("Bot: Bikin form POST gaib buat logout...");
+
+        // 1. Cari kunci gembok bawaan Laravel (CSRF Token)
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        
+        if (!csrfToken) {
+            console.error("Bot Mati Kutu: Meta tag CSRF token nggak ada di <head> web lu!");
+            return;
         }
+
+        // 2. Bikin form POST secara dinamis
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/logout';
+
+        // 3. Masukin tokennya ke dalem form
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '_token';
+        tokenInput.value = csrfToken.content;
+
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+
+        // 4. BOM! Submit formnya
+        form.submit();
+    }, 2000);
+}
     }
 });
