@@ -1,12 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const navEntries = performance.getEntriesByType("navigation");
-    if (navEntries.length > 0 && navEntries[0].type === "reload") {
-        console.warn("Bot: Halaman di-refresh manual! Reset ingatan bot...");
-
-        sessionStorage.removeItem("tour_step");
- 
-        return; 
-    }
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
     // 1. VALIDASI IFRAME DASAR
@@ -16,7 +8,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 2. BACA INGATAN DARI WINDOW.NAME
+   // KODE BARU: DETEKSI REFRESH & BACA INGATAN
+    const navEntries = performance.getEntriesByType("navigation");
+    const isRefreshed = navEntries.length > 0 && navEntries[0].type === "reload";
+
+    if (isRefreshed) {
+        console.warn("Halaman di-refresh! Otak bot di-format ulang.");
+        window.name = ""; // Hapus memori lama sebelum dibaca
+    }
+
     let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
+    
     try {
         if (window.name && window.name.includes('roleIndex')) {
             botState = JSON.parse(window.name);
@@ -33,8 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             console.error("Bot Mode diblokir. Lu nyoba manggil dari:", document.referrer || "Unknown/Direct");
             return;
-        }
-    }
+        } 
+    } 
 
     // 4. DATA LOGIN & TOUR
     const roleSequence = ["marketing", "engineering", "direktur", "purchasing"];
