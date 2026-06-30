@@ -7,16 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // 2. BACA INGATAN DARI WINDOW.NAME
-   // KODE BARU: DETEKSI REFRESH & BACA INGATAN
-    const navEntries = performance.getEntriesByType("navigation");
-    const isRefreshed = navEntries.length > 0 && navEntries[0].type === "reload";
-
-    if (isRefreshed) {
-        console.warn("Halaman di-refresh! Otak bot di-format ulang.");
-        window.name = ""; // Hapus memori lama sebelum dibaca
-    }
-
+    // 2. BACA INGATAN DARI WINDOW.NAME DULUAN
     let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
     
     try {
@@ -27,7 +18,25 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Gagal baca ingatan bot.");
     }
 
-    // 3. GEMBOK DOMAIN VERCEL LU
+    // 3. DETEKSI REFRESH (Pindahin ke sini setelah ingatan kebaca)
+    const navEntries = performance.getEntriesByType("navigation");
+    const isRefreshed = navEntries.length > 0 && navEntries[0].type === "reload";
+
+    if (isRefreshed) {
+        console.warn("Halaman di-refresh! Bot disuruh kerja rodi dari awal lagi.");
+        // Reset langkahnya doang, status isVercel biarin tetep aman
+        botState.roleIndex = 0;
+        botState.stepIndex = 0;
+        window.name = JSON.stringify(botState);
+        
+        // Kalau pas refresh lu lagi nyasar di halaman dalem, tendang balik ke login
+        if (!window.location.pathname.includes("login")) {
+            window.location.href = "/login";
+            return;
+        }
+    }
+
+    // 4. GEMBOK DOMAIN VERCEL
     if (!botState.isVercel) {
         if (document.referrer.includes(ALLOWED_REFERRER)) {
             botState.isVercel = true;
@@ -38,12 +47,24 @@ document.addEventListener("DOMContentLoaded", function () {
         } 
     } 
 
-    // 4. DATA LOGIN & TOUR
+    // 5. DATA LOGIN & TOUR
     const roleSequence = ["marketing", "engineering", "direktur", "purchasing"];
 
-    if (!botState.active || botState.roleIndex >= roleSequence.length) {
-        console.log("Bot Mode: Semua tour selesai. Selamat istirahat.");
-        window.name = ""; 
+    // 6. LOGIKA NGULANG DARI AWAL (INFINITY LOOP)
+    if (botState.roleIndex >= roleSequence.length) {
+        console.log("Bot Mode: Semua tour selesai. Balik lagi jadi kuli dari awal.");
+        botState.roleIndex = 0;
+        botState.stepIndex = 0;
+        window.name = JSON.stringify(botState);
+        
+        if (!window.location.pathname.includes("login")) {
+            window.location.href = "/login";
+        }
+        return; 
+    }
+
+    if (!botState.active) {
+        console.log("Bot Mode: Mati.");
         return;
     }
 
