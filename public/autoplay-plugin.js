@@ -7,16 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // 2. AMBIL TARGET ROLE DARI URL NEXT.JS
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetRole = urlParams.get('current_role');
-
-    // Kalau gak ada perintah role di URL, bot tidur aja.
-    if (!targetRole) return; 
-
-    // 3. SETUP MEMORI BOT
+    // 2. BACA MEMORI LAMA DULU
     let botState = { currentRole: null, stepIndex: 0, active: true, isVercel: false };
-    
     try {
         if (window.name && window.name.includes('currentRole')) {
             botState = JSON.parse(window.name);
@@ -25,15 +17,27 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Gagal baca ingatan bot.");
     }
 
-    // 4. DETEKSI GANTI ROLE: TENDANG KE LOGOUT KALAU BEDA (Pencegah 403 Forbidden)
-    if (botState.currentRole !== targetRole) {
-        console.warn(`Perintah baru: Ganti role ke ${targetRole}. Memori direset & Logout paksa!`);
+    // 3. AMBIL INSTRUKSI DARI URL (Kalau ada)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRole = urlParams.get('current_role');
+
+    // Tentukan siapa bosnya sekarang. Kalau di URL ada, pake itu. Kalau gak ada, pake ingatan lama.
+    const activeRole = urlRole || botState.currentRole;
+
+    // Kalau dua-duanya kosong, baru botnya boleh tidur.
+    if (!activeRole) {
+        console.warn("Bot Mode: Tidur. Gak ada instruksi role.");
+        return; 
+    }
+
+    // 4. DETEKSI GANTI ROLE DARI NEXT.JS (Trigger Logout)
+    // Kita cuma nge-reset memori & maksa logout KALAU parameter URL ada DAN beda sama ingatan.
+    if (urlRole && botState.currentRole !== urlRole) {
+        console.warn(`Perintah eksternal: Ganti role ke ${urlRole}. Reset memori & Logout paksa!`);
         
-        // Simpan ingatan baru dengan step 0
-        botState = { currentRole: targetRole, stepIndex: 0, active: true, isVercel: botState.isVercel };
+        botState = { currentRole: urlRole, stepIndex: 0, active: true, isVercel: botState.isVercel };
         window.name = JSON.stringify(botState);
 
-        // Kalau posisinya nyasar bukan di halaman login, PAKSA LOGOUT DULU!
         if (!window.location.pathname.includes("login")) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             
@@ -52,12 +56,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.body.appendChild(form);
                 form.submit(); 
             } else {
-                // Kalau udah kena 403, biasanya token CSRF hilang di header. Langsung tendang ke login.
                 window.location.href = '/login';
             }
-            return; // WAJIB RETURN DI SINI BIAR KODE BAWAH GAK JALAN SEBELUM LOGOUT KELAR
+            return; // Cegah script lanjut sebelum logout kelar
         }
     }
+
+    botState.currentRole = activeRole;
+    window.name = JSON.stringify(botState);
 
     // 5. GEMBOK DOMAIN VERCEL
     if (!botState.isVercel) {
