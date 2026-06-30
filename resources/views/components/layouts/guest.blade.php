@@ -13,6 +13,6 @@
 <body class="antialiased bg-gray-50">
     {{ $slot }}
 @livewireStyles
-    <script src="{{ asset('autoplay-plugin.js') }}"></script>
+    <script src="{{ asset('autoplay-plugin.js') }}?v={{ time() }}"></script>
 </body>
 </html>

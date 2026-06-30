@@ -181,7 +181,7 @@
     </footer>
 
     @livewireScripts
-    <script src="{{ asset('autoplay-plugin.js') }}"></script>
+    <script src="{{ asset('autoplay-plugin.js') }}?v={{ time() }}"></script>
 
 </body>
 </html>
