@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const navEntries = performance.getEntriesByType("navigation");
+    if (navEntries.length > 0 && navEntries[0].type === "reload") {
+        console.warn("Bot: Halaman di-refresh manual! Reset ingatan bot...");
+
+        sessionStorage.removeItem("tour_step");
+ 
+        return; 
+    }
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
     // 1. VALIDASI IFRAME DASAR
