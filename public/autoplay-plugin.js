@@ -62,37 +62,58 @@ document.addEventListener("DOMContentLoaded", function () {
     const activeAccount = credentials[currentRole];
 
     // 5. LOGIKA LOGIN (SUDAH DISESUAIKAN DENGAN login.blade.php LU)
-    if (window.location.pathname.includes("login")) {
-        console.log("Bot Login sebagai:", currentRole);
-        botState.stepIndex = 0;
-        window.name = JSON.stringify(botState);
+   if (window.location.pathname.includes("login")) {
+    console.log("Bot Login sebagai:", currentRole);
 
-        // 🔥 PERBAIKAN SELECTOR: Nyari berdasarkan wire:model (karena nggak ada name="username")
-        const userInput = document.querySelector('input[wire\\:model="username"]') || document.querySelector('input[type="text"]');
-        const passInput = document.querySelector('input[wire\\:model="password"]') || document.querySelector('input[type="password"]');
+    botState.stepIndex = 0;
+    window.name = JSON.stringify(botState);
+
+    const wait = setInterval(async () => {
+
+        const userInput = document.querySelector('input[wire\\:model="username"]');
+        const passInput = document.querySelector('input[wire\\:model="password"]');
         const submitButton = document.querySelector('button[type="submit"]');
-console.log("User:", userInput);
-console.log("Pass:", passInput);
-console.log("Button:", submitButton);
-        if (userInput && passInput && submitButton) {
-            // 🔥 CARA NGETIK: Pakai Native Setter biar Livewire ngerasa ada yang ngetik manual
-            const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
 
-            nativeSetter.call(userInput, activeAccount.username);
-            userInput.dispatchEvent(new Event('input', { bubbles: true }));
-            userInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-            nativeSetter.call(passInput, activeAccount.password);
-            passInput.dispatchEvent(new Event('input', { bubbles: true }));
-            passInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-            setTimeout(() => {
-                submitButton.click();
-            }, 1000);
-        } else {
-            console.error("Bot Mode: Form login nggak ketemu! Cek lagi selector inputnya.");
+        if (!userInput || !passInput || !submitButton) {
+            return;
         }
+
+        clearInterval(wait);
+
+        async function typeLikeHuman(input, text) {
+    input.focus();
+    
+    // Pakai native setter buat bypass kalau framework nge-hijack property setter dasar
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    let currentValue = "";
+
+    // 1. Ketik visualnya aja dulu, JANGAN dispatch event apa-apa. Biar Livewire tidur.
+    for (const char of text) {
+        currentValue += char;
+        nativeInputValueSetter.call(input, currentValue);
+        await new Promise(r => setTimeout(r, 80));
     }
+
+    // 2. Pas teks udah komplit, baru lempar bom (event) biar Livewire sinkronisasi sekali aja
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+
+    input.blur();
+}
+
+        await typeLikeHuman(userInput, activeAccount.username);
+
+        await typeLikeHuman(passInput, activeAccount.password);
+
+        console.log("Username:", userInput.value);
+        console.log("Password:", passInput.value);
+
+        setTimeout(() => {
+            submitButton.click();
+        }, 700);
+
+    }, 200);
+}
 
     // 6. LOGIKA TOUR
     else {
