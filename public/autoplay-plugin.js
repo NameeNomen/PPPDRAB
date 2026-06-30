@@ -1,39 +1,27 @@
-document.addEventListener("DOMContentLoaded", function () {
+
+   document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
-    // 1. VALIDASI IFRAME DASAR
-    if (window.self === window.top) {
-        console.warn("Bot Mode: Mati. Lu buka web ini langsung, bukan di dalam iframe.");
-        return;
-    }
+    if (window.self === window.top) return; // Tetap kunci di iframe
 
-    // 2. BACA INGATAN DARI WINDOW.NAME DULUAN
+    // Ambil parameter role langsung dari URL iframe yang dikirim Next.js
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetRole = urlParams.get('current_role'); 
+
     let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
     
     try {
         if (window.name && window.name.includes('roleIndex')) {
             botState = JSON.parse(window.name);
         }
-    } catch (e) {
-        console.error("Gagal baca ingatan bot.");
-    }
-
-    // 3. DETEKSI REFRESH (Pindahin ke sini setelah ingatan kebaca)
+    } catch (e) {}
     const navEntries = performance.getEntriesByType("navigation");
     const isRefreshed = navEntries.length > 0 && navEntries[0].type === "reload";
 
-    if (isRefreshed) {
-        console.warn("Halaman di-refresh! Bot disuruh kerja rodi dari awal lagi.");
-        // Reset langkahnya doang, status isVercel biarin tetep aman
-        botState.roleIndex = 0;
-        botState.stepIndex = 0;
-        window.name = JSON.stringify(botState);
-        
-        // Kalau pas refresh lu lagi nyasar di halaman dalem, tendang balik ke login
-        if (!window.location.pathname.includes("login")) {
-            window.location.href = "/login";
-            return;
-        }
+    if (isRefreshed || (targetRole && window.name && !window.name.includes(targetRole))) {
+        console.warn("Role berubah atau halaman di-refresh! Format memori.");
+        window.name = ""; // Hapus memori lama
+        botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
     }
 
     // 4. GEMBOK DOMAIN VERCEL
@@ -160,29 +148,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.name = JSON.stringify(botState);
                 window.location.href = destination;
             }, 4500);
-        } else {
-    console.log(currentRole + " selesai. Siap-siap ganti role...");
-    botState.roleIndex += 1;
-    botState.stepIndex = 0;
-    window.name = JSON.stringify(botState);
-
+        }  else {
+    console.log(currentRole + " selesai. Tour berhenti.");
     setTimeout(() => {
-        console.log("Bot: Bikin form POST gaib buat logout...");
-
-        // 1. Cari kunci gembok bawaan Laravel (CSRF Token)
+        console.log("Bot: Otomatis logout biar session bersih...");
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        
-        if (!csrfToken) {
-            console.error("Bot Mati Kutu: Meta tag CSRF token nggak ada di <head> web lu!");
-            return;
-        }
+        if (!csrfToken) return;
 
-        // 2. Bikin form POST secara dinamis
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/logout';
 
-        // 3. Masukin tokennya ke dalem form
         const tokenInput = document.createElement('input');
         tokenInput.type = 'hidden';
         tokenInput.name = '_token';
@@ -190,10 +166,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         form.appendChild(tokenInput);
         document.body.appendChild(form);
-
-        // 4. BOM! Submit formnya
+        
+        window.name = ""; // Bersihin memory sebelum logout
         form.submit();
-    }, 2000);
+    }, 3000);
 }
     }
 });
