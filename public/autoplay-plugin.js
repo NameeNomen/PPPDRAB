@@ -1,30 +1,65 @@
-
-   document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
-    if (window.self === window.top) return; // Tetap kunci di iframe
-
-    // Ambil parameter role langsung dari URL iframe yang dikirim Next.js
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetRole = urlParams.get('current_role'); 
-
-    let botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
-    
-    try {
-        if (window.name && window.name.includes('roleIndex')) {
-            botState = JSON.parse(window.name);
-        }
-    } catch (e) {}
-    const navEntries = performance.getEntriesByType("navigation");
-    const isRefreshed = navEntries.length > 0 && navEntries[0].type === "reload";
-
-    if (isRefreshed || (targetRole && window.name && !window.name.includes(targetRole))) {
-        console.warn("Role berubah atau halaman di-refresh! Format memori.");
-        window.name = ""; // Hapus memori lama
-        botState = { roleIndex: 0, stepIndex: 0, active: true, isVercel: false };
+    // 1. VALIDASI IFRAME
+    if (window.self === window.top) {
+        console.warn("Bot Mode: Mati. Lu buka web ini langsung, bukan di dalam iframe.");
+        return;
     }
 
-    // 4. GEMBOK DOMAIN VERCEL
+    // 2. AMBIL TARGET ROLE DARI URL NEXT.JS
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetRole = urlParams.get('current_role');
+
+    // Kalau gak ada perintah role di URL, bot tidur aja.
+    if (!targetRole) return; 
+
+    // 3. SETUP MEMORI BOT
+    let botState = { currentRole: null, stepIndex: 0, active: true, isVercel: false };
+    
+    try {
+        if (window.name && window.name.includes('currentRole')) {
+            botState = JSON.parse(window.name);
+        }
+    } catch (e) {
+        console.error("Gagal baca ingatan bot.");
+    }
+
+    // 4. DETEKSI GANTI ROLE: TENDANG KE LOGOUT KALAU BEDA (Pencegah 403 Forbidden)
+    if (botState.currentRole !== targetRole) {
+        console.warn(`Perintah baru: Ganti role ke ${targetRole}. Memori direset & Logout paksa!`);
+        
+        // Simpan ingatan baru dengan step 0
+        botState = { currentRole: targetRole, stepIndex: 0, active: true, isVercel: botState.isVercel };
+        window.name = JSON.stringify(botState);
+
+        // Kalau posisinya nyasar bukan di halaman login, PAKSA LOGOUT DULU!
+        if (!window.location.pathname.includes("login")) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            
+            if (csrfToken) {
+                console.log("Eksekusi bom logout gaib...");
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/logout';
+                
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                tokenInput.value = csrfToken.content;
+                
+                form.appendChild(tokenInput);
+                document.body.appendChild(form);
+                form.submit(); 
+            } else {
+                // Kalau udah kena 403, biasanya token CSRF hilang di header. Langsung tendang ke login.
+                window.location.href = '/login';
+            }
+            return; // WAJIB RETURN DI SINI BIAR KODE BAWAH GAK JALAN SEBELUM LOGOUT KELAR
+        }
+    }
+
+    // 5. GEMBOK DOMAIN VERCEL
     if (!botState.isVercel) {
         if (document.referrer.includes(ALLOWED_REFERRER)) {
             botState.isVercel = true;
@@ -35,29 +70,7 @@
         } 
     } 
 
-    // 5. DATA LOGIN & TOUR
-    const roleSequence = ["marketing", "engineering", "direktur", "purchasing"];
-
-    // 6. LOGIKA NGULANG DARI AWAL (INFINITY LOOP)
-    if (botState.roleIndex >= roleSequence.length) {
-        console.log("Bot Mode: Semua tour selesai. Balik lagi jadi kuli dari awal.");
-        botState.roleIndex = 0;
-        botState.stepIndex = 0;
-        window.name = JSON.stringify(botState);
-        
-        if (!window.location.pathname.includes("login")) {
-            window.location.href = "/login";
-        }
-        return; 
-    }
-
-    if (!botState.active) {
-        console.log("Bot Mode: Mati.");
-        return;
-    }
-
-    console.log("Bot Mode: Aktif. Stempel Vercel valid.");
-
+    // 6. DATA KREDENSIAL & RUTE TOUR
     const credentials = {
         marketing: {
             username: "marketing", password: "marketing123",
@@ -77,64 +90,57 @@
         }
     };
 
-    const currentRole = roleSequence[botState.roleIndex];
-    const activeAccount = credentials[currentRole];
-
-    // 5. LOGIKA LOGIN (SUDAH DISESUAIKAN DENGAN login.blade.php LU)
-   if (window.location.pathname.includes("login")) {
-    console.log("Bot Login sebagai:", currentRole);
-
-    botState.stepIndex = 0;
-    window.name = JSON.stringify(botState);
-
-    const wait = setInterval(async () => {
-
-        const userInput = document.querySelector('input[wire\\:model="username"]');
-        const passInput = document.querySelector('input[wire\\:model="password"]');
-        const submitButton = document.querySelector('button[type="submit"]');
-
-        if (!userInput || !passInput || !submitButton) {
-            return;
-        }
-
-        clearInterval(wait);
-
-        async function typeLikeHuman(input, text) {
-    input.focus();
+    const activeAccount = credentials[botState.currentRole];
     
-    // Pakai native setter buat bypass kalau framework nge-hijack property setter dasar
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-    let currentValue = "";
-
-    // 1. Ketik visualnya aja dulu, JANGAN dispatch event apa-apa. Biar Livewire tidur.
-    for (const char of text) {
-        currentValue += char;
-        nativeInputValueSetter.call(input, currentValue);
-        await new Promise(r => setTimeout(r, 80));
+    if (!activeAccount) {
+        console.error("Bot bingung: Role tidak terdaftar.");
+        return;
     }
 
-    // 2. Pas teks udah komplit, baru lempar bom (event) biar Livewire sinkronisasi sekali aja
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+    // 7. LOGIKA LOGIN (Jalan kalau ada di halaman /login)
+    if (window.location.pathname.includes("login")) {
+        console.log("Bot Login sebagai:", botState.currentRole);
 
-    input.blur();
-}
+        // Pastikan step index reset pas di login
+        botState.stepIndex = 0;
+        window.name = JSON.stringify(botState);
 
-        await typeLikeHuman(userInput, activeAccount.username);
+        const wait = setInterval(async () => {
+            const userInput = document.querySelector('input[wire\\:model="username"]');
+            const passInput = document.querySelector('input[wire\\:model="password"]');
+            const submitButton = document.querySelector('button[type="submit"]');
 
-        await typeLikeHuman(passInput, activeAccount.password);
+            if (!userInput || !passInput || !submitButton) return;
+            clearInterval(wait); // Berhenti nyari elemen kalau udah ketemu
 
-        console.log("Username:", userInput.value);
-        console.log("Password:", passInput.value);
+            // Fungsi ngetik ala manusia buat bypass Livewire
+            async function typeLikeHuman(input, text) {
+                input.focus();
+                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+                let currentValue = "";
+                
+                for (const char of text) {
+                    currentValue += char;
+                    nativeInputValueSetter.call(input, currentValue);
+                    await new Promise(r => setTimeout(r, 80));
+                }
+                
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                input.dispatchEvent(new Event("change", { bubbles: true }));
+                input.blur();
+            }
 
-        setTimeout(() => {
-            submitButton.click();
-        }, 700);
+            await typeLikeHuman(userInput, activeAccount.username);
+            await typeLikeHuman(passInput, activeAccount.password);
 
-    }, 200);
-}
+            setTimeout(() => {
+                submitButton.click();
+            }, 700);
 
-    // 6. LOGIKA TOUR
+        }, 200);
+    } 
+    
+    // 8. LOGIKA TOUR (Jalan setelah berhasil login)
     else {
         let currentStep = botState.stepIndex;
         const tourPaths = activeAccount.tour;
@@ -146,30 +152,33 @@
             setTimeout(() => {
                 botState.stepIndex = currentStep + 1;
                 window.name = JSON.stringify(botState);
-                window.location.href = destination;
+                
+                // Pake replace biar history browser gak numpuk
+                window.location.replace(destination);
             }, 4500);
-        }  else {
-    console.log(currentRole + " selesai. Tour berhenti.");
-    setTimeout(() => {
-        console.log("Bot: Otomatis logout biar session bersih...");
-        const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        if (!csrfToken) return;
+        } else {
+            console.log(botState.currentRole + " selesai. Tour berhenti. Siap-siap bersihin session.");
+            
+            setTimeout(() => {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) return;
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/logout';
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/logout';
 
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = '_token';
-        tokenInput.value = csrfToken.content;
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                tokenInput.value = csrfToken.content;
 
-        form.appendChild(tokenInput);
-        document.body.appendChild(form);
-        
-        window.name = ""; // Bersihin memory sebelum logout
-        form.submit();
-    }, 3000);
-}
+                form.appendChild(tokenInput);
+                document.body.appendChild(form);
+                
+                // Bersihin memory bot lu sebelum dia beneran mati
+                window.name = ""; 
+                form.submit();
+            }, 3000);
+        }
     }
 });
