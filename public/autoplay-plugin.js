@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const credentials = {
         marketing: {
             username: "marketing", password: "marketing123",
-            tour: ["/marketing/dashboard", "/marketing/proyek/detail/1", "/marketing/proyek", "/marketing/bidding", "/marketing/bidding/workspace/1", "/marketing/bidding/log/1", "/marketing/bidding/histori"]
+            tour: ["/marketing/dashboard", "/marketing/proyek", "/marketing/bidding", "/marketing/bidding/workspace/1", "/marketing/bidding/log/1", "/marketing/bidding/histori"]
         },
         engineering: {
             username: "engineering", password: "marketing123",
