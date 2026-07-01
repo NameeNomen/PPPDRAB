@@ -2,23 +2,60 @@ document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
     if (window.self === window.top) return;
 
+    // Fungsi bantuan untuk membaca role dari Parameter ATAU Hash URL
+    function getRoleFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramRole = urlParams.get('current_role');
+        const hashRole = window.location.hash.match(/role=([^&]+)/)?.[1];
+        return paramRole || hashRole;
+    }
+
     // --- MEKANISME DETEKTIF: Paksa bot sadar kalau role ganti ---
     function checkRoleChange() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlRole = urlParams.get('current_role');
+        const urlRole = getRoleFromUrl();
+        let currentBotState = { currentRole: null, stepIndex: 0, active: true, isVercel: false };
         
-        let currentBotState = { currentRole: null };
         try {
             if (window.name) currentBotState = JSON.parse(window.name);
         } catch(e) {}
 
         if (urlRole && currentBotState.currentRole !== urlRole) {
-            console.warn(`Role berubah jadi ${urlRole}. Resetting...`);
-            window.name = ""; 
-            window.location.reload(); 
+            console.warn(`Ganti role ke ${urlRole}. Memaksa logout bersih...`);
+            currentBotState.currentRole = urlRole;
+            currentBotState.stepIndex = 0; // Mulai tour dari awal untuk role baru
+            window.name = JSON.stringify(currentBotState);
+
+            // Eksekusi logout jika posisi tidak berada di halaman login
+            if (!window.location.pathname.includes("login")) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (csrfToken) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/logout';
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '_token';
+                    tokenInput.value = csrfToken.content;
+                    form.appendChild(tokenInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                    return;
+                }
+            }
+            window.location.reload();
         }
     }
-    setInterval(checkRoleChange, 1000); 
+    setInterval(checkRoleChange, 1000);
+
+    // --- LOGIKA REFRESH MANUAL ---
+    // Ngulang dari awal kalau halaman sengaja di-refresh
+    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+        try {
+            let state = JSON.parse(window.name);
+            state.stepIndex = 0; 
+            window.name = JSON.stringify(state);
+        } catch(e) {}
+    }
 
     // --- LOGIKA UTAMA ---
     let botState = { currentRole: null, stepIndex: 0, active: true, isVercel: false };
@@ -28,12 +65,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     } catch (e) {}
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlRole = urlParams.get('current_role');
+    const urlRole = getRoleFromUrl();
     const activeRole = urlRole || botState.currentRole;
 
     if (!activeRole) return;
-
     if (urlRole && botState.currentRole !== urlRole) {
         botState = { currentRole: urlRole, stepIndex: 0, active: true, isVercel: botState.isVercel };
         window.name = JSON.stringify(botState);
