@@ -1,8 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
-
     if (window.self === window.top) return;
 
+    // --- MEKANISME DETEKTIF: Paksa bot sadar kalau role ganti ---
+    function checkRoleChange() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlRole = urlParams.get('current_role');
+        
+        let currentBotState = { currentRole: null };
+        try {
+            if (window.name) currentBotState = JSON.parse(window.name);
+        } catch(e) {}
+
+        if (urlRole && currentBotState.currentRole !== urlRole) {
+            console.warn(`Role berubah jadi ${urlRole}. Resetting...`);
+            window.name = ""; 
+            window.location.reload(); 
+        }
+    }
+    setInterval(checkRoleChange, 1000); 
+
+    // --- LOGIKA UTAMA ---
     let botState = { currentRole: null, stepIndex: 0, active: true, isVercel: false };
     try {
         if (window.name && window.name.includes('currentRole')) {
@@ -22,17 +40,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!window.location.pathname.includes("login")) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
-            
             if (csrfToken) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/logout';
-                
                 const tokenInput = document.createElement('input');
                 tokenInput.type = 'hidden';
                 tokenInput.name = '_token';
                 tokenInput.value = csrfToken.content;
-                
                 form.appendChild(tokenInput);
                 document.body.appendChild(form);
                 form.submit(); 
@@ -78,12 +93,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!activeAccount) return;
 
     if (window.location.pathname.includes("login")) {
-        botState.stepIndex = 0;
-        window.name = JSON.stringify(botState);
-
         const wait = setInterval(() => {
-            const userInput = document.querySelector('input[wire\\:model*="username"]');
-            const passInput = document.querySelector('input[wire\\:model*="password"]');
+            const userInput = document.querySelector('input[wire\\:model*="username"], input[name="username"], #username');
+            const passInput = document.querySelector('input[wire\\:model*="password"], input[name="password"], #password');
             const submitButton = document.querySelector('button[type="submit"]');
 
             if (!userInput || !passInput || !submitButton) return;
@@ -100,11 +112,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             setTimeout(() => {
                 submitButton.click();
-            }, 2500); 
-
+            }, 2000); 
         }, 200);
-    } 
-    else {
+    } else {
         let currentStep = botState.stepIndex;
         const tourPaths = activeAccount.tour;
 
@@ -118,22 +128,18 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (!csrfToken) return;
-
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/logout';
-
                 const tokenInput = document.createElement('input');
                 tokenInput.type = 'hidden';
                 tokenInput.name = '_token';
                 tokenInput.value = csrfToken.content;
-
                 form.appendChild(tokenInput);
                 document.body.appendChild(form);
-                
                 window.name = ""; 
                 form.submit();
-            }, 3000);
+            }, 2000);
         }
     }
 });
