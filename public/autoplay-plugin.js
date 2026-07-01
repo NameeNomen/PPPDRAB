@@ -104,22 +104,33 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 7. LOGIKA LOGIN (Jalan kalau ada di halaman /login)
+   // 7. LOGIKA LOGIN (Jalan kalau ada di halaman /login)
     if (window.location.pathname.includes("login")) {
-        console.log("Bot Login sebagai:", botState.currentRole);
+        console.log("Bot Login OTW. Target:", botState.currentRole);
 
-        // Pastikan step index reset pas di login
         botState.stepIndex = 0;
         window.name = JSON.stringify(botState);
 
+        let attempt = 0; // Biar lu tau kalau dia nyangkut
         const wait = setInterval(async () => {
-            const userInput = document.querySelector('input[wire\\:model="username"]');
-            const passInput = document.querySelector('input[wire\\:model="password"]');
+            attempt++;
+            
+            // Fallback selector diperluas! Cari by wire:model, by name, atau by ID
+            const userInput = document.querySelector('input[wire\\:model*="username"], input[name="username"], #username');
+            const passInput = document.querySelector('input[wire\\:model*="password"], input[name="password"], #password');
             const submitButton = document.querySelector('button[type="submit"]');
 
-            if (!userInput || !passInput || !submitButton) return;
-            clearInterval(wait); // Berhenti nyari elemen kalau udah ketemu
+            if (!userInput || !passInput || !submitButton) {
+                if (attempt % 5 === 0) {
+                    console.warn(`Bot nyari form login udah ${attempt / 5} detik tapi gak nemu. Cek nama class/id input lu!`);
+                }
+                return;
+            }
 
-            // Fungsi ngetik ala manusia buat bypass Livewire
+            clearInterval(wait);
+            console.log("Mata bot melek: Form login ketemu! Mulai ngetik...");
+
+            // Fungsi ngetik ala manusia buat bypass sistem anti-bot / framework reaktif
             async function typeLikeHuman(input, text) {
                 input.focus();
                 const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
@@ -136,15 +147,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 input.blur();
             }
 
+            // Mulai eksekusi ngetik
             await typeLikeHuman(userInput, activeAccount.username);
             await typeLikeHuman(passInput, activeAccount.password);
 
+            console.log("Ngetik kelar. Mencet tombol login dalam 1 detik...");
             setTimeout(() => {
                 submitButton.click();
-            }, 700);
+            }, 1000);
 
         }, 200);
-    } 
+    }  
     
     // 8. LOGIKA TOUR (Jalan setelah berhasil login)
     else {
