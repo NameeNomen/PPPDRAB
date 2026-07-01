@@ -2,13 +2,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
     if (window.self === window.top) return;
 
-    // Fungsi bantuan untuk membaca role dari Parameter ATAU Hash URL
-    function getRoleFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const paramRole = urlParams.get('current_role');
-        const hashRole = window.location.hash.match(/role=([^&]+)/)?.[1];
-        return paramRole || hashRole;
+    // Fungsi bantuan untuk membaca role dari Parameter, Hash URL, ATAU LocalStorage (Cadangan Pasca-Logout)
+function getRoleFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramRole = urlParams.get('current_role');
+    const hashRole = window.location.hash.match(/role=([^&]+)/)?.[1];
+    
+    // Ambil dari localStorage kalau ada data sisa pemindahan role pasca-logout
+    const localRole = localStorage.getItem('next_role_bot'); 
+    
+    // Jika localRole ditemukan, hapus segera dari storage agar tidak terjadi looping tanpa akhir
+    if (!paramRole && !hashRole && localRole) {
+        localStorage.removeItem('next_role_bot');
+        return localRole;
     }
+
+    return paramRole || hashRole;
+}
 
     // --- MEKANISME DETEKTIF: Paksa bot sadar kalau role ganti ---
     function checkRoleChange() {
