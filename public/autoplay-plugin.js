@@ -1,40 +1,22 @@
 document.addEventListener("DOMContentLoaded", function () {
     const ALLOWED_REFERRER = "https://web-porto-nameenomen.vercel.app";
 
-    // 1. VALIDASI IFRAME
-    if (window.self === window.top) {
-        console.warn("Bot Mode: Mati. Lu buka web ini langsung, bukan di dalam iframe.");
-        return;
-    }
+    if (window.self === window.top) return;
 
-    // 2. BACA MEMORI LAMA DULU
     let botState = { currentRole: null, stepIndex: 0, active: true, isVercel: false };
     try {
         if (window.name && window.name.includes('currentRole')) {
             botState = JSON.parse(window.name);
         }
-    } catch (e) {
-        console.error("Gagal baca ingatan bot.");
-    }
+    } catch (e) {}
 
-    // 3. AMBIL INSTRUKSI DARI URL (Kalau ada)
     const urlParams = new URLSearchParams(window.location.search);
     const urlRole = urlParams.get('current_role');
-
-    // Tentukan siapa bosnya sekarang. Kalau di URL ada, pake itu. Kalau gak ada, pake ingatan lama.
     const activeRole = urlRole || botState.currentRole;
 
-    // Kalau dua-duanya kosong, baru botnya boleh tidur.
-    if (!activeRole) {
-        console.warn("Bot Mode: Tidur. Gak ada instruksi role.");
-        return; 
-    }
+    if (!activeRole) return;
 
-    // 4. DETEKSI GANTI ROLE DARI NEXT.JS (Trigger Logout)
-    // Kita cuma nge-reset memori & maksa logout KALAU parameter URL ada DAN beda sama ingatan.
     if (urlRole && botState.currentRole !== urlRole) {
-        console.warn(`Perintah eksternal: Ganti role ke ${urlRole}. Reset memori & Logout paksa!`);
-        
         botState = { currentRole: urlRole, stepIndex: 0, active: true, isVercel: botState.isVercel };
         window.name = JSON.stringify(botState);
 
@@ -42,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             
             if (csrfToken) {
-                console.log("Eksekusi bom logout gaib...");
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/logout';
@@ -58,25 +39,22 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 window.location.href = '/login';
             }
-            return; // Cegah script lanjut sebelum logout kelar
+            return; 
         }
     }
 
     botState.currentRole = activeRole;
     window.name = JSON.stringify(botState);
 
-    // 5. GEMBOK DOMAIN VERCEL
     if (!botState.isVercel) {
         if (document.referrer.includes(ALLOWED_REFERRER)) {
             botState.isVercel = true;
             window.name = JSON.stringify(botState);
         } else {
-            console.error("Bot Mode diblokir. Lu nyoba manggil dari:", document.referrer || "Unknown/Direct");
             return;
         } 
     } 
 
-    // 6. DATA KREDENSIAL & RUTE TOUR
     const credentials = {
         marketing: {
             username: "marketing", password: "marketing123",
@@ -97,87 +75,46 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     const activeAccount = credentials[botState.currentRole];
-    
-    if (!activeAccount) {
-        console.error("Bot bingung: Role tidak terdaftar.");
-        return;
-    }
+    if (!activeAccount) return;
 
-    // 7. LOGIKA LOGIN (Jalan kalau ada di halaman /login)
-   // 7. LOGIKA LOGIN (Jalan kalau ada di halaman /login)
     if (window.location.pathname.includes("login")) {
-        console.log("Bot Login OTW. Target:", botState.currentRole);
-
         botState.stepIndex = 0;
         window.name = JSON.stringify(botState);
 
-        let attempt = 0; // Biar lu tau kalau dia nyangkut
-        const wait = setInterval(async () => {
-            attempt++;
-            
-            // Fallback selector diperluas! Cari by wire:model, by name, atau by ID
-            const userInput = document.querySelector('input[wire\\:model*="username"], input[name="username"], #username');
-            const passInput = document.querySelector('input[wire\\:model*="password"], input[name="password"], #password');
+        const wait = setInterval(() => {
+            const userInput = document.querySelector('input[wire\\:model*="username"]');
+            const passInput = document.querySelector('input[wire\\:model*="password"]');
             const submitButton = document.querySelector('button[type="submit"]');
 
-            if (!userInput || !passInput || !submitButton) {
-                if (attempt % 5 === 0) {
-                    console.warn(`Bot nyari form login udah ${attempt / 5} detik tapi gak nemu. Cek nama class/id input lu!`);
-                }
-                return;
-            }
+            if (!userInput || !passInput || !submitButton) return;
 
             clearInterval(wait);
-            console.log("Mata bot melek: Form login ketemu! Mulai ngetik...");
 
-            // Fungsi ngetik ala manusia buat bypass sistem anti-bot / framework reaktif
-            async function typeLikeHuman(input, text) {
-                input.focus();
-                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-                let currentValue = "";
-                
-                for (const char of text) {
-                    currentValue += char;
-                    nativeInputValueSetter.call(input, currentValue);
-                    await new Promise(r => setTimeout(r, 80));
-                }
-                
-                input.dispatchEvent(new Event("input", { bubbles: true }));
-                input.dispatchEvent(new Event("change", { bubbles: true }));
-                input.blur();
-            }
+            userInput.value = activeAccount.username;
+            passInput.value = activeAccount.password;
 
-            // Mulai eksekusi ngetik
-            await typeLikeHuman(userInput, activeAccount.username);
-            await typeLikeHuman(passInput, activeAccount.password);
+            userInput.dispatchEvent(new Event('input', { bubbles: true }));
+            passInput.dispatchEvent(new Event('input', { bubbles: true }));
+            userInput.dispatchEvent(new Event('change', { bubbles: true }));
+            passInput.dispatchEvent(new Event('change', { bubbles: true }));
 
-            console.log("Ngetik kelar. Mencet tombol login dalam 1 detik...");
             setTimeout(() => {
                 submitButton.click();
-            }, 1000);
+            }, 2500); 
 
         }, 200);
-    }  
-    
-    // 8. LOGIKA TOUR (Jalan setelah berhasil login)
+    } 
     else {
         let currentStep = botState.stepIndex;
         const tourPaths = activeAccount.tour;
 
         if (currentStep < tourPaths.length) {
-            const destination = tourPaths[currentStep];
-            console.log("Bot Tour OTW ke:", destination);
-
             setTimeout(() => {
                 botState.stepIndex = currentStep + 1;
                 window.name = JSON.stringify(botState);
-                
-                // Pake replace biar history browser gak numpuk
-                window.location.replace(destination);
+                window.location.replace(tourPaths[currentStep]);
             }, 4500);
         } else {
-            console.log(botState.currentRole + " selesai. Tour berhenti. Siap-siap bersihin session.");
-            
             setTimeout(() => {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (!csrfToken) return;
@@ -194,7 +131,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 form.appendChild(tokenInput);
                 document.body.appendChild(form);
                 
-                // Bersihin memory bot lu sebelum dia beneran mati
                 window.name = ""; 
                 form.submit();
             }, 3000);
