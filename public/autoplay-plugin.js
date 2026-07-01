@@ -124,10 +124,31 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.name = JSON.stringify(botState);
                 window.location.replace(tourPaths[currentStep]);
             }, 4500);
+    } else {
+        let currentStep = botState.stepIndex;
+        const tourPaths = activeAccount.tour;
+
+        if (currentStep < tourPaths.length) {
+            setTimeout(() => {
+                botState.stepIndex = currentStep + 1;
+                window.name = JSON.stringify(botState);
+                window.location.replace(tourPaths[currentStep]);
+            }, 4500);
         } else {
+            // TOUR SELESAI -> LOGOUT
             setTimeout(() => {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (!csrfToken) return;
+
+                // --- LOGIKA PEMINDAH ROLE ---
+                const roles = ["marketing", "engineering", "direktur", "purchasing"];
+                const currentIndex = roles.indexOf(botState.currentRole);
+                const nextRole = roles[(currentIndex + 1) % roles.length];
+                
+                // Simpen role berikutnya di storage biar abis logout dia inget harus ganti ke siapa
+                localStorage.setItem('next_role_bot', nextRole);
+                // ----------------------------
+
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/logout';
@@ -137,9 +158,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 tokenInput.value = csrfToken.content;
                 form.appendChild(tokenInput);
                 document.body.appendChild(form);
+                
                 window.name = ""; 
                 form.submit();
             }, 2000);
         }
+    }
     }
 });
