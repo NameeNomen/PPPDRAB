@@ -181,11 +181,11 @@ function getRoleFromUrl() {
                     const roles = ["marketing", "engineering", "direktur", "purchasing"];
                     const currentIndex = roles.indexOf(botState.currentRole);
                     const nextRole = roles[(currentIndex + 1) % roles.length];
-                    
-                    // Ingetin bot buat ganti baju (role) pas udah logout
-                    localStorage.setItem('next_role_bot', nextRole);
-                    window.name = ""; // Bikin otak bot amnesia
-                    // ----------------------------
+                   // Simpen role berikutnya di storage buat cadangan
+                localStorage.setItem('next_role_bot', nextRole);
+                botState.currentRole = nextRole;
+                botState.stepIndex = 0; // Reset langkah
+                window.name = JSON.stringify(botState);
 
                     if (csrfToken) {
                         // Kalau CSRF ada, bikin form POST ala Laravel
