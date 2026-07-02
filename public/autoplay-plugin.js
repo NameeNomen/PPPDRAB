@@ -160,54 +160,52 @@ function getRoleFromUrl() {
             }, 2000); 
         }, 200);
     } else {
-        let currentStep = botState.stepIndex;
-        const tourPaths = activeAccount.tour;
+            let currentStep = botState.stepIndex;
+            const tourPaths = activeAccount.tour;
 
-        if (currentStep < tourPaths.length) {
-            setTimeout(() => {
-                botState.stepIndex = currentStep + 1;
-                window.name = JSON.stringify(botState);
-                window.location.replace(tourPaths[currentStep]);
-            }, 4500);
-    } else {
-        let currentStep = botState.stepIndex;
-        const tourPaths = activeAccount.tour;
+            if (currentStep < tourPaths.length) {
+                // 1. TOUR MASIH JALAN: Eksekusi pindah halaman
+                setTimeout(() => {
+                    botState.stepIndex = currentStep + 1;
+                    window.name = JSON.stringify(botState);
+                    window.location.replace(tourPaths[currentStep]);
+                }, 4500);
+            } else {
+                // 2. TOUR SELESAI: Langsung set up buat logout, gausah banyak ngecek lagi
+                setTimeout(() => {
+                    console.log("Tour kelar. Siap-siap ganti role...");
+                    
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    
+                    // --- LOGIKA PEMINDAH ROLE ---
+                    const roles = ["marketing", "engineering", "direktur", "purchasing"];
+                    const currentIndex = roles.indexOf(botState.currentRole);
+                    const nextRole = roles[(currentIndex + 1) % roles.length];
+                    
+                    // Ingetin bot buat ganti baju (role) pas udah logout
+                    localStorage.setItem('next_role_bot', nextRole);
+                    window.name = ""; // Bikin otak bot amnesia
+                    // ----------------------------
 
-        if (currentStep < tourPaths.length) {
-            setTimeout(() => {
-                botState.stepIndex = currentStep + 1;
-                window.name = JSON.stringify(botState);
-                window.location.replace(tourPaths[currentStep]);
-            }, 4500);
-        } else {
-            // TOUR SELESAI -> LOGOUT
-            setTimeout(() => {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]');
-                if (!csrfToken) return;
-
-                // --- LOGIKA PEMINDAH ROLE ---
-                const roles = ["marketing", "engineering", "direktur", "purchasing"];
-                const currentIndex = roles.indexOf(botState.currentRole);
-                const nextRole = roles[(currentIndex + 1) % roles.length];
-                
-                // Simpen role berikutnya di storage biar abis logout dia inget harus ganti ke siapa
-                localStorage.setItem('next_role_bot', nextRole);
-                // ----------------------------
-
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/logout';
-                const tokenInput = document.createElement('input');
-                tokenInput.type = 'hidden';
-                tokenInput.name = '_token';
-                tokenInput.value = csrfToken.content;
-                form.appendChild(tokenInput);
-                document.body.appendChild(form);
-                
-                window.name = ""; 
-                form.submit();
-            }, 2000);
+                    if (csrfToken) {
+                        // Kalau CSRF ada, bikin form POST ala Laravel
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/logout';
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = '_token';
+                        tokenInput.value = csrfToken.content;
+                        form.appendChild(tokenInput);
+                        document.body.appendChild(form);
+                        form.submit();
+                    } else {
+                        // Kalau CSRF GAK ADA, jangan di 'return'! 
+                        // Paksa bot pindah ke login biar sistem lu gak mati suri.
+                        console.warn("CSRF token gak ketemu, paksa redirect ke login.");
+                        window.location.href = '/login';
+                    }
+                }, 2000);
+            }
         }
-    }
-    }
 });
